@@ -3,7 +3,14 @@ import 'dotenv/config';
 
 export default ({ config }) => ({
   ...config,
+  scheme: 'glmba',
   entryPoint: 'node_modules/expo-router/entry',
+  icon: './assets/icon.png',
+  splash: {
+    image: './assets/splash-icon.png',
+    backgroundColor: '#ffffff',
+    resizeMode: 'contain',
+  },
   extra: {
     firebaseConfig: {
       apiKey: process.env.FIREBASE_API_KEY,
@@ -17,11 +24,17 @@ export default ({ config }) => ({
   },
   ios: {
     ...config.ios,
+    bundleIdentifier: 'com.cesardelgado.glmba',
     googleServicesFile: './GoogleService-Info.plist',
   },
   android: {
     ...config.android,
+    package: 'com.cesardelgado.glmba',
     googleServicesFile: './google-services.json',
+    edgeToEdgeEnabled: true,
+  },
+  web: {
+    bundler: 'metro',
   },
   plugins: [
     '@react-native-firebase/app',

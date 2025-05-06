@@ -1,4 +1,4 @@
-// app/(tabs,drawer)/settings.tsx
+// app/settings.tsx
 import { View, Text } from 'react-native';
 export default function Settings() {
   return (

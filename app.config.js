@@ -39,5 +39,6 @@ export default ({ config }) => ({
   plugins: [
     '@react-native-firebase/app',
     ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
+    'expo-router',
   ],
 });

@@ -1,4 +1,4 @@
-// app/(tabs,drawer)/profile.tsx
+// app/profile.tsx
 import { View, Text } from 'react-native';
 export default function Profile() {
   return (

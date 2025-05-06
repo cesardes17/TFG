@@ -1,10 +1,15 @@
-// app/(tabs)/_layout.tsx
+// app/_layout.native.tsx
 import { Tabs } from 'expo-router';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { FontAwesome } from '@expo/vector-icons';
 
-export default function TabLayout() {
+export default function NativeLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#2196f3',
+      }}
+    >
       <Tabs.Screen
         name='index'
         options={{

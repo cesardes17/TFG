@@ -1,4 +1,4 @@
-// app/(tabs,drawer)/index.tsx
+// app/index.tsx
 import { View, Text, Button } from 'react-native';
 import { useRouter } from 'expo-router';
 

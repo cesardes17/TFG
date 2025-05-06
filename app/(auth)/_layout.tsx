@@ -1,11 +1,12 @@
 import { router, Stack } from 'expo-router';
 import { Platform, Text, TouchableOpacity } from 'react-native';
-import { ArrowBackIcon, ArrowBackIosIcon } from '../../src/components/icons';
+import { ArrowBackIcon, ArrowBackIosIcon } from '../../src/components/Icons';
 
 export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
+        headerTitleAlign: 'center',
         headerLeft: () => {
           return (
             <TouchableOpacity

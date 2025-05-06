@@ -1,8 +1,10 @@
-// src/api/config/firebase.ts
 import { Platform } from 'react-native';
 
-// Unified exports for Auth, Firestore, Storage, and Realtime Database
-let auth: any, firestore: any, storage: any, database: any;
+// Selecciona la implementación adecuada
+let auth: any;
+let firestore: any;
+let storage: any;
+let database: any;
 
 if (Platform.OS === 'web') {
   const web = require('./firebase.web');
@@ -12,10 +14,10 @@ if (Platform.OS === 'web') {
   database = web.database;
 } else {
   const native = require('./firebase.native');
-  auth = native.auth();
-  firestore = native.firestore();
-  storage = native.storage();
-  database = native.database();
+  auth = native.auth;
+  firestore = native.firestore;
+  storage = native.storage;
+  database = native.database;
 }
 
 export { auth, firestore, storage, database };

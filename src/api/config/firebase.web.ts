@@ -1,4 +1,3 @@
-// src/api/config/firebase.web.ts
 import Constants from 'expo-constants';
 import { initializeApp, FirebaseApp, FirebaseOptions } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
@@ -6,23 +5,22 @@ import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getDatabase, Database } from 'firebase/database';
 
-// Load Firebase config injected via app.config.js
+// Lee la config desde app.config.js → extra.firebaseConfig
 const extra = Constants.expoConfig?.extra as {
   firebaseConfig?: FirebaseOptions;
 };
 const firebaseConfig = extra.firebaseConfig;
-
 if (!firebaseConfig) {
   throw new Error(
-    'Missing Firebase configuration. Ensure your .env and app.config.js define the FIREBASE_* variables.'
+    'Missing Firebase config in Constants.expoConfig.extra. Revisa tu .env y app.config.js'
   );
 }
 
-// Initialize Firebase Web SDK (Modular API)
-const app: FirebaseApp = initializeApp(firebaseConfig);
-const auth: Auth = getAuth(app);
-const firestore: Firestore = getFirestore(app);
-const storage: FirebaseStorage = getStorage(app);
-const database: Database = getDatabase(app);
+// Inicializa la app web
+const appWeb: FirebaseApp = initializeApp(firebaseConfig);
 
-export { auth, firestore, storage, database };
+// Exporta instancias modulares
+export const auth: Auth = getAuth(appWeb);
+export const firestore: Firestore = getFirestore(appWeb);
+export const storage: FirebaseStorage = getStorage(appWeb);
+export const database: Database = getDatabase(appWeb);

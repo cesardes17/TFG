@@ -1,63 +1,57 @@
-// src/api/authFirebase.ts
 import { Platform } from 'react-native';
-import { auth } from './config/firebase';
+import { auth as nativeAuth } from './config/firebase';
+
+const isWeb = Platform.OS === 'web';
 
 /**
- * Sign in user with email and password
+ * Inicia sesión con email + password
  */
-export const signInWithEmail = async (email: string, password: string) => {
-  if (Platform.OS === 'web') {
-    const { signInWithEmailAndPassword } = await import('firebase/auth');
-    return signInWithEmailAndPassword(
-      auth as import('firebase/auth').Auth,
-      email,
-      password
+export async function signInWithEmail(email: string, password: string) {
+  if (isWeb) {
+    const { getAuth, signInWithEmailAndPassword } = await import(
+      'firebase/auth'
     );
+    const auth = getAuth();
+    return signInWithEmailAndPassword(auth, email, password);
   }
-  return (
-    auth as import('@react-native-firebase/auth').FirebaseAuthTypes.Module
-  ).signInWithEmailAndPassword(email, password);
-};
+  // nativeAuth ya es la instancia modular de getAuth()
+  return nativeAuth.signInWithEmailAndPassword(email, password);
+}
 
 /**
- * Create new user with email and password
+ * Registra un usuario nuevo con email + password
  */
-export const signUpWithEmail = async (email: string, password: string) => {
-  if (Platform.OS === 'web') {
-    const { createUserWithEmailAndPassword } = await import('firebase/auth');
-    return createUserWithEmailAndPassword(
-      auth as import('firebase/auth').Auth,
-      email,
-      password
+export async function signUpWithEmail(email: string, password: string) {
+  if (isWeb) {
+    const { getAuth, createUserWithEmailAndPassword } = await import(
+      'firebase/auth'
     );
+    const auth = getAuth();
+    return createUserWithEmailAndPassword(auth, email, password);
   }
-  return (
-    auth as import('@react-native-firebase/auth').FirebaseAuthTypes.Module
-  ).createUserWithEmailAndPassword(email, password);
-};
+  return nativeAuth.createUserWithEmailAndPassword(email, password);
+}
 
 /**
- * Sign out current user
+ * Cierra sesión
  */
-export const signOutUser = async () => {
-  if (Platform.OS === 'web') {
-    const { signOut } = await import('firebase/auth');
-    return signOut(auth as import('firebase/auth').Auth);
+export async function signOutUser() {
+  if (isWeb) {
+    const { getAuth, signOut } = await import('firebase/auth');
+    const auth = getAuth();
+    return signOut(auth);
   }
-  return (
-    auth as import('@react-native-firebase/auth').FirebaseAuthTypes.Module
-  ).signOut();
-};
+  return nativeAuth.signOut();
+}
 
 /**
- * Subscribe to auth state changes
+ * Escucha cambios en el estado de auth
  */
-export const onAuthStateChangedListener = (callback: (user: any) => void) => {
-  if (Platform.OS === 'web') {
-    const { onAuthStateChanged } = require('firebase/auth');
-    return onAuthStateChanged(auth as import('firebase/auth').Auth, callback);
+export function onAuthStateChangedListener(callback: (user: any) => void) {
+  if (isWeb) {
+    const { getAuth, onAuthStateChanged } = require('firebase/auth');
+    const auth = getAuth();
+    return onAuthStateChanged(auth, callback);
   }
-  return (
-    auth as import('@react-native-firebase/auth').FirebaseAuthTypes.Module
-  ).onAuthStateChanged(callback);
-};
+  return nativeAuth.onAuthStateChanged(callback);
+}

@@ -1,4 +1,3 @@
-// src/services/authService.ts
 import {
   signInWithEmail,
   signUpWithEmail,
@@ -7,48 +6,24 @@ import {
 } from '../api/authFirebase';
 
 /**
- * Higher-level Auth Service wrapping Firebase auth operations
+ * Capa de servicio de Auth para el resto de la app
  */
 export const AuthService = {
-  /**
-   * Logs in a user with email and password
-   */
-  login: async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmail(email, password);
-      return userCredential.user;
-    } catch (error) {
-      throw error;
-    }
+  async login(email: string, password: string) {
+    const credential = await signInWithEmail(email, password);
+    return credential.user;
   },
 
-  /**
-   * Registers a new user
-   */
-  register: async (email: string, password: string) => {
-    try {
-      const userCredential = await signUpWithEmail(email, password);
-      return userCredential.user;
-    } catch (error) {
-      throw error;
-    }
+  async register(email: string, password: string) {
+    const credential = await signUpWithEmail(email, password);
+    return credential.user;
   },
 
-  /**
-   * Logs out the current user
-   */
-  logout: async () => {
-    try {
-      await signOutUser();
-    } catch (error) {
-      throw error;
-    }
+  async logout() {
+    await signOutUser();
   },
 
-  /**
-   * Subscribes to auth state changes
-   */
-  onAuthChange: (callback: (user: any) => void) => {
+  onAuthChange(callback: (user: any) => void) {
     return onAuthStateChangedListener(callback);
   },
 };

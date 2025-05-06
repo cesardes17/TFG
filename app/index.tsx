@@ -1,13 +1,13 @@
-// app/index.tsx
-import { View, Text, Button } from 'react-native';
-import { useRouter } from 'expo-router';
+// app/login.tsx
+import React from 'react';
+import { View, Text, Button, Platform } from 'react-native';
+import { Redirect, useRouter } from 'expo-router';
 
-export default function Home() {
-  const router = useRouter();
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Pantalla Home</Text>
-      <Button title='Ir a Perfil' onPress={() => router.push('/profile')} />
-    </View>
-  );
+export default function Login() {
+  const isWeb = Platform.OS === 'web';
+
+  if (isWeb) {
+    return <Redirect href='/(drawer)/' />;
+  }
+  return <Redirect href='/(tabs)/' />;
 }

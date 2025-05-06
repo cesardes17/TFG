@@ -24,8 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="exp+glmba"/>
         <data android:scheme="glmba"/>
+        <data android:scheme="exp+glmba"/>
       </intent-filter>
     </activity>
   </application>

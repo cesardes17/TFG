@@ -1,26 +1,30 @@
-// app/_layout.native.tsx
+// app/_layout.native.tsx   ← Tabs (iOS/Android)
+import React from 'react';
 import { Tabs } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
+import { Feather, FontAwesome } from '@expo/vector-icons';
+
+// Simula el estado de autenticación (cámbialo a `true` para ver Perfil)
+const isLoggedIn = false;
 
 export default function NativeLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
         tabBarActiveTintColor: '#2196f3',
       }}
     >
       <Tabs.Screen
         name='index'
         options={{
-          title: 'Home',
+          title: 'Inicio',
           tabBarIcon: ({ color }) => (
             <FontAwesome name='home' size={24} color={color} />
           ),
         }}
       />
+
       <Tabs.Screen
-        name='profile'
+        name='perfil'
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color }) => (
@@ -29,11 +33,11 @@ export default function NativeLayout() {
         }}
       />
       <Tabs.Screen
-        name='settings'
+        name='more'
         options={{
-          title: 'Ajustes',
+          title: 'More',
           tabBarIcon: ({ color }) => (
-            <FontAwesome name='cog' size={24} color={color} />
+            <Feather name='menu' size={24} color={color} />
           ),
         }}
       />

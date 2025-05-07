@@ -1,7 +1,10 @@
 import {
+  Entypo,
   Feather,
   FontAwesome,
+  FontAwesome5,
   Ionicons,
+  MaterialCommunityIcons,
   MaterialIcons,
   SimpleLineIcons,
 } from '@expo/vector-icons';
@@ -37,4 +40,22 @@ export const MenuIcon = ({ color, size = 24 }: IconProps) => {
 
 export const CircleCheckIcon = ({ color, size = 24 }: IconProps) => {
   return <Feather name='check-circle' size={size} color={color} />;
+};
+
+export const WeightHangingIcon = ({ size = 24, color }: IconProps) => {
+  return <FontAwesome5 name='weight-hanging' size={size} color={color} />;
+};
+
+export const BasketballOutlineIcon = ({ size = 24, color }: IconProps) => {
+  return <Ionicons name='basketball-outline' size={size} color={color} />;
+};
+
+export const RulerIcon = ({ size = 24, color }: IconProps) => {
+  return <Entypo name='ruler' size={size} color={color} />;
+};
+
+export const BadgeAccountIcon = ({ size = 24, color }: IconProps) => {
+  return (
+    <MaterialCommunityIcons name='badge-account' size={size} color={color} />
+  );
 };

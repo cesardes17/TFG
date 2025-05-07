@@ -3,10 +3,12 @@ import StyledText from '../../components/common/StyledText';
 import { AuthService } from '../../services/authService';
 import { router } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
+import ShowUserInfo from '../../components/user/ShowUserInfo';
+import { useUser } from '../../contexts/UserContext';
 
 export default function PerfilScreen() {
   const { theme } = useTheme();
-
+  const { user } = useUser();
   const handleLogout = async () => {
     try {
       await AuthService.logout();
@@ -16,9 +18,13 @@ export default function PerfilScreen() {
     }
   };
 
+  if (!user) {
+    return;
+  }
+
   return (
     <View style={styles.container}>
-      <StyledText>Pantalla Perfil</StyledText>
+      <ShowUserInfo user={user} />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: theme.text.error }]}
         onPress={handleLogout}
@@ -35,15 +41,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   button: {
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
     marginTop: 20,
+    minWidth: '100%',
   },
   buttonText: {
+    alignSelf: 'center',
     fontSize: 16,
     fontWeight: 'bold',
   },

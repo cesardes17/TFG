@@ -13,7 +13,7 @@ export const lightTheme: Theme = {
     success: colors.success.background,
     warning: colors.warning.background,
     info: colors.info.background,
-    navigation: colors.primary600,
+    navigation: colors.primary900,
   },
 
   text: {
@@ -35,12 +35,12 @@ export const lightTheme: Theme = {
     info: colors.info.border,
   },
   icon: {
-    active: colors.primary600,
-    inactive: colors.primary400,
+    active: colors.primary200,
+    inactive: colors.primary500,
   },
   input: {
     default: {
-      background: colors.primary300,
+      background: colors.primary100,
       text: colors.primary900,
       border: colors.primary950,
     },
@@ -50,7 +50,7 @@ export const lightTheme: Theme = {
       border: colors.error.border,
     },
     focused: {
-      background: colors.primary600,
+      background: colors.primary400,
       text: colors.primary900,
       border: colors.primary950,
     },

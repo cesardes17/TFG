@@ -9,6 +9,7 @@ export const registerValidationSchemas = {
       .oneOf([Yup.ref('password')], 'Las contraseñas no coinciden')
       .required('Requerido'),
     nombre: Yup.string().required('Requerido'),
+    apellidos: Yup.string().required('Requerido'),
   }),
   step2: (roles: { value: Role }[]) =>
     Yup.object().shape({
@@ -28,17 +29,20 @@ export const registerValidationSchemas = {
       .min(30, 'El peso debe ser mayor a 30kg')
       .max(200, 'El peso debe ser menor a 200kg')
       .required('Requerido'),
-  }),
-  step4: Yup.object().shape({
     dorsal: Yup.number()
       .min(0, 'El dorsal debe ser mayor a 0')
       .max(99, 'El dorsal debe ser menor a 99')
       .required('Requerido'),
   }),
-  step5: Yup.object().shape({
+  step4: Yup.object().shape({
     posicion: Yup.string()
-      .min(2, 'La posición debe tener al menos 2 caracteres')
-      .max(50, 'La posición debe tener menos de 50 caracteres')
+      .oneOf(
+        ['base', 'escolta', 'alero', 'ala-pivot', 'pivot'],
+        'Posición inválida'
+      )
       .required('Requerido'),
+  }),
+  step5: Yup.object().shape({
+    photoURL: Yup.string().optional(),
   }),
 };

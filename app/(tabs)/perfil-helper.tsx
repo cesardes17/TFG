@@ -5,6 +5,7 @@ import StyledText from '../../src/components/common/StyledText';
 import { useUser } from '../../src/contexts/UserContext';
 import { useEffect } from 'react';
 import { router } from 'expo-router';
+import PerfilScreen from '../../src/screens/user/PerfilScreen';
 
 export default function Profile() {
   const { user, loading } = useUser();
@@ -17,7 +18,7 @@ export default function Profile() {
 
   return (
     <PageContainer>
-      <StyledText>Pantalla Perfil</StyledText>
+      <PerfilScreen />
     </PageContainer>
   );
 }

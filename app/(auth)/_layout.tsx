@@ -15,7 +15,7 @@ export default function AuthLayout() {
           backgroundColor: theme.background.navigation,
         },
         headerTitleStyle: {
-          color: theme.text.primary,
+          color: theme.text.light,
         },
         headerLeft: () => {
           return (
@@ -31,11 +31,13 @@ export default function AuthLayout() {
               }}
             >
               {Platform.OS === 'ios' ? (
-                <ArrowBackIosIcon color={theme.text.primary} />
+                <ArrowBackIosIcon color={theme.text.light} />
               ) : (
-                <ArrowBackIcon color={theme.text.primary} />
+                <ArrowBackIcon color={theme.text.light} />
               )}
-              <StyledText>Inicio</StyledText>
+              <StyledText style={{ color: theme.text.light }}>
+                Inicio
+              </StyledText>
             </TouchableOpacity>
           );
         },

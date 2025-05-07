@@ -27,37 +27,39 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
 
+  // Dentro de UserProvider, tras recibir fbUser...
+  const loadUserProfile = async (uid: string) => {
+    const MAX_RETRIES = 5;
+    let retries = 0;
+    let result;
+    do {
+      result = await FirestoreService.getDocument<User>('users', uid);
+      if (result.success && result.data) {
+        setUser(result.data);
+        return;
+      }
+      // Espera 500 ms antes de reintentar
+      await new Promise((r) => setTimeout(r, 500));
+      retries++;
+    } while (retries < MAX_RETRIES);
+
+    // Si tras los reintentos sigue sin data:
+    console.error('Perfil de usuario no encontrado tras registro:', uid);
+    setUser(null);
+  };
+
   useEffect(() => {
-    const unsubscribe = AuthService.onAuthChange(async (firebaseUser) => {
-      if (!firebaseUser) {
+    const unsubscribe = AuthService.onAuthChange(async (fbUser) => {
+      if (!fbUser) {
         setUser(null);
         setLoading(false);
         return;
       }
-
-      // Le decimos a FirestoreService que esperamos un objeto User
-      const result: ResultService<User | null> =
-        await FirestoreService.getDocument<User>('users', firebaseUser.uid);
-
-      if (result.success) {
-        if (result.data) {
-          setUser(result.data); // ahora result.data ya cumple User
-        } else {
-          console.error(
-            'Perfil de usuario inexistente en Firestore:',
-            firebaseUser.uid
-          );
-          setUser(null);
-        }
-      } else {
-        setError(result.errorMessage);
-        setUser(null);
-      }
-
+      // en lugar de llamar una sola vez:
+      await loadUserProfile(fbUser.uid);
       setLoading(false);
     });
-
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   return (

@@ -10,7 +10,11 @@ interface FormikTextInputProps
   name: string;
 }
 
-export default function InputFormik({ name, ...props }: FormikTextInputProps) {
+export default function InputFormik({
+  name,
+  placeholder,
+  ...props
+}: FormikTextInputProps) {
   const [field, meta, helpers] = useField(name);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -21,6 +25,7 @@ export default function InputFormik({ name, ...props }: FormikTextInputProps) {
     <View style={styles.container}>
       <StyledTextInput
         value={field.value}
+        placeholder={placeholder}
         onChangeText={(value) => {
           helpers.setValue(value);
           // Limpiar el estado de error mientras el usuario escribe

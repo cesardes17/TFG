@@ -23,7 +23,7 @@ export default function NativeLayout() {
         tabBarStyle: { backgroundColor: theme.background.navigation },
         tabBarLabelStyle: { fontSize: 12 },
         headerStyle: { backgroundColor: theme.background.navigation },
-        headerTitleStyle: { color: theme.text.primary },
+        headerTitleStyle: { color: theme.text.light },
         headerTitleAlign: 'center',
         headerShadowVisible: false,
       }}

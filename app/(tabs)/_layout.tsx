@@ -2,15 +2,25 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Feather, FontAwesome } from '@expo/vector-icons';
+import { useTheme } from '../../src/contexts/ThemeContext';
 
 // Simula el estado de autenticación (cámbialo a `true` para ver Perfil)
 const isLoggedIn = false;
 
 export default function NativeLayout() {
+  const { theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2196f3',
+        tabBarActiveTintColor: theme.icon.active,
+        tabBarInactiveTintColor: theme.icon.inactive,
+        tabBarStyle: { backgroundColor: theme.background },
+        tabBarLabelStyle: { fontSize: 12 },
+        headerStyle: { backgroundColor: theme.background },
+        headerTitleStyle: { color: theme.text.primary },
+        headerTitleAlign: 'center',
+        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen

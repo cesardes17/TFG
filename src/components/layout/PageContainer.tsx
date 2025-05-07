@@ -20,11 +20,11 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
 
   return (
     <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: theme.background }]}
+      style={[styles.safeArea, { backgroundColor: theme.background.primary }]}
     >
       <StatusBar
         barStyle={mode ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.background}
+        backgroundColor={theme.background.primary}
         translucent
       />
       <View

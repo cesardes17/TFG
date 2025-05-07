@@ -1,29 +1,54 @@
+// src/services/authService.ts
 import {
   signInWithEmail,
   signUpWithEmail,
   signOutUser,
   onAuthStateChangedListener,
 } from '../api/authFirebase';
+import type { ResultService } from '../types/ResultService';
+import { translateAuthError } from '../utils/errorTranslator';
 
-/**
- * Capa de servicio de Auth para el resto de la app
- */
 export const AuthService = {
-  async login(email: string, password: string) {
-    const credential = await signInWithEmail(email, password);
-    return credential.user;
+  login: async (
+    email: string,
+    password: string
+  ): Promise<ResultService<any>> => {
+    try {
+      const userCredential = await signInWithEmail(email, password);
+      return { data: userCredential.user, success: true };
+    } catch (error: any) {
+      const code = error.code || '';
+      const message = translateAuthError(code, 'No se pudo iniciar sesión.');
+      return { success: false, errorMessage: message };
+    }
   },
 
-  async register(email: string, password: string) {
-    const credential = await signUpWithEmail(email, password);
-    return credential.user;
+  register: async (
+    email: string,
+    password: string
+  ): Promise<ResultService<any>> => {
+    try {
+      const userCredential = await signUpWithEmail(email, password);
+      return { data: userCredential.user, success: true };
+    } catch (error: any) {
+      const code = error.code || '';
+      const message = translateAuthError(
+        code,
+        'No se pudo registrar el usuario.'
+      );
+      return { success: false, errorMessage: message };
+    }
   },
 
-  async logout() {
-    await signOutUser();
+  logout: async (): Promise<ResultService<null>> => {
+    try {
+      await signOutUser();
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, errorMessage: 'No se pudo cerrar sesión.' };
+    }
   },
 
-  onAuthChange(callback: (user: any) => void) {
-    return onAuthStateChangedListener(callback);
-  },
+  onAuthChange: (callback: (user: any) => void) =>
+    onAuthStateChangedListener(callback),
 };

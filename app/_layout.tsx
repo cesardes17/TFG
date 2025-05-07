@@ -2,11 +2,14 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { ThemeProvider } from '../src/contexts/ThemeContext';
+import { UserProvider } from '../src/contexts/UserContext';
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ThemeProvider>
+    <UserProvider>
+      <ThemeProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ThemeProvider>
+    </UserProvider>
   );
 }

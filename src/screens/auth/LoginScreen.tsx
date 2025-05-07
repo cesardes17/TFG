@@ -1,9 +1,12 @@
-import { Text, View } from 'react-native';
+import { Button, Text, View } from 'react-native';
+import PageContainer from '../../components/layout/PageContainer';
+import { router } from 'expo-router';
 
 export default function LoginScreen() {
   return (
-    <View>
-      <Text>Login Screen</Text>
-    </View>
+    <Button
+      title='Crea una Cuenta'
+      onPress={() => router.replace('/register')}
+    />
   );
 }

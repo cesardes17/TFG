@@ -1,11 +1,22 @@
 // app/register.tsx
-import React from 'react';
-import { View, Text, Button } from 'react-native';
+import React, { useEffect } from 'react';
+
 import { useRouter } from 'expo-router';
 import PageContainer from '../../src/components/layout/PageContainer';
 import RegisterScreen from '../../src/screens/auth/RegisterScreen';
+import { useUser } from '../../src/contexts/UserContext';
 
 export default function Register() {
+  const router = useRouter();
+  const { user, loading } = useUser();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user) return router.push('/');
+  }, []);
+
+  if (loading) return null;
+
   return (
     <PageContainer>
       <RegisterScreen />

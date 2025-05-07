@@ -32,7 +32,7 @@ export default function HeaderConfig({
         title: title,
         headerTitleAlign: 'center',
         headerStyle: {
-          backgroundColor: theme.background,
+          backgroundColor: theme.backgroundPrimary,
         },
         headerTintColor: theme.text.primary,
         headerTitleStyle: {

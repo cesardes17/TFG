@@ -22,14 +22,26 @@ export const colors = {
   gray800: '#262626',
   gray900: '#1F1F1F',
 
-  success: '#52C41A',
-  warning: '#FAAD14',
-  error: '#F5222D',
-  info: '#1890FF',
-
-  errorText: '#D32F2F',
-  errorBorder: '#DC2626',
-  errorBackground: '#FFEBEB',
+  error: {
+    text: '#D32F2F',
+    border: '#DC2626',
+    background: '#FFEBEB',
+  },
+  info: {
+    text: '#1890FF',
+    border: '#1890FF',
+    background: '#C3ECFFFF',
+  },
+  warning: {
+    text: '#FAAD14',
+    border: '#FAAD14',
+    background: '#FFFBE6',
+  },
+  success: {
+    text: '#52C41A',
+    border: '#52C41A',
+    background: '#F6FFED',
+  },
 
   white: '#FFFFFF',
   black: '#000000',

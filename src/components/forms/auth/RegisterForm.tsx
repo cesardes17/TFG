@@ -10,6 +10,7 @@ import { registerValidationSchemas } from '../../../validations/auth';
 import registrationHelper from '../../../utils/registrationHelper';
 import StyledAlert from '../../common/StyledAlert';
 import ImagePicker from '../../common/ImagePicker';
+import { router } from 'expo-router';
 
 const roles: { label: string; description: string; value: Role }[] = [
   {
@@ -35,7 +36,11 @@ interface FormValues {
   photoURL?: string;
 }
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  setIsLoading: (isLoading: boolean) => void;
+}
+
+export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
   const { theme } = useTheme();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null); // Agrega el estado de error
@@ -157,6 +162,7 @@ export default function RegisterForm() {
   );
 
   const handleSubmit = async (values: FormValues) => {
+    setIsLoading(true);
     console.log('Registro con:', values);
 
     // Check if role is valid and handle jugador role separately
@@ -192,6 +198,9 @@ export default function RegisterForm() {
         await registrationHelper(user, values.password);
       } catch (error) {
         setError((error as Error).message);
+      } finally {
+        setIsLoading(false);
+        router.replace('/');
       }
     } else {
       // Handle spectator registration
@@ -205,6 +214,9 @@ export default function RegisterForm() {
         await registrationHelper(user, values.password);
       } catch (error) {
         setError((error as Error).message);
+      } finally {
+        setIsLoading(false);
+        router.replace('/');
       }
     }
   };

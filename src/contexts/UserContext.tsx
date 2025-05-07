@@ -29,7 +29,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   // Dentro de UserProvider, tras recibir fbUser...
   const loadUserProfile = async (uid: string) => {
-    const MAX_RETRIES = 5;
+    const MAX_RETRIES = 10;
     let retries = 0;
     let result;
     do {

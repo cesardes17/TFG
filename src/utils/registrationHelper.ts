@@ -53,9 +53,6 @@ export default async function registrationHelper(
     if (!userSuccess || !userData) {
       throw new Error(userMsg || 'Error al crear usuario en Firestore');
     }
-
-    await new Promise((r) => setTimeout(r, 500));
-    // Ahora logueamos de nuevo con las mismas credenciales
     await AuthService.login(user.correo, password);
 
     return { success: true, data: userData, errorMessage: null };

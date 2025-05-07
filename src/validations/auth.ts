@@ -19,4 +19,26 @@ export const registerValidationSchemas = {
         )
         .required('Requerido'),
     }),
+  step3: Yup.object().shape({
+    altura: Yup.number()
+      .min(100, 'La altura debe ser mayor a 100cm')
+      .max(250, 'La altura debe ser menor a 250cm')
+      .required('Requerido'),
+    peso: Yup.number()
+      .min(30, 'El peso debe ser mayor a 30kg')
+      .max(200, 'El peso debe ser menor a 200kg')
+      .required('Requerido'),
+  }),
+  step4: Yup.object().shape({
+    dorsal: Yup.number()
+      .min(0, 'El dorsal debe ser mayor a 0')
+      .max(99, 'El dorsal debe ser menor a 99')
+      .required('Requerido'),
+  }),
+  step5: Yup.object().shape({
+    posicion: Yup.string()
+      .min(2, 'La posición debe tener al menos 2 caracteres')
+      .max(50, 'La posición debe tener menos de 50 caracteres')
+      .required('Requerido'),
+  }),
 };

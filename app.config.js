@@ -38,10 +38,6 @@ export default ({ config }) => ({
   },
   plugins: [
     '@react-native-firebase/app',
-    '@react-native-firebase/auth',
-    '@react-native-firebase/firestore', // <— Añadido Firestore
-    '@react-native-firebase/storage',
-    '@react-native-firebase/database', // Realtime Database
     ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
     // 'expo-router', // no suele ser necesario aquí
   ],

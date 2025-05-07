@@ -46,3 +46,8 @@ export const registerValidationSchemas = {
     photoURL: Yup.string().optional(),
   }),
 };
+
+export const loginValidationSchema = Yup.object().shape({
+  correo: Yup.string().email('Correo inválido').required('Requerido'),
+  password: Yup.string().required('Requerido'),
+});

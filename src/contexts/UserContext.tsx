@@ -6,10 +6,11 @@ import React, {
   useContext,
   ReactNode,
 } from 'react';
-import type { ResultService } from '../types/ResultService';
+
 import { AuthService } from '../services/core/authService';
-import { FirestoreService } from '../services/core/firestoreService';
+
 import type { User } from '../types/User'; // <— importa tu tipo User
+import { UserService } from '../services/userService';
 
 interface UserContextValue {
   user: User | null; // ahora usa User (PlayerUser u OtherUser)
@@ -33,7 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     let retries = 0;
     let result;
     do {
-      result = await FirestoreService.getDocument<User>('users', uid);
+      result = await UserService.getUserProfile(uid);
       if (result.success && result.data) {
         setUser(result.data);
         return;

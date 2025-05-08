@@ -1,4 +1,5 @@
 // src/services/userService.ts
+
 import type { UserRegistration, User } from '../types/User';
 import type { ResultService } from '../types/ResultService';
 import { AuthService } from './core/authService';
@@ -10,70 +11,54 @@ import { Timestamp } from 'firebase/firestore';
  */
 export const UserService = {
   /**
-   * Registra un nuevo usuario:
-   *  1) AuthService.register(email, pass)
-   *  2) FirestoreService.setDocument('users', {...userData, uid, createdAt})
-   *  3) En caso de fallo en Firestore, revierte el registro de Auth (AuthService.logout o .deleteUser)
+   * Crea un nuevo usuario en Auth y en Firestore (colección 'users/{uid}')
    */
   createUser: async (
     uid: string,
     registrationData: UserRegistration
   ): Promise<ResultService<User>> => {
-    // 2) arma el payload Firestore (sin password, con createdAt)
-
-    const firestorePayload = {
+    // Armar payload sin contraseña
+    const payload: Omit<User, 'password'> & { createdAt: any } = {
       uid,
       ...registrationData,
-      createdAt: Timestamp.now(), // Changed from Date to Timestamp
+      createdAt: Timestamp.now(),
     };
 
-    // 3) escribe en Firestore
-    const fsRes = await FirestoreService.setDocument<User>(
+    // Inserta en Firestore en 'users/{uid}'
+    // Firma: setDocumentByPath(collection: string, docId: string, data: T)
+    const res = await FirestoreService.setDocumentByPath<User>(
       'users',
-      firestorePayload,
-      uid
+      uid,
+      payload as User
     );
-    if (!fsRes.success) {
-      // 4) si falla Firestore, revierte el registro Auth
+    if (!res.success) {
+      // Si falla Firestore, revierte la sesión en Auth
       await AuthService.logout();
-      return { success: false, errorMessage: fsRes.errorMessage };
+      return { success: false, errorMessage: res.errorMessage };
     }
 
-    // 5) todo OK: devuelve el usuario recién creado
-    return {
-      success: true,
-      data: {
-        ...(firestorePayload as User),
-        uid,
-        createdAt: firestorePayload.createdAt,
-      },
-    };
+    // Devolver el usuario creado
+    return { success: true, data: payload as User };
   },
 
   /**
-   * Obtiene el perfil de usuario por UID
+   * Obtiene el perfil de usuario por UID desde 'users/{uid}'
    */
   getUserProfile: async (uid: string): Promise<ResultService<User>> => {
     try {
-      const result = await FirestoreService.getDocument<User>('users', uid);
-
-      if (!result.success || !result.data) {
-        throw new Error(
-          result.errorMessage || 'No se encontró el perfil de usuario'
-        );
+      // Firma: getDocumentByPath<T>(collection: string, docId: string)
+      const res = await FirestoreService.getDocumentByPath<User>('users', uid);
+      if (!res.success || !res.data) {
+        return { success: false, errorMessage: 'Usuario no encontrado' };
       }
-
-      return {
-        success: true,
-        data: result.data,
-      };
-    } catch (error) {
+      return { success: true, data: res.data };
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'No se pudo obtener el perfil de usuario',
+            : 'Error al obtener perfil de usuario',
       };
     }
   },

@@ -3,11 +3,10 @@
 import {
   deleteDocumentByPathFS,
   getCollectionByPathFS,
-  getCollectionByPathWithFilterFS,
   getDocumentByPathFS,
   setDocumentByPathFS,
-} from '../../api/firestoreFirebase';
-import type { ResultService } from '../../types/ResultService';
+} from '../api/firestoreFirebase';
+import { ResultService } from '../types/ResultService';
 
 /**
  * Servicio unificado para Firestore con rutas dinámicas
@@ -43,28 +42,15 @@ export const FirestoreService = {
   },
 
   /**
-   * Obtiene documentos con filtros en una ruta dada:
-   * filters: [['field','==',value],...]
-   * pathSegments: ... 'colección','docId','subcolección', etc
-   */
-  getDocumentsWithFilterByPath: async <T>(
-    filters: [string, import('firebase/firestore').WhereFilterOp, any][],
-    ...pathSegments: string[]
-  ): Promise<ResultService<T[]>> => {
-    try {
-      const data = await getCollectionByPathWithFilterFS<T>(
-        filters,
-        ...pathSegments
-      );
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
-    }
-  },
-
-  /**
    * Crea o reemplaza un documento en la ruta dada.
    * El payload debe ser el último argumento.
+   *
+   * Ejemplos de uso:
+   * // ID explícito:
+   * FirestoreService.setDocumentByPath('users', uid, payload)
+   *
+   * // ID automático:
+   * FirestoreService.setDocumentByPath('temporadas', temporadaId, 'bolsa', jugadorObj)
    */
   setDocumentByPath: async <T extends Record<string, any>>(
     ...pathSegmentsAndData: [...string[], T]

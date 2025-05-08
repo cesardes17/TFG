@@ -17,7 +17,7 @@ export const navigationItems: NavigationItem[] = [
     id: 'ajustes',
     title: 'Ajustes',
     description: 'Configura tu experiencia en la aplicación.',
-    path: '/ajustes',
+    path: '/ajustesMobile',
     allowedRoles: ['*'], // cualquier usuario, incluso invitado
   },
   {
@@ -31,7 +31,7 @@ export const navigationItems: NavigationItem[] = [
     id: 'panelControl',
     title: 'Panel de Control',
     description: 'Gestiona la Liga Municipal de Baloncesto.',
-    path: '/panelControl',
+    path: '/panelControlMobile',
     allowedRoles: ['organizador', 'coorganizador'], // solo organizadores y coorganizadores
   },
   {

@@ -30,17 +30,17 @@ export const colors = {
   info: {
     text: '#1890FF',
     border: '#1890FF',
-    background: '#C3ECFFFF',
+    background: '#C3ECFF',
   },
   warning: {
     text: '#FAAD14',
     border: '#FAAD14',
-    background: '#FFFBE6',
+    background: '#FAAD14',
   },
   success: {
-    text: '#52C41A',
-    border: '#52C41A',
-    background: '#F6FFED',
+    text: '#337A10FF',
+    border: '#3F9713',
+    background: '#61E61EFF',
   },
 
   white: '#FFFFFF',

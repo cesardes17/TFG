@@ -68,3 +68,11 @@ export const AtIcon = ({ size = 24, color }: IconProps) => {
 export const UserIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='user' size={size} color={color} />;
 };
+
+export const WarningIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='warning' size={size} color={color} />;
+};
+
+export const InfoIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='infocirlceo' size={size} color={color} />;
+};

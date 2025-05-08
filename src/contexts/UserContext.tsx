@@ -7,8 +7,8 @@ import React, {
   ReactNode,
 } from 'react';
 import type { ResultService } from '../types/ResultService';
-import { AuthService } from '../services/authService';
-import { FirestoreService } from '../services/firestoreService';
+import { AuthService } from '../services/core/authService';
+import { FirestoreService } from '../services/core/firestoreService';
 import type { User } from '../types/User'; // <— importa tu tipo User
 
 interface UserContextValue {

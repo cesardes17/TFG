@@ -1,12 +1,14 @@
 // src/services/firestoreService.ts
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import {
   getDocumentFS,
   getDocumentsFS,
   setDocumentFS,
   updateDocumentFS,
   deleteDocumentFS,
-} from '../api/firestoreFirebase';
-import type { ResultService } from '../types/ResultService';
+  getDocumentsWithFilterFS,
+} from '../../api/firestoreFirebase';
+import type { ResultService } from '../../types/ResultService';
 
 /**
  * High-level service for Firestore operations with unified results
@@ -23,6 +25,21 @@ export const FirestoreService = {
       return {
         success: false,
         errorMessage: error.message || 'Error fetching document',
+      };
+    }
+  },
+
+  getDocumentsWithFilter: async <T>(
+    collectionName: string,
+    filters: [string, FirebaseFirestoreTypes.WhereFilterOp, any][]
+  ): Promise<ResultService<{ id: string; data: T }[]>> => {
+    try {
+      const docs = await getDocumentsWithFilterFS<T>(collectionName, filters);
+      return { data: docs, success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        errorMessage: error.message || 'Error fetching filtered documents',
       };
     }
   },

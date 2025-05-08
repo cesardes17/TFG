@@ -1,6 +1,6 @@
 // src/services/storageService.ts
-import { uploadFileFS, deleteFileFS } from '../api/storageFirebase';
-import type { ResultService } from '../types/ResultService';
+import { uploadFileFS, deleteFileFS } from '../../api/storageFirebase';
+import type { ResultService } from '../../types/ResultService';
 
 /**
  * Servicio de alto nivel para operaciones con Firebase Storage

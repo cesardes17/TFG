@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import StyledText from '../../components/common/StyledText';
-import { AuthService } from '../../services/authService';
+import { AuthService } from '../../services/core/authService';
 import { router } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
 import ShowUserInfo from '../../components/user/ShowUserInfo';

@@ -4,7 +4,7 @@ import { Formik } from 'formik';
 import { useTheme } from '../../../contexts/ThemeContext';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
-import { AuthService } from '../../../services/authService';
+import { AuthService } from '../../../services/core/authService';
 import StyledAlert from '../../common/StyledAlert';
 import { router } from 'expo-router';
 import { Platform } from 'react-native';

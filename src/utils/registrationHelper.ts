@@ -1,6 +1,6 @@
 // /src/utils/registrationHelper.ts
-import { AuthService } from '../services/authService';
-import { StorageService } from '../services/storageService';
+import { AuthService } from '../services/core/authService';
+import { StorageService } from '../services/core/storageService';
 import { UserService } from '../services/userService';
 import type { UserRegistration } from '../types/User';
 import { getRandomUID } from './getRandomUID';

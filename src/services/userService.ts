@@ -1,8 +1,8 @@
 // src/services/userService.ts
 import type { UserRegistration, User } from '../types/User';
 import type { ResultService } from '../types/ResultService';
-import { AuthService } from './authService';
-import { FirestoreService } from './firestoreService';
+import { AuthService } from './core/authService';
+import { FirestoreService } from './core/firestoreService';
 import { Timestamp } from 'firebase/firestore';
 
 /**

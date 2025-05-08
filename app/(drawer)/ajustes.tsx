@@ -1,9 +1,10 @@
 // app/settings.tsx
-import { View, Text } from 'react-native';
+import PageContainer from '../../src/components/layout/PageContainer';
+import SettingsScreen from '../../src/screens/SettingsScreen';
 export default function Settings() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Pantalla Ajustes</Text>
-    </View>
+    <PageContainer>
+      <SettingsScreen />
+    </PageContainer>
   );
 }

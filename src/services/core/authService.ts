@@ -4,9 +4,9 @@ import {
   signUpWithEmail,
   signOutUser,
   onAuthStateChangedListener,
-} from '../api/authFirebase';
-import type { ResultService } from '../types/ResultService';
-import { translateAuthError } from '../utils/errorTranslator';
+} from '../../api/authFirebase';
+import type { ResultService } from '../../types/ResultService';
+import { translateAuthError } from '../../utils/errorTranslator';
 
 export const AuthService = {
   login: async (

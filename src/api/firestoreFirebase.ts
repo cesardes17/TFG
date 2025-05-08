@@ -1,4 +1,5 @@
 // src/api/firestoreFirebase.ts
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Platform } from 'react-native';
 
 // Web & Native both use modular API v22
@@ -42,6 +43,51 @@ export async function getDocumentFS<T>(
     );
     const snap = await getDoc(ref);
     return snap.exists() ? (snap.data() as T) : null;
+  }
+}
+/**
+ * Fetch documents with filters
+ */
+export async function getDocumentsWithFilterFS<T>(
+  collectionName: string,
+  filters: [string, FirebaseFirestoreTypes.WhereFilterOp, any][]
+): Promise<{ id: string; data: T }[]> {
+  const db = await getDb();
+
+  if (Platform.OS === 'web') {
+    const { collection, getDocs, query, where } = await import(
+      'firebase/firestore'
+    );
+    const colRef = collection(
+      db as import('firebase/firestore').Firestore,
+      collectionName
+    );
+    const q = query(
+      colRef,
+      ...filters.map(([field, op, value]) => where(field, op, value))
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({
+      id: doc.id,
+      data: doc.data() as T,
+    }));
+  } else {
+    const { collection, getDocs, query, where } = await import(
+      '@react-native-firebase/firestore'
+    );
+    const colRef = collection(
+      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
+      collectionName
+    );
+    const q = query(
+      colRef,
+      ...filters.map(([field, op, value]) => where(field, op, value))
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({
+      id: doc.id,
+      data: doc.data() as T,
+    }));
   }
 }
 

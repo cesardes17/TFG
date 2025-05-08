@@ -3,9 +3,6 @@ import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 
-// Simula el estado de autenticación (cámbialo a `true` para ver Perfil)
-const isLoggedIn = false;
-
 export default function WebLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

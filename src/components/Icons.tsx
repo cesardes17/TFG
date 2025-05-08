@@ -1,4 +1,5 @@
 import {
+  AntDesign,
   Entypo,
   Feather,
   FontAwesome,
@@ -58,4 +59,12 @@ export const BadgeAccountIcon = ({ size = 24, color }: IconProps) => {
   return (
     <MaterialCommunityIcons name='badge-account' size={size} color={color} />
   );
+};
+
+export const AtIcon = ({ size = 24, color }: IconProps) => {
+  return <MaterialIcons name='alternate-email' size={size} color={color} />;
+};
+
+export const UserIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='user' size={size} color={color} />;
 };

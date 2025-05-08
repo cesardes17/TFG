@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemePreference, useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 
 const options: { label: string; value: ThemePreference }[] = [
   { label: 'System', value: 'system' },
@@ -13,7 +14,7 @@ export default function ThemeSwitcher() {
   const { preference, setPreference, theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container]}>
       <Text style={[styles.title, { color: theme.text.primary }]}>
         Choose Theme
       </Text>
@@ -25,26 +26,20 @@ export default function ThemeSwitcher() {
               key={opt.value}
               style={[
                 styles.optionButton,
+
                 {
-                  borderColor: selected
-                    ? theme.text.primary
-                    : theme.border.secondary,
-                },
-                {
-                  backgroundColor: selected
-                    ? theme.text.primary
-                    : 'transparent',
+                  backgroundColor: selected ? theme.text.info : 'transparent',
                 },
               ]}
               onPress={() => setPreference(opt.value)}
             >
-              <Text
+              <StyledText
                 style={{
-                  color: selected ? theme.background : theme.text.primary,
+                  color: selected ? theme.text.light : theme.text.primary,
                 }}
               >
                 {opt.label}
-              </Text>
+              </StyledText>
             </TouchableOpacity>
           );
         })}
@@ -72,7 +67,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     marginHorizontal: 4,
-    borderWidth: 2,
+
     borderRadius: 4,
     alignItems: 'center',
   },

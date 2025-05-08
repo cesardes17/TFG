@@ -1,35 +1,39 @@
 // src/screens/MoreScreen.tsx
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
+import { navigationItems } from '../constants/navigationsItems';
+import { useUser } from '../contexts/UserContext';
+import NavigationCard from '../components/navigation/NavigationCard';
 
 export default function MoreScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { user } = useUser();
 
-  // Opciones de navegación adicionales
-  const options = [{ label: 'Settings', route: '/settings' }];
+  const userRol = user ? user.role : null;
+
+  const filteredItems = navigationItems.filter(
+    (item) =>
+      item.allowedRoles.includes('*') ||
+      (item.allowedRoles.includes('auth') && user) ||
+      (userRol && item.allowedRoles.includes(userRol))
+  );
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-    >
-      <Text style={[styles.title, { color: theme.text.primary }]}>
-        More Options
-      </Text>
-      {options.map((opt) => (
-        <TouchableOpacity
-          key={opt.route}
-          style={[styles.button, { borderColor: theme.border.secondary }]}
-          onPress={() => router.push(opt.route)}
-        >
-          <Text style={[styles.buttonText, { color: theme.text.secondary }]}>
-            {opt.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <FlatList
+      data={filteredItems}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <NavigationCard
+          onPress={() => {
+            router.push(item.path);
+          }}
+          item={item}
+        />
+      )}
+    />
   );
 }
 

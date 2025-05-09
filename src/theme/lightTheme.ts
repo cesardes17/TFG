@@ -7,6 +7,9 @@ export const lightTheme: Theme = {
   cardSelected: colors.primary50,
   stepperActive: colors.primary600,
   stepperInactive: colors.gray300,
+
+  transparent: 'transparent',
+
   background: {
     primary: colors.gray100,
     error: colors.error.background,
@@ -45,7 +48,7 @@ export const lightTheme: Theme = {
       border: colors.primary950,
     },
     error: {
-      background: colors.error.background,
+      background: colors.error.inputBackground,
       text: colors.error.text,
       border: colors.error.border,
     },
@@ -58,6 +61,42 @@ export const lightTheme: Theme = {
       background: colors.gray300,
       text: colors.gray600,
       border: colors.gray800,
+    },
+  },
+  alert: {
+    success: {
+      text: colors.success.text,
+      background: colors.success.alertBackground,
+    },
+    info: {
+      text: colors.info.text,
+      background: colors.info.alertBackground,
+    },
+    warning: {
+      text: colors.warning.text,
+      background: colors.warning.alertBackground,
+    },
+    error: {
+      text: colors.error.text,
+      background: colors.error.alertBackground,
+    },
+  },
+  toast: {
+    success: {
+      text: colors.white,
+      background: colors.success.text,
+    },
+    info: {
+      text: colors.white,
+      background: colors.info.text,
+    },
+    warning: {
+      text: colors.white,
+      background: colors.warning.text,
+    },
+    error: {
+      text: colors.white,
+      background: colors.error.text,
     },
   },
 };

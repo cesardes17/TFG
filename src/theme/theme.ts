@@ -6,6 +6,8 @@ export interface Theme {
   stepperActive: string;
   stepperInactive: string;
 
+  transparent: string;
+
   background: {
     primary: string;
     error: string;
@@ -58,6 +60,42 @@ export interface Theme {
       background: string;
       text: string;
       border: string;
+    };
+  };
+  alert: {
+    success: {
+      text: string;
+      background: string;
+    };
+    info: {
+      text: string;
+      background: string;
+    };
+    warning: {
+      text: string;
+      background: string;
+    };
+    error: {
+      text: string;
+      background: string;
+    };
+  };
+  toast: {
+    success: {
+      text: string;
+      background: string;
+    };
+    info: {
+      text: string;
+      background: string;
+    };
+    warning: {
+      text: string;
+      background: string;
+    };
+    error: {
+      text: string;
+      background: string;
     };
   };
 }

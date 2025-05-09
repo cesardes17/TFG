@@ -18,27 +18,27 @@ export default function StyledAlert({ message, variant }: StyledAlertProps) {
     switch (variant) {
       case 'error':
         return {
-          backgroundColor: 'rgba(255, 59, 48, 0.1)', // rojo con 10% de opacidad
+          backgroundColor: theme.alert.error.background,
           borderColor: theme.border.error,
-          textColor: theme.text.error,
+          textColor: theme.alert.error.text,
         };
       case 'success':
         return {
-          backgroundColor: 'rgba(52, 199, 89, 0.1)', // verde con 10% de opacidad
+          backgroundColor: theme.alert.success.background,
           borderColor: theme.border.success,
-          textColor: theme.text.success,
+          textColor: theme.alert.success.text,
         };
       case 'warning':
         return {
-          backgroundColor: 'rgba(255, 149, 0, 0.1)', // naranja con 10% de opacidad
+          backgroundColor: theme.alert.warning.background,
           borderColor: theme.border.warning,
-          textColor: theme.text.warning,
+          textColor: theme.alert.warning.text,
         };
       case 'info':
         return {
-          backgroundColor: 'rgba(0, 122, 255, 0.1)', // azul con 10% de opacidad
+          backgroundColor: theme.alert.info.background,
           borderColor: theme.border.info,
-          textColor: theme.text.info,
+          textColor: theme.alert.info.text,
         };
     }
   };

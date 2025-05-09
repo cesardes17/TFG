@@ -33,7 +33,10 @@ export default function WebLayout() {
 
         <Drawer.Screen
           name='perfil-helper'
-          options={{ drawerLabel: user ? 'Perfil' : 'Login' }}
+          options={{
+            drawerLabel: user ? 'Perfil' : 'Login',
+            title: 'Perfil',
+          }}
         />
         <Drawer.Screen
           name='panelControl'

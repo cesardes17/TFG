@@ -7,6 +7,9 @@ export const darkTheme: Theme = {
   cardSelected: colors.primary200,
   stepperActive: colors.primary300,
   stepperInactive: colors.gray700,
+
+  transparent: 'transparent',
+
   background: {
     primary: colors.gray900,
     error: colors.error.background,
@@ -58,6 +61,42 @@ export const darkTheme: Theme = {
       background: colors.gray300,
       text: colors.gray600,
       border: colors.gray800,
+    },
+  },
+  alert: {
+    success: {
+      text: colors.success.text,
+      background: colors.gray800,
+    },
+    info: {
+      text: colors.info.text,
+      background: colors.gray800,
+    },
+    warning: {
+      text: colors.warning.text,
+      background: colors.gray800,
+    },
+    error: {
+      text: colors.error.text,
+      background: colors.gray800,
+    },
+  },
+  toast: {
+    success: {
+      text: colors.white,
+      background: colors.success.text,
+    },
+    info: {
+      text: colors.white,
+      background: colors.info.text,
+    },
+    warning: {
+      text: colors.white,
+      background: colors.warning.text,
+    },
+    error: {
+      text: colors.white,
+      background: colors.error.text,
     },
   },
 };

@@ -25,22 +25,31 @@ export const colors = {
   error: {
     text: '#D32F2F',
     border: '#DC2626',
-    background: '#FFEBEB',
+    background: '#A91D1DFF',
+    inputBackground: '#FFE9E9',
+    toastBackground: '#FFE9E9',
+    alertBackground: '#FFEBEE',
   },
   info: {
     text: '#1890FF',
     border: '#1890FF',
-    background: '#C3ECFF',
+    background: '#217BA4FF',
+    toastBackground: '#E6F7FF',
+    alertBackground: '#E6F7FF',
   },
   warning: {
     text: '#FAAD14',
     border: '#FAAD14',
     background: '#FAAD14',
+    toastBackground: '#FFF7E6',
+    alertBackground: '#FFFBE6',
   },
   success: {
     text: '#337A10FF',
     border: '#3F9713',
     background: '#61E61EFF',
+    toastBackground: '#F6FFED',
+    alertBackground: '#F6FFED',
   },
 
   white: '#FFFFFF',

@@ -1,80 +1,83 @@
-// src/services/firestoreService.ts
-
-import {
-  deleteDocumentByPathFS,
-  getCollectionByPathFS,
-  getDocumentByPathFS,
-  setDocumentByPathFS,
-} from '../api/firestoreFirebase';
+import { BolsaJugador } from '../types/BolsaJugador';
 import { ResultService } from '../types/ResultService';
+import { getRandomUID } from '../utils/getRandomUID';
+import { FirestoreService } from './core/firestoreService';
 
-/**
- * Servicio unificado para Firestore con rutas dinámicas
- */
-export const FirestoreService = {
-  /**
-   * Obtiene un documento en la ruta dada: ...'colección','docId'
-   */
-  getDocumentByPath: async <T>(
-    ...pathSegments: string[]
-  ): Promise<ResultService<T | null>> => {
-    try {
-      const data = await getDocumentByPathFS<T>(...pathSegments);
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
-    }
+export const bolsaJugadoresService = {
+  getJugadoresInscritos: async (idTemporada: string) => {
+    console.warn('No implmentado todavia');
   },
 
-  /**
-   * Obtiene todos los documentos de una colección anidada:
-   * ...'colección','docId','subcolección', etc
-   */
-  getCollectionByPath: async <T>(
-    ...pathSegments: string[]
-  ): Promise<ResultService<T[]>> => {
+  inscribirJugador: async (
+    idJugador: string,
+    idTemporada: string
+  ): Promise<ResultService<BolsaJugador>> => {
     try {
-      const data = await getCollectionByPathFS<T>(...pathSegments);
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
+      const payload: BolsaJugador = {
+        id: getRandomUID(),
+        idJugador: idJugador,
+        createdAt: new Date().toISOString(),
+      };
+      const path = ['temporadas', idTemporada, 'bolsaJugadores', payload.id];
+
+      const res = await FirestoreService.setDocumentByPath(...path, payload);
+
+      if (!res.success || !res.data) {
+        throw new Error(res.errorMessage || 'Error al inscribir jugador');
+      }
+      return { success: true, data: payload };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error al inscribir jugador',
+      };
     }
   },
-
-  /**
-   * Crea o reemplaza un documento en la ruta dada.
-   * El payload debe ser el último argumento.
-   *
-   * Ejemplos de uso:
-   * // ID explícito:
-   * FirestoreService.setDocumentByPath('users', uid, payload)
-   *
-   * // ID automático:
-   * FirestoreService.setDocumentByPath('temporadas', temporadaId, 'bolsa', jugadorObj)
-   */
-  setDocumentByPath: async <T extends Record<string, any>>(
-    ...pathSegmentsAndData: [...string[], T]
+  getJugadorInscrito: async (
+    userId: string,
+    idTemporada: string
   ): Promise<ResultService<string>> => {
     try {
-      const id = await setDocumentByPathFS<T>(...pathSegmentsAndData);
-      return { success: true, data: id };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
+      const path = ['temporadas', idTemporada, 'bolsaJugadores'];
+      const res =
+        await FirestoreService.getDocumentsWithFilterByPath<BolsaJugador>(
+          [['idJugador', '==', userId]],
+          ...path
+        );
+
+      if (!res.success || !res.data) {
+        throw new Error(res.errorMessage || 'Error al inscribir jugador');
+      }
+
+      return { success: true, data: res.data[0].id };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error al inscribir jugador',
+      };
     }
   },
-
-  /**
-   * Elimina un documento en la ruta dada:
-   * ...'colección','docId', etc
-   */
-  deleteDocumentByPath: async (
-    ...pathSegments: string[]
-  ): Promise<ResultService<null>> => {
+  deleteJugadorInscrito: async (
+    docId: string,
+    idTemporada: string
+  ): Promise<ResultService<Boolean>> => {
     try {
-      await deleteDocumentByPathFS(...pathSegments);
-      return { success: true, data: null };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
+      const path = ['temporadas', idTemporada, 'bolsaJugadores', docId];
+      const res = await FirestoreService.deleteDocumentByPath(...path);
+      console.log('Bolsa Service - res: ', res);
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al inscribir jugador');
+      }
+
+      return { success: true, data: true };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error al inscribir jugador',
+      };
     }
   },
 };

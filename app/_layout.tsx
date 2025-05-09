@@ -4,15 +4,18 @@ import { Stack } from 'expo-router';
 import { ThemeProvider } from '../src/contexts/ThemeContext';
 import { UserProvider } from '../src/contexts/UserContext';
 import { TemporadaProvider } from '../src/contexts/TemporadaContext';
+import { ToastProvider } from '../src/contexts/ToastContext';
 
 export default function RootLayout() {
   return (
-    <TemporadaProvider>
+    <ThemeProvider>
       <UserProvider>
-        <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </ThemeProvider>
+        <TemporadaProvider>
+          <ToastProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </ToastProvider>
+        </TemporadaProvider>
       </UserProvider>
-    </TemporadaProvider>
+    </ThemeProvider>
   );
 }

@@ -64,7 +64,7 @@ export default function StyledAlert({ message, variant }: StyledAlertProps) {
         {
           backgroundColor: variantStyles.backgroundColor,
           borderColor: variantStyles.borderColor,
-          gap: isMobile ? 0 : 12,
+          gap: isMobile ? 8 : 12,
         },
       ]}
     >

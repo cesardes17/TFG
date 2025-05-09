@@ -48,12 +48,14 @@ export const FirestoreService = {
    * pathSegments: ... 'colección','docId','subcolección', etc
    */
   getDocumentsWithFilterByPath: async <T>(
-    filters: [string, import('firebase/firestore').WhereFilterOp, any][],
+    andFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
+    orFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
     ...pathSegments: string[]
   ): Promise<ResultService<T[]>> => {
     try {
       const data = await getCollectionByPathWithFilterFS<T>(
-        filters,
+        andFilters,
+        orFilters,
         ...pathSegments
       );
       return { success: true, data };

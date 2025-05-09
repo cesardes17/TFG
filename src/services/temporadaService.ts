@@ -13,7 +13,11 @@ export const temporadaService = {
       // Usa la API de filtros sobre la colección raíz
       const snapshot = await FirestoreService.getDocumentsWithFilterByPath<
         Temporada & { id: string }
-      >([['activa', '==', true]], 'temporadas');
+      >(
+        [['activa', '==', true]],
+        [], //filtros or vacios
+        'temporadas'
+      );
       if (!snapshot.success || !snapshot.data || snapshot.data.length === 0) {
         return {
           success: false,

@@ -23,18 +23,9 @@ export default async function registrationHelper(
     // 2) Si es jugador o capitán, sube la foto
     const isJugador = user.role === 'jugador' || user.role === 'capitan';
     if (isJugador && user.photoURL) {
-      // extrae extensión del archivo local
-      const extMatch = /\.(jpg|jpeg|png|gif)$/i.exec(user.photoURL as string);
-      const extension = extMatch ? extMatch[1] : 'jpg';
-
-      // genera UUID
-      const fileName = `${getRandomUID()}.${extension}`;
-      // path completo en Storage
-      const remotePath = `fotos_jugadores/${fileName}`;
-
       // sube y recoge la URL
       const storageRes = await StorageService.uploadFile(
-        remotePath,
+        'fotos_jugadores',
         user.photoURL
       );
       if (!storageRes.success || !storageRes.data) {

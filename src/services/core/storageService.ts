@@ -1,6 +1,7 @@
 // src/services/storageService.ts
 import { uploadFileFS, deleteFileFS } from '../../api/storageFirebase';
 import type { ResultService } from '../../types/ResultService';
+import { getRandomUID } from '../../utils/getRandomUID';
 
 /**
  * Servicio de alto nivel para operaciones con Firebase Storage
@@ -14,15 +15,25 @@ export const StorageService = {
    * @returns URL de descarga del archivo
    */
   uploadFile: async (
-    path: string,
+    folder: string,
     file: Blob | File | string
   ): Promise<ResultService<string>> => {
     try {
-      const downloadURL = await uploadFileFS(path, file);
-      return {
-        success: true,
-        data: downloadURL,
-      };
+      // 1) Extrae extensión a partir de la ruta original (fallback a jpg)
+      const uri = typeof file === 'string' ? file : (file as File).name ?? '';
+      const extMatch = /\.(jpg|jpeg|png|gif)$/i.exec(uri);
+      const extension = extMatch ? extMatch[1] : 'jpg';
+
+      // 2) Genera nombre único
+      const fileName = `${getRandomUID()}.${extension}`;
+
+      // 3) Construye ruta remota: "folder/fileName"
+      const remotePath = `${folder.replace(/\/+$/, '')}/${fileName}`;
+
+      // 4) Llama al helper de bajo nivel
+      const downloadUrl = await uploadFileFS(remotePath, file);
+
+      return { success: true, data: downloadUrl };
     } catch (error: any) {
       return {
         success: false,

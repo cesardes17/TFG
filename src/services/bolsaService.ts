@@ -43,6 +43,7 @@ export const bolsaJugadoresService = {
       const res =
         await FirestoreService.getDocumentsWithFilterByPath<BolsaJugador>(
           [['idJugador', '==', userId]],
+          [], //filtros or vacios
           ...path
         );
 

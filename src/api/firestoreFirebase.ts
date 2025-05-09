@@ -153,12 +153,14 @@ export async function deleteDocumentByPathFS(
 }
 
 /**
- * Obtiene documentos filtrados de una colección anidada.
- * @param filters Array de tuplas [campo, operador, valor]
- * @param pathSegments Ruta terminando en colección.
+ * Obtiene documentos con lógica AND + OR en una ruta arbitraria.
+ * @param andFilters Arreglo de tuplas [campo, operador, valor] que se combinan en AND
+ * @param orFilters Arreglo de tuplas [campo, operador, valor] que se agrupan bajo un único OR
+ * @param pathSegments Ruta: 'colección', 'docId', 'subcolección', ... terminando en colección
  */
 export async function getCollectionByPathWithFilterFS<T>(
-  filters: [string, import('firebase/firestore').WhereFilterOp, any][],
+  andFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
+  orFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
   ...pathSegments: string[]
 ): Promise<T[]> {
   if (pathSegments.length % 2 === 0) {
@@ -167,33 +169,33 @@ export async function getCollectionByPathWithFilterFS<T>(
     );
   }
   const db = await getDb();
-  if (Platform.OS === 'web') {
-    const { collection, query, where, getDocs } = await import(
-      'firebase/firestore'
-    );
-    const collRef = (collection as any)(
-      db as import('firebase/firestore').Firestore,
-      ...pathSegments
-    );
-    const q = query(
-      collRef,
-      ...filters.map(([field, op, val]) => where(field, op, val))
-    );
-    const snap = await (getDocs as any)(q);
-    return snap.docs.map((d: any) => d.data() as T);
-  } else {
-    const { collection, query, where, getDocs } = await import(
-      '@react-native-firebase/firestore'
-    );
-    const collRef = (collection as any)(
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
-      ...pathSegments
-    );
-    const q = query(
-      collRef,
-      ...filters.map(([field, op, val]) => where(field, op, val))
-    );
-    const snap = await (getDocs as any)(q);
-    return snap.docs.map((d: any) => d.data() as T);
+  const isWeb = Platform.OS === 'web';
+
+  // Importa funciones dinámicamente
+  const mod = isWeb
+    ? await import('firebase/firestore')
+    : await import('@react-native-firebase/firestore');
+  const { collection, query, where, getDocs, or } = mod;
+
+  // Referencia a la colección
+  const collRef = (collection as any)(db as any, ...pathSegments);
+
+  // Construcción de constraints
+  const constraints: any[] = [];
+  // AND filters
+  for (const [field, op, val] of andFilters) {
+    constraints.push((where as any)(field, op, val));
   }
+  // OR filters (si existen)
+  if (orFilters.length > 0) {
+    const orClauses = orFilters.map(([field, op, val]) =>
+      (where as any)(field, op, val)
+    );
+    constraints.push((or as any)(...orClauses));
+  }
+
+  // Ejecuta query
+  const q = (query as any)(collRef, ...constraints);
+  const snap = await (getDocs as any)(q);
+  return snap.docs.map((d: any) => d.data() as T);
 }

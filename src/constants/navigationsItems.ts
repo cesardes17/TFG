@@ -24,7 +24,7 @@ export const navigationItems: NavigationItem[] = [
     id: 'solicitudes',
     title: 'Solicitudes',
     description: 'Gestiona tus solicitudes de unión a equipos.',
-    path: '/solicitudes',
+    path: '/solicitudesMobile',
     allowedRoles: ['jugador', 'capitan', 'organizador', 'coorganizador'], // solo jugadores y capitanes
   },
   {

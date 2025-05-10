@@ -4,7 +4,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 interface HeaderConfigProps {
   title: string;
   backLabel?: string;
-  backRoute?: string;
   animation?:
     | 'default'
     | 'fade'
@@ -21,7 +20,7 @@ interface HeaderConfigProps {
 
 export default function HeaderConfig({
   title,
-  backLabel = 'Inicio',
+  backLabel = 'Volver',
 }: HeaderConfigProps) {
   const { theme } = useTheme();
 

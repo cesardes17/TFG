@@ -34,6 +34,11 @@ export interface PlayerProfile {
   posicion: string;
   /** En este caso es obligatoria la foto de perfil */
   photoURL: string;
+  equipo?: {
+    id: string;
+    nombre: string;
+    escudoUrl: string;
+  };
 }
 
 /**

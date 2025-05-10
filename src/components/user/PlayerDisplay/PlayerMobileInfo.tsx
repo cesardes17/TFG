@@ -1,4 +1,4 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { PlayerUser } from '../../../types/User';
 import StyledText from '../../common/StyledText';
 import {
@@ -9,6 +9,8 @@ import {
 } from '../../Icons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { capitalizeFirst, titleCase } from '../../../utils/capitalizeString';
+import { router } from 'expo-router';
+import ProgressiveImage from '../../common/ProgressiveImage';
 
 interface PlayerWebInfoProps {
   player: PlayerUser;
@@ -19,11 +21,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
 
   return (
     <View style={styles.cardMobile}>
-      <Image
-        source={{ uri: player.photoURL }}
-        style={styles.imageMobile}
-        resizeMode='cover'
-      />
+      <ProgressiveImage uri={player.photoURL} />
       <View
         style={[
           styles.dorsalContainer,
@@ -38,6 +36,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
         <StyledText style={styles.nombreMobile}>
           {titleCase(player.nombre + ' ' + player.apellidos)}
         </StyledText>
+
         <View style={styles.column}>
           <View style={styles.row}>
             <BadgeAccountIcon color={theme.icon.active} size={20} />
@@ -51,8 +50,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
               {titleCase(player.posicion)}
             </StyledText>
           </View>
-        </View>
-        <View style={styles.column}>
+
           <View style={styles.row}>
             <RulerIcon color={theme.icon.active} size={20} />
             <StyledText style={styles.textMobile}>
@@ -65,6 +63,26 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
           </View>
         </View>
       </View>
+      {player.equipo && (
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: '/equipo/[id]',
+              params: { id: player.equipo!.id },
+            })
+          }
+          style={{
+            alignSelf: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <ProgressiveImage
+            uri={player.equipo.escudoUrl}
+            style={styles.imageTeam}
+          />
+          <StyledText>{player.equipo.nombre}</StyledText>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -77,6 +95,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 16,
     alignSelf: 'center',
+  },
+  imageTeam: {
+    width: '20%',
+    aspectRatio: 1,
   },
   imageMobile: {
     width: '100%',
@@ -114,7 +136,7 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
   },
   textMobile: {
     fontSize: 16,

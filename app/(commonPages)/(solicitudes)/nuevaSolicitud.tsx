@@ -7,7 +7,7 @@ export default function NuevaSolicitudPage() {
   return (
     <PageContainer>
       {Platform.OS !== 'web' && (
-        <HeaderConfig title='Nueva Solicitud' backLabel='Más' />
+        <HeaderConfig title='Nueva Solicitud' backLabel='Solicitudes' />
       )}
       <NuevaSolicitudScreen />
     </PageContainer>

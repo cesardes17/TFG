@@ -1,6 +1,6 @@
 // src/screens/SolicitudesScreen.tsx
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, TouchableOpacity } from 'react-native';
 
 import StyledTextInput from '../../components/common/StyledTextInput';
 import BaseConfirmationModal, {
@@ -10,12 +10,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { Solicitud } from '../../types/Solicitud';
 import { BaseSolicitudService } from '../../services/solicitudesService';
 import SolicitudesList from '../../components/solicitudes/SolicitudesList';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import StyledText from '../../components/common/StyledText';
 import { AddIcon } from '../../components/Icons';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
-import { rechazarCrearEquipoSolicitud } from '../../services/solicitudesService/createTeamSolicitud/rechazar';
 import { useToast } from '../../contexts/ToastContext';
 
 export default function SolicitudesScreen() {
@@ -33,12 +32,20 @@ export default function SolicitudesScreen() {
   const isAdmin =
     user?.role === 'coorganizador' || user!.role === 'organizador'; // Asumiendo que el rol 'admin' tiene el valor 'admin' en el objeto user
 
-  useEffect(() => {
-    if (!temporada) return;
-    BaseSolicitudService.getSolicitudes(temporada.id).then((res) => {
-      if (res.success && res.data) setSolicitudes(res.data);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (!temporada) return;
+
+      const fetchSolicitudes = async () => {
+        const res = await BaseSolicitudService.getSolicitudes(temporada.id);
+        if (res.success && res.data) {
+          setSolicitudes(res.data);
+        }
+      };
+
+      fetchSolicitudes();
+    }, [temporada])
+  );
 
   const openAcceptModal = (id: string) => {
     setSelectedId(id);
@@ -59,9 +66,29 @@ export default function SolicitudesScreen() {
       setInputError(true);
       return;
     }
-
+    console.log('modalType', modalType);
     if (modalType === 'update') {
-      console.log('Actualizando solicitud...');
+      const aceptacionData: Solicitud = {
+        ...solicitud,
+        id: selectedId, // Aseguramos que id esté presente
+        estado: 'aceptada',
+        fechaRespuestaAdmin: new Date().toISOString(),
+        admin: {
+          id: user!.uid,
+          nombre: user!.nombre,
+          apellidos: user!.apellidos,
+          correo: user!.correo,
+        },
+      };
+      const res = await BaseSolicitudService.aceptarSolicitud(
+        temporada!.id,
+        aceptacionData
+      );
+      if (res.success) {
+        showToast('Solicitud aceptada', 'success');
+      } else {
+        showToast('Error al aceptar solicitud', 'error');
+      }
     } else {
       const rechazoData: Solicitud = {
         ...solicitud,
@@ -75,12 +102,6 @@ export default function SolicitudesScreen() {
           apellidos: user!.apellidos,
           correo: user!.correo,
         },
-        // Aseguramos que las propiedades requeridas estén presentes
-        tipo: solicitud.tipo,
-        solicitante: solicitud.solicitante,
-        fechaCreacion: solicitud.fechaCreacion,
-        nombreEquipo: solicitud.nombreEquipo,
-        escudoUrl: solicitud.escudoUrl,
       };
 
       const res = await BaseSolicitudService.rechazarSolicitud(

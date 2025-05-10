@@ -1,6 +1,11 @@
 import { Equipo } from '../../../types/Equipo';
+import { Inscripcion } from '../../../types/Inscripcion';
 import { solicitudCrearEquipo } from '../../../types/Solicitud';
+import { PlayerUser } from '../../../types/User';
+import { getRandomUID } from '../../../utils/getRandomUID';
 import { equipoService } from '../../equipoService';
+import { inscripcionesService } from '../../inscripcionesService';
+import { UserService } from '../../userService';
 import { BaseSolicitudService } from '../baseSolicitud';
 
 export const aceptarCrearEquipoSolicitud = async (
@@ -19,7 +24,7 @@ export const aceptarCrearEquipoSolicitud = async (
     }
     //Paso 2: Crear el equipo
     const equipoData: Equipo = {
-      id: data.id,
+      id: getRandomUID(),
       capitan: data.solicitante,
       nombre: data.nombreEquipo,
       escudoUrl: data.escudoUrl,
@@ -28,9 +33,48 @@ export const aceptarCrearEquipoSolicitud = async (
 
     const resEquipo = await equipoService.crearEquipo(
       temporadaId,
-      data.id,
+      equipoData.id,
       equipoData
     );
+    if (!resEquipo.success) {
+      throw new Error(resEquipo.errorMessage || 'Error al crear el equipo');
+    }
+
+    //Paso 3: Inscribir jugador a equipo
+    const inscripcionData: Inscripcion = {
+      id: getRandomUID(),
+      equipoId: data.id,
+      jugador: data.solicitante,
+    };
+
+    const resInscripcion = await inscripcionesService.crearInscripcion(
+      temporadaId,
+      inscripcionData.id,
+      inscripcionData
+    );
+
+    if (!resInscripcion.success) {
+      throw new Error(
+        resInscripcion.errorMessage || 'Error al crear la inscripcion'
+      );
+    }
+    //Paso 4: Actualizar rol de usuario a capitán
+    const userData: Partial<PlayerUser> = {
+      role: 'capitan',
+    };
+    const resUser = await UserService.UpdatePlayerProfile(
+      data.solicitante.id,
+      userData
+    );
+
+    if (!resUser.success) {
+      throw new Error(resUser.errorMessage || 'Error al actualizar el usuario');
+    }
+
+    return {
+      success: true,
+      data: resSol.data,
+    };
   } catch (error) {
     return {
       success: false,

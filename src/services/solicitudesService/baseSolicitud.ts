@@ -111,4 +111,42 @@ export const BaseSolicitudService = {
       };
     }
   },
+
+  /** Rechaza una solicitud */
+  aceptarSolicitud: async (
+    temporadaId: string,
+    data: Solicitud
+  ): Promise<ResultService<null>> => {
+    try {
+      switch (data.tipo) {
+        case 'Crear Equipo':
+          const res = await aceptarCrearEquipoSolicitud(temporadaId, data);
+
+          if (!res.success) {
+            throw new Error(
+              res.errorMessage || 'Error al rechazar la solicitud'
+            );
+          }
+          break;
+
+        default:
+          return {
+            success: false,
+            errorMessage: 'Tipo de solicitud no reconocido',
+          };
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error desconocido al rechazar la solicitud',
+      };
+    }
+  },
 };

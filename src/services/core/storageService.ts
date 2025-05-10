@@ -44,12 +44,23 @@ export const StorageService = {
 
   /**
    * Elimina un archivo de Firebase Storage
-   * @param path - Ruta del archivo a eliminar
+   * @param url - url del archivo a eliminar
    */
-  deleteFile: async (path: string): Promise<ResultService<null>> => {
+  deleteFileByUrl: async (url: string): Promise<ResultService<null>> => {
     try {
-      await deleteFileFS(path);
-      return { success: true };
+      // 1) Separa en dos por '/o/'
+      const [, afterO] = url.split('/o/');
+      if (!afterO) {
+        throw new Error('URL de Storage inválida');
+      }
+      // 2) Quita los parámetros tras el '?'
+      const [encodedPath] = afterO.split('?');
+      // 3) Decodifica "%2F" a "/"
+      const objectPath = decodeURIComponent(encodedPath);
+
+      // Finalmente llama a tu función interna
+      await deleteFileFS(objectPath);
+      return { success: true, data: null };
     } catch (error: any) {
       return {
         success: false,

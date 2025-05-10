@@ -32,4 +32,29 @@ export const inscripcionesService = {
       };
     }
   },
+  getInscripcionesByTeam: async (
+    temporadaId: string,
+    id: string
+  ): Promise<ResultService<Inscripcion[]>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECTION];
+      const res = await FirestoreService.getDocumentsWithFilterByPath(
+        [['equipoId', '==', id]],
+        [],
+        ...path
+      );
+      return {
+        success: true,
+        data: res.data as Inscripcion[],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener los jugadores del equipo',
+      };
+    }
+  },
 };

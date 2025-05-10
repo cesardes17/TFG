@@ -43,7 +43,7 @@ export const aceptarCrearEquipoSolicitud = async (
     //Paso 3: Inscribir jugador a equipo
     const inscripcionData: Inscripcion = {
       id: getRandomUID(),
-      equipoId: data.id,
+      equipoId: resEquipo.data!,
       jugador: data.solicitante,
     };
 

@@ -1,6 +1,5 @@
 // src/app/equipo/[id].tsx
 import { useLocalSearchParams } from 'expo-router';
-import StyledText from '../../src/components/common/StyledText';
 import PageContainer from '../../src/components/layout/PageContainer';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -10,8 +9,8 @@ import { Inscripcion } from '../../src/types/Inscripcion';
 import { equipoService } from '../../src/services/equipoService';
 import { useTemporadaContext } from '../../src/contexts/TemporadaContext';
 import StyledAlert from '../../src/components/common/StyledAlert';
-import { closeMenu } from 'expo-dev-client';
 import HeaderConfig from '../../src/components/layout/HeaderConfig';
+import { inscripcionesService } from '../../src/services/inscripcionesService';
 
 export default function EquipoPage() {
   const { theme } = useTheme();
@@ -21,6 +20,7 @@ export default function EquipoPage() {
   const [equipo, setEquipo] = useState<Equipo | null>(null);
   const [jugadores, setJugadores] = useState<Inscripcion[]>([]);
   const [error, setError] = useState('');
+  const [errorJugador, seterrorJugador] = useState('');
   useEffect(() => {
     async function loadEquipo() {
       if (!temporada) return;
@@ -29,8 +29,26 @@ export default function EquipoPage() {
 
         if (!res.success) {
           setError(res.errorMessage || 'Error al obtener el equipo.');
+        } else {
+          setEquipo(res.data!);
         }
-        setEquipo(res.data!);
+
+        const resJugadores = await inscripcionesService.getInscripcionesByTeam(
+          temporada.id,
+          id
+        );
+        console.log(id);
+        console.log('resjugadore ', resJugadores);
+        if (!resJugadores.success || !resJugadores.data) {
+          seterrorJugador(
+            resJugadores.errorMessage ||
+              'Error al obtener los jugadores del equipo'
+          );
+        } else {
+          setJugadores(resJugadores.data);
+        }
+
+        console.log();
       } catch (err) {
         console.error(err);
       } finally {

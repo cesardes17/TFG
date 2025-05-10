@@ -1,4 +1,5 @@
 // /src/utils/registrationHelper.ts
+import { storage } from '../api/config/firebase';
 import { AuthService } from '../services/core/authService';
 import { StorageService } from '../services/core/storageService';
 import { UserService } from '../services/userService';
@@ -9,6 +10,9 @@ export default async function registrationHelper(
   user: UserRegistration,
   password: string
 ) {
+  let authCreado,
+    imagenJugador,
+    usuarioCreado = null;
   try {
     // 1) Registrar en Auth
     const { success, data, errorMessage } = await AuthService.register(
@@ -19,6 +23,7 @@ export default async function registrationHelper(
       throw new Error(errorMessage || 'Error al registrar usuario');
     }
     const uid = data.uid;
+    authCreado = uid;
 
     // 2) Si es jugador o capitán, sube la foto
     const isJugador = user.role === 'jugador' || user.role === 'capitan';
@@ -31,7 +36,7 @@ export default async function registrationHelper(
       if (!storageRes.success || !storageRes.data) {
         throw new Error(storageRes.errorMessage || 'Error al subir la imagen');
       }
-
+      imagenJugador = storageRes.data;
       user.photoURL = storageRes.data; // ahora es la URL remota
     }
 
@@ -44,10 +49,17 @@ export default async function registrationHelper(
     if (!userSuccess || !userData) {
       throw new Error(userMsg || 'Error al crear usuario en Firestore');
     }
+    usuarioCreado = userData;
     await AuthService.login(user.correo, password);
 
     return { success: true, data: userData, errorMessage: null };
   } catch (error: any) {
+    if (authCreado) {
+      //crear metodo para eliminar usuario de auth
+    }
+    if (imagenJugador) {
+      StorageService.deleteFileByUrl(imagenJugador);
+    }
     console.error(error);
     return { success: false, data: null, errorMessage: error.message };
   }

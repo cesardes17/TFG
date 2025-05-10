@@ -1,97 +1,158 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import StyledText from '../../components/common/StyledText';
-import { useEffect, useState } from 'react';
+// src/screens/SolicitudesScreen.tsx
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, TouchableOpacity } from 'react-native';
+
+import StyledTextInput from '../../components/common/StyledTextInput';
+import BaseConfirmationModal, {
+  ConfirmationType,
+} from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { BaseSolicitudService } from '../../services/solicitudesService/baseSolicitud';
-import { useTemporadaContext } from '../../contexts/TemporadaContext';
-import StyledAlert from '../../components/common/StyledAlert';
 import { Solicitud } from '../../types/Solicitud';
-import SolicitudCard from '../../components/solicitudes/SolicitudCard';
-import { FlatList, TouchableOpacity } from 'react-native';
+import { BaseSolicitudService } from '../../services/solicitudesService';
+import SolicitudesList from '../../components/solicitudes/SolicitudesList';
 import { router } from 'expo-router';
-import StyledButton from '../../components/common/StyledButton';
+import StyledText from '../../components/common/StyledText';
+import { AddIcon } from '../../components/Icons';
+import { useTemporadaContext } from '../../contexts/TemporadaContext';
+import { useUser } from '../../contexts/UserContext';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
+  const { user } = useUser();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<ConfirmationType>('update');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [inputError, setInputError] = useState(false);
+
+  const isAdmin =
+    user?.role === 'coorganizador' || user!.role === 'organizador'; // Asumiendo que el rol 'admin' tiene el valor 'admin' en el objeto user
 
   useEffect(() => {
     if (!temporada) return;
-    const fetchSolicitudes = async () => {
-      setIsLoading(true);
-      try {
-        const res = await BaseSolicitudService.getSolicitudes(temporada.id);
-        if (!res.success || !res.data) {
-          throw new Error(res.errorMessage);
-        }
-        setSolicitudes(res.data);
-        setIsLoading(false);
-      } catch (error) {
-        console.log(error);
-        setIsLoading(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSolicitudes();
+    BaseSolicitudService.getSolicitudes(temporada.id).then((res) => {
+      if (res.success && res.data) setSolicitudes(res.data);
+    });
   }, []);
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size='large' color={theme.text.primary} />
-      </View>
-    );
-  }
+  const openAcceptModal = (id: string) => {
+    setSelectedId(id);
+    setModalType('update');
+    setModalVisible(true);
+  };
 
-  if (!temporada) {
-    <View style={styles.container}>
-      <StyledAlert
-        variant='warning'
-        message='No hay ninguna temporada activa. Espera a que los organizadores activen la temporada nueva'
-      />
-    </View>;
-  }
+  const openRejectModal = (id: string) => {
+    setSelectedId(id);
+    setModalType('delete'); // 'delete' → usamos input para motivo
+    setModalVisible(true);
+  };
+
+  const handleConfirm = async () => {
+    const solicitud = solicitudes.find((s) => s.id === selectedId);
+    if (!selectedId || !solicitud) return;
+    if (modalType === 'delete' && !rejectReason.trim()) {
+      setInputError(true);
+      return;
+    }
+
+    if (modalType === 'update') {
+      console.log('Actualizando solicitud...');
+    } else {
+      const rechazoData: Solicitud = {
+        ...solicitud,
+        id: selectedId, // Aseguramos que id esté presente
+        estado: 'rechazada',
+        respuestaAdmin: rejectReason,
+        fechaRespuestaAdmin: new Date().toISOString(),
+        admin: {
+          id: user!.uid,
+          nombreCompleto: user!.nombre + ' ' + user!.apellidos,
+          correo: user!.correo,
+        },
+        // Aseguramos que las propiedades requeridas estén presentes
+        tipo: solicitud.tipo,
+        solicitante: solicitud.solicitante,
+        fechaCreacion: solicitud.fechaCreacion,
+        nombreEquipo: solicitud.nombreEquipo,
+        escudoUrl: solicitud.escudoUrl,
+      };
+
+      await BaseSolicitudService.setSolicitud(
+        temporada!.id,
+        selectedId,
+        rechazoData
+      );
+    }
+
+    // refresca lista y cierra modal
+    const res = await BaseSolicitudService.getSolicitudes(temporada!.id);
+    if (res.success && res.data) setSolicitudes(res.data);
+    setModalVisible(false);
+    setRejectReason('');
+    setSelectedId(null);
+  };
 
   return (
-    <View style={{ flex: 1 }}>
-      <StyledButton
-        title='Nueva solicitud'
-        variant='outline'
-        onPress={() => router.push('/nuevaSolicitud')}
+    <View style={{ flex: 1, marginTop: 8 }}>
+      {!isAdmin && (
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 12,
+            borderWidth: 1,
+            borderRadius: 8,
+            borderColor: theme.border.primary,
+            justifyContent: 'center',
+            gap: 8,
+          }}
+          onPress={() => router.push('/nuevaSolicitud')}
+        >
+          <AddIcon color={theme.text.primary} size={24} />
+          <StyledText>Nueva Solicitud</StyledText>
+        </TouchableOpacity>
+      )}
+
+      <SolicitudesList
+        solicitudes={solicitudes}
+        esAdmin={isAdmin}
+        onAceptar={(id) => openAcceptModal(id)}
+        onRechazar={(id) => openRejectModal(id)}
       />
 
-      <FlatList
-        data={solicitudes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <SolicitudCard solicitud={item} />}
-        ListEmptyComponent={() => (
-          <View style={styles.container}>
-            <StyledAlert variant='info' message='No hay solicitudes' />
-          </View>
+      <BaseConfirmationModal
+        visible={modalVisible}
+        type={modalType}
+        title={
+          modalType === 'update'
+            ? '¿Confirmar aceptación?'
+            : '¿Motivo de rechazo?'
+        }
+        confirmLabel={modalType === 'update' ? 'Aceptar' : 'Rechazar'}
+        cancelLabel='Cancelar'
+        onCancel={() => {
+          setModalVisible(false);
+          setRejectReason('');
+        }}
+        onConfirm={handleConfirm}
+      >
+        {modalType === 'delete' && (
+          <>
+            <StyledTextInput
+              multiline
+              placeholder='Introduce el motivo de rechazo'
+              value={rejectReason}
+              onChangeText={setRejectReason}
+              error={inputError}
+            />
+            {inputError && (
+              <StyledText variant='error'>Este campo es obligatorio</StyledText>
+            )}
+          </>
         )}
-        style={{ marginTop: 12 }}
-      />
+      </BaseConfirmationModal>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addButton: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

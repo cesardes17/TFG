@@ -20,6 +20,7 @@ import { getRandomUID } from '../../../utils/getRandomUID';
 import { useTemporadaContext } from '../../../contexts/TemporadaContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { router } from 'expo-router';
+import { useUser } from '../../../contexts/UserContext';
 
 type SolicitudTipo = 'createTeam' | 'joinTeam' | 'leaveTeam' | 'dissolveTeam';
 
@@ -59,6 +60,8 @@ export default function NuevaSolicitudForm() {
   const { temporada } = useTemporadaContext();
   const { theme } = useTheme();
   const { showToast } = useToast();
+  const { user } = useUser();
+
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [tipo, setTipo] = useState<SolicitudTipo | ''>('');
@@ -74,12 +77,17 @@ export default function NuevaSolicitudForm() {
       switch (tipo) {
         case 'createTeam':
           const createTeamSolicitud: solicitudCrearEquipo = {
-            tipo: 'Crear Equipo',
-            escudoUrl: values.teamLogo || '',
-            nombreEquipo: values.teamName || '',
-            estado: 'pendiente',
-            fechaCreacion: new Date().toISOString(),
             id: getRandomUID(),
+            estado: 'pendiente',
+            tipo: 'Crear Equipo',
+            solicitante: {
+              id: user!.uid,
+              nombreCompleto: user!.nombre + ' ' + user!.apellidos,
+              correo: user!.correo,
+            },
+            fechaCreacion: new Date().toISOString(),
+            nombreEquipo: values.teamName || '',
+            escudoUrl: values.teamLogo || '',
           };
 
           const res = await BaseSolicitudService.setSolicitud(

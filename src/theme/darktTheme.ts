@@ -48,7 +48,7 @@ export const darkTheme: Theme = {
       border: colors.primary950,
     },
     error: {
-      background: colors.error.background,
+      background: colors.error.inputBackground,
       text: colors.error.text,
       border: colors.error.border,
     },

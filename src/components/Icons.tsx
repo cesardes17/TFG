@@ -76,3 +76,11 @@ export const WarningIcon = ({ size = 24, color }: IconProps) => {
 export const InfoIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='infocirlceo' size={size} color={color} />;
 };
+
+export const ShieldIcon = ({ size = 24, color }: IconProps) => {
+  return <Feather name='shield' size={size} color={color} />;
+};
+
+export const AddIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='plus' size={size} color={color} />;
+};

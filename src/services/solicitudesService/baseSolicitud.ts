@@ -8,7 +8,7 @@ import { StorageService } from '../core/storageService';
 const COLLECTION = 'solicitudes';
 
 export const BaseSolicitudService = {
-  /** Crea o actualiza una solicitud con ID explícito */
+  /** Crea una nueva solicitud */
   setSolicitud: async (
     temporadaId: string,
     id: string,
@@ -16,14 +16,16 @@ export const BaseSolicitudService = {
   ): Promise<ResultService<string>> => {
     try {
       const path = ['temporadas', temporadaId, COLLECTION, id];
-      const res = await StorageService.uploadFile(
-        'escudos_equipos',
-        data.escudoUrl
-      );
-      if (!res.success || !res.data) {
-        throw new Error(res.errorMessage || 'Error al subir el archivo');
+      if (data.escudoUrl && !data.escudoUrl.startsWith('http')) {
+        const res = await StorageService.uploadFile(
+          'escudos_equipos',
+          data.escudoUrl
+        );
+        if (!res.success || !res.data) {
+          throw new Error(res.errorMessage || 'Error al subir el archivo');
+        }
+        data.escudoUrl = res.data;
       }
-      data.escudoUrl = res.data;
       return FirestoreService.setDocumentByPath<Solicitud>(...path, data);
     } catch (error) {
       return {

@@ -6,9 +6,19 @@ type baseSolicitud = {
     | 'Unirse a Equipo'
     | 'Salir de Equipo'
     | 'Disolver Equipo';
+  solicitante: {
+    id: string;
+    nombreCompleto: string;
+    correo: string;
+  };
   fechaCreacion: string;
-  adminId?: string;
+  admin?: {
+    id: string;
+    nombreCompleto: string;
+    correo: string;
+  };
   fechaRespuestaAdmin?: string;
+  respuestaAdmin?: string;
 };
 
 export type solicitudCrearEquipo = baseSolicitud & {

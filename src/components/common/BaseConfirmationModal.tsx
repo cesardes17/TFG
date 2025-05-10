@@ -14,6 +14,7 @@ type Props = {
   type?: ConfirmationType;
   confirmLabel?: string;
   cancelLabel?: string;
+  children?: React.ReactNode;
 };
 
 export default function BaseConfirmationModal({
@@ -25,6 +26,7 @@ export default function BaseConfirmationModal({
   type = 'create',
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
+  children,
 }: Props) {
   const { theme } = useTheme();
 
@@ -79,6 +81,8 @@ export default function BaseConfirmationModal({
               {description}
             </Text>
           )}
+
+          {children && <View style={{ marginBottom: 20 }}>{children}</View>}
 
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <Pressable

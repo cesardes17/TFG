@@ -15,11 +15,14 @@ import StyledText from '../../components/common/StyledText';
 import { AddIcon } from '../../components/Icons';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
+import { rechazarCrearEquipoSolicitud } from '../../services/solicitudesService/createTeamSolicitud/rechazar';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
   const { user } = useUser();
+  const { showToast } = useToast();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<ConfirmationType>('update');
@@ -68,7 +71,8 @@ export default function SolicitudesScreen() {
         fechaRespuestaAdmin: new Date().toISOString(),
         admin: {
           id: user!.uid,
-          nombreCompleto: user!.nombre + ' ' + user!.apellidos,
+          nombre: user!.nombre,
+          apellidos: user!.apellidos,
           correo: user!.correo,
         },
         // Aseguramos que las propiedades requeridas estén presentes
@@ -79,15 +83,21 @@ export default function SolicitudesScreen() {
         escudoUrl: solicitud.escudoUrl,
       };
 
-      await BaseSolicitudService.setSolicitud(
+      const res = await BaseSolicitudService.rechazarSolicitud(
         temporada!.id,
-        selectedId,
         rechazoData
       );
+
+      if (res.success) {
+        showToast('Solicitud rechazada', 'success');
+      } else {
+        showToast('Error al rechazar solicitud', 'error');
+      }
     }
 
     // refresca lista y cierra modal
     const res = await BaseSolicitudService.getSolicitudes(temporada!.id);
+    console.log(res.data);
     if (res.success && res.data) setSolicitudes(res.data);
     setModalVisible(false);
     setRejectReason('');

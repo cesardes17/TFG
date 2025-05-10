@@ -8,13 +8,15 @@ type baseSolicitud = {
     | 'Disolver Equipo';
   solicitante: {
     id: string;
-    nombreCompleto: string;
+    nombre: string;
+    apellidos: string;
     correo: string;
   };
   fechaCreacion: string;
   admin?: {
     id: string;
-    nombreCompleto: string;
+    nombre: string;
+    apellidos: string;
     correo: string;
   };
   fechaRespuestaAdmin?: string;

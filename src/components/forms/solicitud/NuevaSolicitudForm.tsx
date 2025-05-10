@@ -82,7 +82,8 @@ export default function NuevaSolicitudForm() {
             tipo: 'Crear Equipo',
             solicitante: {
               id: user!.uid,
-              nombreCompleto: user!.nombre + ' ' + user!.apellidos,
+              nombre: user!.nombre,
+              apellidos: user!.apellidos,
               correo: user!.correo,
             },
             fechaCreacion: new Date().toISOString(),

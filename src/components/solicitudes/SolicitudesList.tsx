@@ -8,6 +8,7 @@ import SolicitudCrearEquipoCard from './SolicitudCrearEquipoCard';
 // import SolicitudSalirEquipoCard    from './SolicitudSalirEquipoCard';
 // import SolicitudDisolverEquipoCard from './SolicitudDisolverEquipoCard';
 import StyledButton from '../common/StyledButton';
+import StyledAlert from '../common/StyledAlert';
 
 type Props = {
   solicitudes: Solicitud[];
@@ -51,6 +52,11 @@ export default function SolicitudesList({
       renderItem={renderItem}
       contentContainerStyle={styles.listContent}
       style={{ marginTop: 16 }}
+      ListEmptyComponent={
+        <View style={{ alignItems: 'center' }}>
+          <StyledAlert variant='info' message='No hay solicitudes' />
+        </View>
+      }
     />
   );
 }

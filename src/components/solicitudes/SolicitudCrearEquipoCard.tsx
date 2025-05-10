@@ -103,7 +103,9 @@ export default function SolicitudCrearEquipoCard({
             Solicitado por:
           </StyledText>
           <StyledText variant='primary' size='small' style={styles.solicitante}>
-            {solicitud.solicitante.nombreCompleto}
+            {solicitud.solicitante.nombre +
+              ' ' +
+              solicitud.solicitante.apellidos}
           </StyledText>
           <StyledText variant='secondary' size='small' style={styles.date}>
             {formatearFecha(solicitud.fechaCreacion)}
@@ -152,10 +154,16 @@ export default function SolicitudCrearEquipoCard({
               ? 'Esperando respuesta…'
               : `Solicitud ${
                   estado === 'aceptada' ? 'aceptada' : 'rechazada'
-                } por ${solicitud.admin?.nombreCompleto} el ${
+                } por ${
+                  solicitud.admin?.nombre + ' ' + solicitud.admin?.nombre
+                } el ${
                   solicitud.fechaRespuestaAdmin
                     ? formatearFecha(solicitud.fechaRespuestaAdmin)
                     : ''
+                }\n Motivo: ${
+                  solicitud.respuestaAdmin
+                }\n Para mas información contacta con ${
+                  solicitud.admin?.correo
                 }`}
           </StyledText>
         )}

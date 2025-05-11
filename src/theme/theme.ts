@@ -7,6 +7,7 @@ export interface Theme {
   stepperInactive: string;
 
   transparent: string;
+  skeleton: string;
 
   background: {
     primary: string;

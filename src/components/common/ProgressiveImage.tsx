@@ -1,71 +1,69 @@
-import React, { useState, useRef, useEffect } from 'react';
+// src/components/common/ProgressiveImage.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Image,
   StyleSheet,
-  ImageStyle,
   Animated,
-  Dimensions,
+  ImageProps,
+  ViewStyle,
+  ImageStyle,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 
-interface ProgressiveImageProps {
+interface ProgressiveImageProps extends Partial<ImageProps> {
   uri: string;
-  style?: ImageStyle;
+  containerStyle?: ViewStyle;
   imageStyle?: ImageStyle;
 }
 
 export default function ProgressiveImage({
   uri,
-  style,
+  containerStyle,
   imageStyle,
+  ...rest
 }: ProgressiveImageProps) {
-  const [loading, setLoading] = useState(true);
-  const shimmerTranslate = useRef(new Animated.Value(-1)).current;
-  const screenWidth = Dimensions.get('window').width;
+  const [loaded, setLoaded] = useState(false);
+  const pulse = useRef(new Animated.Value(0.3)).current;
 
+  // animación de pulso
   useEffect(() => {
-    if (loading) {
-      Animated.loop(
-        Animated.timing(shimmerTranslate, {
-          toValue: 1,
-          duration: 1200,
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 0.6,
+          duration: 600,
           useNativeDriver: true,
-        })
-      ).start();
-    }
-  }, [loading]);
-
-  const shimmerStyle = {
-    transform: [
-      {
-        translateX: shimmerTranslate.interpolate({
-          inputRange: [-1, 1],
-          outputRange: [-screenWidth, screenWidth],
         }),
-      },
-    ],
-  };
+        Animated.timing(pulse, {
+          toValue: 0.3,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulse]);
 
   return (
-    <View style={[styles.container, style]}>
-      {loading && (
-        <View style={styles.skeletonContainer}>
-          <Animated.View style={[StyleSheet.absoluteFill, shimmerStyle]}>
-            <LinearGradient
-              colors={['#eeeeee', '#dddddd', '#eeeeee']}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={StyleSheet.absoluteFill}
-            />
-          </Animated.View>
-        </View>
+    <View style={[styles.container, containerStyle]}>
+      {/** placeholder skeleton */}
+      {!loaded && (
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: '#333',
+              opacity: pulse,
+              borderRadius: imageStyle?.borderRadius || 0,
+            },
+          ]}
+        />
       )}
+
       <Image
         source={{ uri }}
         style={[styles.image, imageStyle]}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
+        onLoad={() => setLoaded(true)}
+        {...rest}
       />
     </View>
   );
@@ -74,17 +72,11 @@ export default function ProgressiveImage({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 1,
-    borderRadius: 12,
+    aspectRatio: 1, // POR DEFECTO cuadrado
     overflow: 'hidden',
-    backgroundColor: '#eee',
   },
   image: {
     width: '100%',
     height: '100%',
-  },
-  skeletonContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#e0e0e0',
   },
 });

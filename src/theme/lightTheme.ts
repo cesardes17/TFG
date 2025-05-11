@@ -9,7 +9,7 @@ export const lightTheme: Theme = {
   stepperInactive: colors.gray300,
 
   transparent: 'transparent',
-
+  skeleton: colors.gray200,
   background: {
     primary: colors.gray100,
     error: colors.error.background,

@@ -9,6 +9,7 @@ export const darkTheme: Theme = {
   stepperInactive: colors.gray700,
 
   transparent: 'transparent',
+  skeleton: colors.gray200,
 
   background: {
     primary: colors.gray900,

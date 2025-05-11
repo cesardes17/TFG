@@ -1,4 +1,5 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+// src/components/player/PlayerWebInfo.tsx
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { PlayerUser } from '../../../types/User';
 import StyledText from '../../common/StyledText';
 import {
@@ -20,8 +21,15 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
   const { theme } = useTheme();
 
   return (
-    <View style={styles.cardMobile}>
-      <ProgressiveImage uri={player.photoURL} />
+    <View style={styles.card}>
+      {/* Foto principal */}
+      <ProgressiveImage
+        uri={player.photoURL}
+        containerStyle={styles.imageContainer}
+        imageStyle={styles.image}
+      />
+
+      {/* Dorsal en la esquina */}
       <View
         style={[
           styles.dorsalContainer,
@@ -32,37 +40,36 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
           {player.dorsal}
         </StyledText>
       </View>
-      <View style={styles.contentMobile}>
-        <StyledText style={styles.nombreMobile}>
+
+      {/* Datos personales */}
+      <View style={styles.content}>
+        <StyledText style={styles.name}>
           {titleCase(player.nombre + ' ' + player.apellidos)}
         </StyledText>
 
-        <View style={styles.column}>
-          <View style={styles.row}>
-            <BadgeAccountIcon color={theme.icon.active} size={20} />
-            <StyledText size='large' style={styles.textMobile}>
-              {capitalizeFirst(player.role)}
-            </StyledText>
-          </View>
-          <View style={styles.row}>
-            <BasketballOutlineIcon color={theme.icon.active} size={20} />
-            <StyledText style={styles.textMobile}>
-              {titleCase(player.posicion)}
-            </StyledText>
-          </View>
-
-          <View style={styles.row}>
-            <RulerIcon color={theme.icon.active} size={20} />
-            <StyledText style={styles.textMobile}>
-              {player.altura} cm
-            </StyledText>
-          </View>
-          <View style={styles.row}>
-            <WeightHangingIcon color={theme.icon.active} size={20} />
-            <StyledText style={styles.textMobile}>{player.peso} kg</StyledText>
-          </View>
+        <View style={styles.row}>
+          <BadgeAccountIcon color={theme.icon.active} size={20} />
+          <StyledText size='large' style={styles.text}>
+            {capitalizeFirst(player.role)}
+          </StyledText>
+        </View>
+        <View style={styles.row}>
+          <BasketballOutlineIcon color={theme.icon.active} size={20} />
+          <StyledText style={styles.text}>
+            {titleCase(player.posicion)}
+          </StyledText>
+        </View>
+        <View style={styles.row}>
+          <RulerIcon color={theme.icon.active} size={20} />
+          <StyledText style={styles.text}>{player.altura} cm</StyledText>
+        </View>
+        <View style={styles.row}>
+          <WeightHangingIcon color={theme.icon.active} size={20} />
+          <StyledText style={styles.text}>{player.peso} kg</StyledText>
         </View>
       </View>
+
+      {/* Equipo */}
       {player.equipo && (
         <TouchableOpacity
           onPress={() =>
@@ -71,16 +78,16 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
               params: { id: player.equipo!.id },
             })
           }
-          style={{
-            alignSelf: 'center',
-            alignItems: 'center',
-          }}
+          style={styles.teamButton}
         >
           <ProgressiveImage
             uri={player.equipo.escudoUrl}
-            style={styles.imageTeam}
+            containerStyle={styles.teamImageContainer}
+            imageStyle={styles.teamImage}
           />
-          <StyledText>{player.equipo.nombre}</StyledText>
+          <StyledText style={styles.teamName}>
+            {player.equipo.nombre}
+          </StyledText>
         </TouchableOpacity>
       )}
     </View>
@@ -88,27 +95,25 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
 }
 
 const styles = StyleSheet.create({
-  cardMobile: {
-    marginTop: 5,
-    minWidth: '100%',
+  card: {
+    marginVertical: 16,
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 16,
-    alignSelf: 'center',
+    backgroundColor: '#1f1f1f', // o theme.cardDefault
   },
-  imageTeam: {
-    width: '20%',
-    aspectRatio: 1,
-  },
-  imageMobile: {
+
+  imageContainer: {
     width: '100%',
-    aspectRatio: 1,
+    height: 250, // ajusta la altura deseada
   },
+  image: {
+    resizeMode: 'cover',
+  },
+
   dorsalContainer: {
     position: 'absolute',
     top: 12,
     right: 12,
-
     borderRadius: 24,
     width: 48,
     height: 48,
@@ -119,27 +124,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
   },
-  contentMobile: {
+
+  content: {
     padding: 16,
-    gap: 12,
+    backgroundColor: '#1f1f1f', // o theme.surface
   },
-  nombreMobile: {
+  name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
-    alignSelf: 'center',
+    marginBottom: 12,
+    color: '#fff', // o theme.text.primary
+    textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  column: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  textMobile: {
+  text: {
     fontSize: 16,
     marginLeft: 8,
+    color: '#ccc', // o theme.text.secondary
+  },
+
+  teamButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  teamImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  teamImage: {
+    resizeMode: 'cover',
+  },
+  teamName: {
+    color: '#fff', // o theme.text.primary
+    fontSize: 16,
   },
 });

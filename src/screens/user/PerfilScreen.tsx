@@ -111,6 +111,7 @@ export default function PerfilScreen() {
       user!.uid!,
       temporada.id
     );
+
     if (res.success) {
       setInscritoBolsa({
         inscrito: true,

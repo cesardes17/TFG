@@ -8,7 +8,11 @@ import BaseConfirmationModal, {
 } from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Solicitud } from '../../types/Solicitud';
-import { BaseSolicitudService } from '../../services/solicitudesService';
+import {
+  aceptarCrearEquipoSolicitud,
+  BaseSolicitudService,
+  rechazarCrearEquipoSolicitud,
+} from '../../services/solicitudesService';
 import SolicitudesList from '../../components/solicitudes/SolicitudesList';
 import { router, useFocusEffect } from 'expo-router';
 import StyledText from '../../components/common/StyledText';
@@ -80,7 +84,7 @@ export default function SolicitudesScreen() {
           correo: user!.correo,
         },
       };
-      const res = await BaseSolicitudService.aceptarSolicitud(
+      const res = await aceptarCrearEquipoSolicitud(
         temporada!.id,
         aceptacionData
       );
@@ -104,7 +108,7 @@ export default function SolicitudesScreen() {
         },
       };
 
-      const res = await BaseSolicitudService.rechazarSolicitud(
+      const res = await rechazarCrearEquipoSolicitud(
         temporada!.id,
         rechazoData
       );

@@ -1,152 +1,82 @@
-// src/services/solicitud/BaseSolicitudService.ts
+// src/services/solicitudesService/baseSolicitud.ts
 
-import { ResultService } from '../../types/ResultService';
-import { Solicitud } from '../../types/Solicitud';
-import { FirestoreService } from '../core/firestoreService';
+import {
+  getCollectionByPathFS,
+  getDocumentByPathFS,
+  setDocumentByPathFS,
+  deleteDocumentByPathFS,
+  getCollectionByPathWithFilterFS,
+} from '../../api/firestoreFirebase';
+import type { ResultService } from '../../types/ResultService';
+import type { Solicitud } from '../../types/Solicitud';
 import { StorageService } from '../core/storageService';
-import { aceptarCrearEquipoSolicitud } from './createTeamSolicitud/aceptar';
-import { rechazarCrearEquipoSolicitud } from './createTeamSolicitud/rechazar';
-
-const COLLECTION = 'solicitudes';
 
 export const BaseSolicitudService = {
-  /** Crea una nueva solicitud */
-  setSolicitud: async (
-    temporadaId: string,
-    id: string,
-    data: Solicitud
-  ): Promise<ResultService<string>> => {
+  /** Listar todas las solicitudes de una subcolección: temporadas/{id}/solicitudes */
+  async getSolicitudes(
+    temporadaId: string
+  ): Promise<ResultService<Solicitud[]>> {
     try {
-      if (data.escudoUrl && !data.escudoUrl.startsWith('http')) {
-        const res = await StorageService.uploadFile(
+      const data = await getCollectionByPathWithFilterFS<Solicitud>(
+        [['estado', '==', 'pendiente']],
+        [],
+        'temporadas',
+        temporadaId,
+        'solicitudes'
+      );
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
+    }
+  },
+
+  /** Crear o actualizar una solicitud en temporadas/{temporadaId}/solicitudes/{solicitudId} */
+  async setSolicitud(
+    temporadaId: string,
+    solicitudId: string,
+    payload: Partial<Solicitud>
+  ): Promise<ResultService<string>> {
+    try {
+      console.log(payload);
+      if (payload.escudoUrl && !payload.escudoUrl.startsWith('http')) {
+        const imageRes = await StorageService.uploadFile(
           'escudos_equipos',
-          data.escudoUrl
+          payload.escudoUrl
         );
-        if (!res.success || !res.data) {
-          throw new Error(res.errorMessage || 'Error al subir el archivo');
+        if (!imageRes.success) {
+          throw new Error(imageRes.errorMessage || 'Error al subir la imagen');
         }
-        data.escudoUrl = res.data;
+        payload.escudoUrl = imageRes.data;
       }
-      const path = ['temporadas', temporadaId, COLLECTION, id];
-      const resSol = await FirestoreService.setDocumentByPath(...path, data);
-      if (!resSol.success) {
-        throw new Error(resSol.errorMessage || 'Error al crear la solicitud');
-      }
-      return {
-        success: true,
-        data: resSol.data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al crear la solicitud',
-      };
+
+      const id = await setDocumentByPathFS(
+        'temporadas',
+        temporadaId,
+        'solicitudes',
+        solicitudId,
+        payload
+      );
+      return { success: true, data: id };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
     }
   },
 
-  /** Obtiene todas las solicitudes (o filtra según condiciones)
-   * @param temporadaId ID de la temporada
-   * @param estado Estado de la solicitud (pendiente, aceptada, rechazada). Por defecto, solo obtiene las pendientes
-   */
-  getSolicitudes: async (
+  /** Borrar una solicitud concreta */
+  async deleteSolicitud(
     temporadaId: string,
-    estado: string = 'pendiente'
-  ): Promise<ResultService<Solicitud[]>> => {
-    const path = ['temporadas', temporadaId, COLLECTION];
-    const res = await FirestoreService.getDocumentsWithFilterByPath<Solicitud>(
-      [['estado', '==', estado]],
-      [],
-      ...path
-    );
-    console.log(res);
-    return {
-      success: res.success,
-      data: res.data,
-      errorMessage: res.errorMessage,
-    };
-  },
-
-  /** Elimina una solicitud por su ID */
-  deleteSolicitud: async (id: string): Promise<ResultService<null>> => {
-    return FirestoreService.deleteDocumentByPath(COLLECTION, id);
-  },
-
-  /** Rechaza una solicitud */
-  rechazarSolicitud: async (
-    temporadaId: string,
-    data: Solicitud
-  ): Promise<ResultService<null>> => {
+    solicitudId: string
+  ): Promise<ResultService<null>> {
     try {
-      switch (data.tipo) {
-        case 'Crear Equipo':
-          const res = await rechazarCrearEquipoSolicitud(temporadaId, data);
-
-          if (!res.success) {
-            throw new Error(
-              res.errorMessage || 'Error al rechazar la solicitud'
-            );
-          }
-          break;
-
-        default:
-          return {
-            success: false,
-            errorMessage: 'Tipo de solicitud no reconocido',
-          };
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error desconocido al rechazar la solicitud',
-      };
-    }
-  },
-
-  /** Rechaza una solicitud */
-  aceptarSolicitud: async (
-    temporadaId: string,
-    data: Solicitud
-  ): Promise<ResultService<null>> => {
-    try {
-      switch (data.tipo) {
-        case 'Crear Equipo':
-          const res = await aceptarCrearEquipoSolicitud(temporadaId, data);
-
-          if (!res.success) {
-            throw new Error(
-              res.errorMessage || 'Error al rechazar la solicitud'
-            );
-          }
-          break;
-
-        default:
-          return {
-            success: false,
-            errorMessage: 'Tipo de solicitud no reconocido',
-          };
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error desconocido al rechazar la solicitud',
-      };
+      await deleteDocumentByPathFS(
+        'temporadas',
+        temporadaId,
+        'solicitudes',
+        solicitudId
+      );
+      return { success: true, data: null };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
     }
   },
 };

@@ -61,6 +61,11 @@ export const aceptarCrearEquipoSolicitud = async (
     //Paso 4: Actualizar rol de usuario a capitán
     const userData: Partial<PlayerUser> = {
       role: 'capitan',
+      equipo: {
+        id: resEquipo.data!,
+        nombre: equipoData.nombre,
+        escudoUrl: equipoData.escudoUrl,
+      },
     };
     const resUser = await UserService.UpdatePlayerProfile(
       data.solicitante.id,

@@ -6,5 +6,7 @@ export type Inscripcion = {
     nombre: string;
     apellidos: string;
     correo: string;
+    photoURL: string;
+    dorsal: number;
   };
 };

@@ -12,6 +12,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import type { Solicitud } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import { ShieldIcon } from '../Icons';
+import ProgressiveImage from '../common/ProgressiveImage';
 
 type Props = {
   solicitud: Solicitud;
@@ -96,7 +97,10 @@ export default function SolicitudCrearEquipoCard({
           <StyledText variant='primary' style={styles.teamName}>
             {solicitud.nombreEquipo}
           </StyledText>
-          <Image source={{ uri: solicitud.escudoUrl }} style={styles.escudo} />
+          <ProgressiveImage
+            uri={solicitud.escudoUrl}
+            containerStyle={styles.escudo}
+          />
         </View>
         <View>
           <StyledText variant='secondary' size='small' style={styles.label}>

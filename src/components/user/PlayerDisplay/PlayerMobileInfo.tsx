@@ -21,7 +21,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
   const { theme } = useTheme();
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderColor: theme.border.primary }]}>
       {/* Foto principal */}
       <ProgressiveImage
         uri={player.photoURL}
@@ -48,23 +48,23 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
         </StyledText>
 
         <View style={styles.row}>
-          <BadgeAccountIcon color={theme.icon.active} size={20} />
+          <BadgeAccountIcon color={theme.icon.primary} size={20} />
           <StyledText size='large' style={styles.text}>
             {capitalizeFirst(player.role)}
           </StyledText>
         </View>
         <View style={styles.row}>
-          <BasketballOutlineIcon color={theme.icon.active} size={20} />
+          <BasketballOutlineIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.text}>
             {titleCase(player.posicion)}
           </StyledText>
         </View>
         <View style={styles.row}>
-          <RulerIcon color={theme.icon.active} size={20} />
+          <RulerIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.text}>{player.altura} cm</StyledText>
         </View>
         <View style={styles.row}>
-          <WeightHangingIcon color={theme.icon.active} size={20} />
+          <WeightHangingIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.text}>{player.peso} kg</StyledText>
         </View>
       </View>
@@ -96,10 +96,9 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 16,
+    marginVertical: 12,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#1f1f1f', // o theme.cardDefault
   },
 
   imageContainer: {
@@ -127,13 +126,11 @@ const styles = StyleSheet.create({
 
   content: {
     padding: 16,
-    backgroundColor: '#1f1f1f', // o theme.surface
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#fff', // o theme.text.primary
     textAlign: 'center',
   },
   row: {
@@ -144,7 +141,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     marginLeft: 8,
-    color: '#ccc', // o theme.text.secondary
   },
 
   teamButton: {
@@ -162,7 +158,6 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   teamName: {
-    color: '#fff', // o theme.text.primary
     fontSize: 16,
   },
 });

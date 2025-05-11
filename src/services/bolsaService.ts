@@ -2,6 +2,9 @@ import { BolsaJugador } from '../types/BolsaJugador';
 import { ResultService } from '../types/ResultService';
 import { getRandomUID } from '../utils/getRandomUID';
 import { FirestoreService } from './core/firestoreService';
+import { temporadaService } from './temporadaService';
+
+const COLLECTION = 'bolsaJugadores';
 
 export const bolsaJugadoresService = {
   getJugadoresInscritos: async (idTemporada: string) => {
@@ -18,7 +21,7 @@ export const bolsaJugadoresService = {
         idJugador: idJugador,
         createdAt: new Date().toISOString(),
       };
-      const path = ['temporadas', idTemporada, 'bolsaJugadores', payload.id];
+      const path = ['temporadas', idTemporada, COLLECTION, payload.id];
 
       const res = await FirestoreService.setDocumentByPath(...path, payload);
 
@@ -36,13 +39,13 @@ export const bolsaJugadoresService = {
   },
   getJugadorInscrito: async (
     userId: string,
-    idTemporada: string
+    temporadaId: string
   ): Promise<ResultService<string>> => {
     try {
-      const path = ['temporadas', idTemporada, 'bolsaJugadores'];
+      const path = ['temporadas', temporadaId, COLLECTION];
       const res =
         await FirestoreService.getDocumentsWithFilterByPath<BolsaJugador>(
-          [['idJugador', '==', userId]],
+          [['jugador.id', '==', userId]],
           [], //filtros or vacios
           ...path
         );

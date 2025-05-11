@@ -11,6 +11,7 @@ import { useTemporadaContext } from '../../src/contexts/TemporadaContext';
 import StyledAlert from '../../src/components/common/StyledAlert';
 import HeaderConfig from '../../src/components/layout/HeaderConfig';
 import { inscripcionesService } from '../../src/services/inscripcionesService';
+import EquipoInfoScreen from '../../src/screens/EquipoInfoScreen';
 
 export default function EquipoPage() {
   const { theme } = useTheme();
@@ -84,7 +85,8 @@ export default function EquipoPage() {
 
   return (
     <PageContainer>
-      <HeaderConfig title={equipo!.nombre} />
+      <HeaderConfig title={'Informacion de Equipo'} />
+      <EquipoInfoScreen equipoId={id} />
     </PageContainer>
   );
 }

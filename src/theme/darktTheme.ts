@@ -41,6 +41,7 @@ export const darkTheme: Theme = {
   icon: {
     active: colors.primary300,
     inactive: colors.primary600,
+    primary: colors.primary400,
   },
   input: {
     default: {
@@ -99,5 +100,13 @@ export const darkTheme: Theme = {
       text: colors.white,
       background: colors.error.text,
     },
+  },
+  table: {
+    headerBackground: colors.gray800, // Encabezado gris oscuro
+    headerText: colors.white, // Texto blanco
+    rowEvenBackground: colors.gray900, // Filas pares más claras
+    rowOddBackground: colors.black, // Filas impares fondo negro
+    rowBorder: colors.gray700, // Borde gris intermedio
+    rowText: colors.gray100, // Texto claro
   },
 };

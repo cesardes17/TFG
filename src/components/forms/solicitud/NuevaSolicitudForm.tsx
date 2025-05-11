@@ -21,6 +21,7 @@ import { useTemporadaContext } from '../../../contexts/TemporadaContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { router } from 'expo-router';
 import { useUser } from '../../../contexts/UserContext';
+import { PlayerProfile } from '../../../types/User';
 
 type SolicitudTipo = 'createTeam' | 'joinTeam' | 'leaveTeam' | 'dissolveTeam';
 
@@ -85,6 +86,8 @@ export default function NuevaSolicitudForm() {
               nombre: user!.nombre,
               apellidos: user!.apellidos,
               correo: user!.correo,
+              photoURL: (user as PlayerProfile).photoURL,
+              dorsal: (user as PlayerProfile).dorsal,
             },
             fechaCreacion: new Date().toISOString(),
             nombreEquipo: values.teamName || '',

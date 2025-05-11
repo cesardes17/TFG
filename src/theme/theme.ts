@@ -39,7 +39,7 @@ export interface Theme {
     info: string;
   };
   // Iconos
-  icon: { active: string; inactive: string };
+  icon: { active: string; inactive: string; primary: string };
 
   input: {
     default: {
@@ -98,5 +98,13 @@ export interface Theme {
       text: string;
       background: string;
     };
+  };
+  table: {
+    headerBackground: string;
+    headerText: string;
+    rowEvenBackground: string;
+    rowOddBackground: string;
+    rowBorder: string;
+    rowText: string;
   };
 }

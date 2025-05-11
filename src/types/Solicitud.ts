@@ -11,6 +11,8 @@ type baseSolicitud = {
     nombre: string;
     apellidos: string;
     correo: string;
+    photoURL: string;
+    dorsal: number;
   };
   fechaCreacion: string;
   admin?: {

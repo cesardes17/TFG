@@ -33,10 +33,10 @@ export default function HeaderConfig({
         headerStyle: {
           backgroundColor: theme.background.navigation,
         },
-        headerTintColor: theme.text.primary,
+        headerTintColor: theme.text.light,
         headerTitleStyle: {
           fontWeight: 'bold',
-          color: theme.text.primary,
+          color: theme.text.light,
         },
         headerBackTitle: backLabel,
       }}

@@ -30,7 +30,7 @@ export const lightTheme: Theme = {
     light: colors.gray100,
   },
   border: {
-    primary: colors.primary600,
+    primary: colors.gray900,
     secondary: colors.gray300,
     error: colors.error.border,
     success: colors.success.border,
@@ -40,6 +40,7 @@ export const lightTheme: Theme = {
   icon: {
     active: colors.primary200,
     inactive: colors.primary500,
+    primary: colors.primary800,
   },
   input: {
     default: {
@@ -98,5 +99,13 @@ export const lightTheme: Theme = {
       text: colors.white,
       background: colors.error.text,
     },
+  },
+  table: {
+    headerBackground: colors.primary700, // Fuerte contraste para encabezado
+    headerText: colors.white, // Texto blanco sobre fondo oscuro
+    rowEvenBackground: colors.white, // Filas pares en blanco
+    rowOddBackground: colors.gray100, // Filas impares en gris claro
+    rowBorder: colors.gray300, // Separadores suaves
+    rowText: colors.gray900, // Texto negro
   },
 };

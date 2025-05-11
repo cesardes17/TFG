@@ -4,7 +4,6 @@ import { AuthService } from '../services/core/authService';
 import { StorageService } from '../services/core/storageService';
 import { UserService } from '../services/userService';
 import type { UserRegistration } from '../types/User';
-import { getRandomUID } from './getRandomUID';
 
 export default async function registrationHelper(
   user: UserRegistration,
@@ -55,7 +54,7 @@ export default async function registrationHelper(
     return { success: true, data: userData, errorMessage: null };
   } catch (error: any) {
     if (authCreado) {
-      //crear metodo para eliminar usuario de auth
+      AuthService.deleteUser();
     }
     if (imagenJugador) {
       StorageService.deleteFileByUrl(imagenJugador);

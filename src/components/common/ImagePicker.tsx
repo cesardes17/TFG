@@ -4,6 +4,7 @@ import * as ExpoImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { compressImage } from '../../utils/imageCompressor';
 
 interface ImagePickerProps {
   onImageSelected: (uri: string) => void;
@@ -35,12 +36,15 @@ export default function ImagePicker({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.5,
+      quality: 0.5, // opcional, porque también vamos a comprimir después
     });
 
     if (!result.canceled && result.assets[0].uri) {
-      setImage(result.assets[0].uri);
-      onImageSelected(result.assets[0].uri);
+      const originalUri = result.assets[0].uri;
+      const compressedUri = await compressImage(originalUri);
+
+      setImage(compressedUri); // Mostramos imagen comprimida
+      onImageSelected(compressedUri); // Enviamos la comprimida al padre
     }
   };
 

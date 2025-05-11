@@ -55,3 +55,24 @@ export function onAuthStateChangedListener(callback: (user: any) => void) {
   }
   return nativeAuth.onAuthStateChanged(callback);
 }
+
+/**
+ * Elimina el usuario actualmente autenticado
+ */
+export async function deleteCurrentUser(): Promise<void> {
+  if (isWeb) {
+    const { getAuth, deleteUser } = await import('firebase/auth');
+    const auth = getAuth();
+    if (auth.currentUser) {
+      return deleteUser(auth.currentUser);
+    }
+    throw new Error('No hay usuario autenticado');
+  }
+
+  const currentUser = nativeAuth.currentUser;
+  if (currentUser) {
+    return currentUser.delete();
+  }
+
+  throw new Error('No hay usuario autenticado');
+}

@@ -1,9 +1,9 @@
-// src/services/authService.ts
 import {
   signInWithEmail,
   signUpWithEmail,
   signOutUser,
   onAuthStateChangedListener,
+  deleteCurrentUser, // 👈 importa la nueva función
 } from '../../api/authFirebase';
 import type { ResultService } from '../../types/ResultService';
 import { translateAuthError } from '../../utils/errorTranslator';
@@ -46,6 +46,19 @@ export const AuthService = {
       return { success: true };
     } catch (error: any) {
       return { success: false, errorMessage: 'No se pudo cerrar sesión.' };
+    }
+  },
+
+  deleteUser: async (): Promise<ResultService<null>> => {
+    try {
+      await deleteCurrentUser();
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        errorMessage:
+          error?.message ?? 'No se pudo eliminar el usuario actual.',
+      };
     }
   },
 

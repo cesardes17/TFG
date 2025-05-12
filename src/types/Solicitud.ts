@@ -8,14 +8,7 @@ type baseSolicitud = {
   id: string;
   estado: 'aceptada' | 'rechazada' | 'pendiente';
   tipo: tipoSolicitud;
-  solicitante: {
-    id: string;
-    nombre: string;
-    apellidos: string;
-    correo: string;
-    photoURL?: string;
-    dorsal?: number;
-  };
+
   fechaCreacion: string;
   admin?: {
     id: string;
@@ -30,8 +23,23 @@ type baseSolicitud = {
 export type solicitudCrearEquipo = baseSolicitud & {
   nombreEquipo: string;
   escudoUrl: string;
+  solicitante: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    correo: string;
+    photoURL: string;
+    dorsal: number;
+  };
 };
 export type solicitudUnirseEquipo = baseSolicitud & {
+  solicitante: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    correo: string;
+    photoURL: string;
+  };
   jugadorObjetivo: {
     id: string;
     nombre: string;
@@ -42,7 +50,7 @@ export type solicitudUnirseEquipo = baseSolicitud & {
   };
   fechaRespuestaJugador?: string;
   motivoRespuestaJugador?: string;
-  aprobadoJugador?: boolean;
+  aprobadoJugadorObjetivo?: boolean;
   equipoObjetivo: {
     id: string;
     nombre: string;

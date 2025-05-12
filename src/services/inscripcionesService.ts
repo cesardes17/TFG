@@ -57,4 +57,37 @@ export const inscripcionesService = {
       };
     }
   },
+
+  getDorsalesByTeam: async (
+    temporadaId: string,
+    equipoId: string
+  ): Promise<ResultService<number[]>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECTION];
+      const res = await FirestoreService.getDocumentsWithFilterByPath(
+        [['equipoId', '==', equipoId]],
+        [],
+        ...path
+      );
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al obtener los dorsales');
+      }
+      const inscripciones = res.data as Inscripcion[];
+      const dorsales = inscripciones.map(
+        (inscripcion) => inscripcion.jugador.dorsal
+      );
+      return {
+        success: true,
+        data: dorsales,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener los dorsales',
+      };
+    }
+  },
 };

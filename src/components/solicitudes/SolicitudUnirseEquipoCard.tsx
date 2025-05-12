@@ -1,11 +1,10 @@
 import type React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useTheme } from '../../contexts/ThemeContext';
-import StyledText from '../common/StyledText';
-import ProgressiveImage from '../common/ProgressiveImage';
 import { solicitudUnirseEquipo } from '../../types/Solicitud';
+import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface Props {
   solicitud: solicitudUnirseEquipo;
@@ -23,7 +22,6 @@ const SolicitudEquipo: React.FC<Props> = ({
   onAceptar,
   onRechazar,
 }) => {
-  const { theme } = useTheme();
   const {
     jugadorObjetivo,
     equipoObjetivo,
@@ -32,14 +30,17 @@ const SolicitudEquipo: React.FC<Props> = ({
     fechaCreacion,
     fechaRespuestaJugador,
     fechaRespuestaAdmin,
+    aprobadoJugadorObjetivo,
+    motivoRespuestaJugador,
+    admin,
+    respuestaAdmin,
   } = solicitud;
 
-  // Formatear fecha
+  const { theme } = useTheme();
   const formatearFecha = (fecha: string) => {
     return format(new Date(fecha), "d 'de' MMMM 'de' yyyy", { locale: es });
   };
 
-  // Determinar si el usuario actual puede responder
   const esJugadorObjetivo = usuarioActual.id === jugadorObjetivo.id;
   const esAdmin = usuarioActual.esAdmin === true;
 
@@ -48,24 +49,16 @@ const SolicitudEquipo: React.FC<Props> = ({
     ((esJugadorObjetivo && !fechaRespuestaJugador) ||
       (esAdmin && !fechaRespuestaAdmin));
 
-  const handleAceptar = () => {
-    onAceptar?.(solicitud.id);
-  };
-  const handleRechazar = () => {
-    onRechazar?.(solicitud.id);
-  };
-
-  // Obtener color y texto para el estado
   const obtenerColorEstado = () => {
     switch (estado) {
       case 'pendiente':
-        return theme.background.warning;
+        return '#FFC107';
       case 'aceptada':
-        return theme.background.success;
+        return '#4CAF50';
       case 'rechazada':
-        return theme.background.error;
+        return '#F44336';
       default:
-        return theme.background.primary;
+        return '#9E9E9E';
     }
   };
 
@@ -82,9 +75,17 @@ const SolicitudEquipo: React.FC<Props> = ({
     }
   };
 
+  const estiloSeccion = (sinBorde = false) => [
+    styles.seccion,
+    sinBorde && {
+      borderBottomWidth: 0,
+      marginBottom: 0,
+      paddingBottom: 0,
+    },
+  ];
+
   return (
-    <View style={[styles.tarjeta, { backgroundColor: theme.cardDefault }]}>
-      {/* Cabecera con estado */}
+    <View style={styles.tarjeta}>
       <View style={styles.cabecera}>
         <View
           style={[
@@ -92,118 +93,138 @@ const SolicitudEquipo: React.FC<Props> = ({
             { backgroundColor: obtenerColorEstado() },
           ]}
         >
-          <StyledText variant='light' size='small' style={styles.estadoTexto}>
-            {obtenerTextoEstado()}
-          </StyledText>
+          <Text style={styles.estadoTexto}>{obtenerTextoEstado()}</Text>
         </View>
-        <StyledText variant='secondary' size='small'>
+        <Text style={styles.fechaCreacion}>
           Creada el {formatearFecha(fechaCreacion)}
-        </StyledText>
+        </Text>
       </View>
 
-      {/* Información del jugador */}
-      <View
-        style={[styles.seccion, { borderBottomColor: theme.border.secondary }]}
-      >
-        <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Jugador
-        </StyledText>
+      <View style={styles.seccion}>
+        <Text style={styles.tituloSeccion}>Jugador</Text>
         <View style={styles.infoJugador}>
-          <ProgressiveImage
-            uri={jugadorObjetivo.photoURL || 'https://via.placeholder.com/50'}
-            containerStyle={[
-              styles.fotoJugador,
-              { borderColor: theme.border.primary },
-            ]}
-            imageStyle={styles.fotoJugador}
+          <Image
+            source={{
+              uri: jugadorObjetivo.photoURL || 'https://via.placeholder.com/50',
+            }}
+            style={styles.fotoJugador}
           />
           <View style={styles.datosJugador}>
-            <StyledText variant='primary' style={styles.nombreCompleto}>
+            <Text style={styles.nombreCompleto}>
               {jugadorObjetivo.nombre} {jugadorObjetivo.apellidos}
-            </StyledText>
-            <StyledText variant='secondary' size='small'>
-              {jugadorObjetivo.correo}
-            </StyledText>
-            <StyledText variant='secondary' size='small'>
-              Dorsal: {jugadorObjetivo.dorsal}
-            </StyledText>
+            </Text>
+            <Text style={styles.correo}>{jugadorObjetivo.correo}</Text>
+            <Text style={styles.dorsal}>Dorsal: {jugadorObjetivo.dorsal}</Text>
+          </View>
+          <View style={styles.contenedorIconoEstado}>
+            {aprobadoJugadorObjetivo === true ? (
+              <CircleCheckIcon size={24} color={theme.background.success} />
+            ) : aprobadoJugadorObjetivo === false ? (
+              <CloseCircleoIcon size={24} color={theme.background.error} />
+            ) : estado === 'pendiente' ? (
+              <ClockCircleOIcon size={24} color={theme.background.warning} />
+            ) : null}
           </View>
         </View>
       </View>
 
-      {/* Información del equipo */}
-      <View
-        style={[styles.seccion, { borderBottomColor: theme.border.secondary }]}
-      >
-        <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Equipo
-        </StyledText>
+      <View style={styles.seccion}>
+        <Text style={styles.tituloSeccion}>Equipo</Text>
         <View style={styles.infoEquipo}>
-          <ProgressiveImage
-            uri={equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40'}
-            containerStyle={[
-              styles.escudoEquipo,
-              { borderColor: theme.border.primary },
-            ]}
-            imageStyle={styles.escudoEquipo}
+          <Image
+            source={{
+              uri: equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40',
+            }}
+            style={styles.escudoEquipo}
           />
-          <StyledText variant='primary' style={styles.nombreEquipo}>
-            {equipoObjetivo.nombre}
-          </StyledText>
+          <Text style={styles.nombreEquipo}>{equipoObjetivo.nombre}</Text>
         </View>
       </View>
 
-      {/* Información del solicitante */}
-      <View
-        style={[styles.seccion, { borderBottomColor: theme.border.secondary }]}
-      >
-        <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Solicitante
-        </StyledText>
+      <View style={estiloSeccion(true)}>
+        <Text style={styles.tituloSeccion}>Solicitante</Text>
         <View style={styles.infoSolicitante}>
-          <StyledText variant='primary' style={styles.nombreCompleto}>
+          <Text style={styles.nombreCompleto}>
             {solicitante.nombre} {solicitante.apellidos}
-          </StyledText>
-          <StyledText variant='secondary' size='small'>
-            {solicitante.correo}
-          </StyledText>
+          </Text>
+          <Text style={styles.correo}>{solicitante.correo}</Text>
         </View>
       </View>
 
-      {/* Acciones */}
-      <View style={styles.seccionAcciones}>
-        {puedeResponder ? (
-          <View style={styles.botonesAccion}>
-            <TouchableOpacity
-              style={[
-                styles.boton,
-                styles.botonAceptar,
-                { backgroundColor: theme.button.primary.background },
-              ]}
-              onPress={handleAceptar}
-            >
-              <StyledText variant='light' style={styles.textoBotonAceptar}>
-                Aceptar
-              </StyledText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.boton,
-                styles.botonRechazar,
-                { backgroundColor: theme.button.error.background },
-              ]}
-              onPress={handleRechazar}
-            >
-              <StyledText variant='light' style={styles.textoBotonRechazar}>
-                Rechazar
-              </StyledText>
-            </TouchableOpacity>
+      <View style={styles.bloqueAccionesFooter}>
+        {estado === 'pendiente' ? (
+          puedeResponder ? (
+            <View style={styles.botonesAccion}>
+              <TouchableOpacity
+                style={[styles.boton, styles.botonAceptar]}
+                onPress={() => onAceptar(solicitud.id)}
+              >
+                <Text style={styles.textoBotonAceptar}>Aceptar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.boton, styles.botonRechazar]}
+                onPress={() => onRechazar(solicitud.id)}
+              >
+                <Text style={styles.textoBotonRechazar}>Rechazar</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={styles.esperandoRespuesta}>Esperando respuesta</Text>
+          )
+        ) : (
+          <View style={styles.infoResolucion}>
+            {(() => {
+              const fechaRespuesta =
+                fechaRespuestaAdmin && fechaRespuestaJugador
+                  ? new Date(fechaRespuestaAdmin) >
+                    new Date(fechaRespuestaJugador)
+                    ? fechaRespuestaAdmin
+                    : fechaRespuestaJugador
+                  : fechaRespuestaAdmin || fechaRespuestaJugador;
+
+              const esRespuestaAdmin =
+                fechaRespuestaAdmin &&
+                (!fechaRespuestaJugador ||
+                  new Date(fechaRespuestaAdmin) >
+                    new Date(fechaRespuestaJugador));
+
+              const nombreRespondedor = esRespuestaAdmin
+                ? admin
+                  ? `${admin.nombre} ${admin.apellidos}`
+                  : 'Administrador'
+                : `${jugadorObjetivo.nombre} ${jugadorObjetivo.apellidos}`;
+
+              const correoRespondedor = esRespuestaAdmin
+                ? admin
+                  ? admin.correo
+                  : ''
+                : jugadorObjetivo.correo;
+
+              return (
+                <>
+                  {fechaRespuesta && (
+                    <Text style={styles.textoInfoResolucion}>
+                      Resuelta el {formatearFecha(fechaRespuesta)}
+                    </Text>
+                  )}
+                  <Text style={styles.textoInfoResolucion}>
+                    Respondida por {nombreRespondedor} ({correoRespondedor})
+                  </Text>
+                  {estado === 'rechazada' && motivoRespuestaJugador && (
+                    <Text style={styles.textoMotivoRechazo}>
+                      Motivo del rechazo: {motivoRespuestaJugador}
+                    </Text>
+                  )}
+                  {estado === 'rechazada' && respuestaAdmin && (
+                    <Text style={styles.textoMotivoRechazo}>
+                      Motivo del rechazo: {respuestaAdmin}
+                    </Text>
+                  )}
+                </>
+              );
+            })()}
           </View>
-        ) : estado === 'pendiente' ? (
-          <StyledText variant='secondary' style={styles.esperandoRespuesta}>
-            Esperando respuesta
-          </StyledText>
-        ) : null}
+        )}
       </View>
     </View>
   );
@@ -262,10 +283,15 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 12,
   },
   datosJugador: {
     flex: 1,
+    marginHorizontal: 12,
+  },
+  contenedorIconoEstado: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   nombreCompleto: {
     fontSize: 16,
@@ -293,11 +319,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  infoSolicitante: {
-    // Estilos para la información del solicitante
-  },
-  seccionAcciones: {
-    marginTop: 8,
+  infoSolicitante: {},
+  bloqueAccionesFooter: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
   },
   botonesAccion: {
     flexDirection: 'row',
@@ -328,6 +355,22 @@ const styles = StyleSheet.create({
   esperandoRespuesta: {
     textAlign: 'center',
     color: '#666',
+    fontStyle: 'italic',
+  },
+  infoResolucion: {
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+  },
+  textoInfoResolucion: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  textoMotivoRechazo: {
+    fontSize: 14,
+    color: '#F44336',
+    marginTop: 8,
     fontStyle: 'italic',
   },
 });

@@ -19,7 +19,8 @@ export const BaseSolicitudService = {
   ): Promise<ResultService<Solicitud[]>> {
     try {
       const data = await getCollectionByPathWithFilterFS<Solicitud>(
-        [['estado', '==', 'pendiente']],
+        // [['estado', '==', 'pendiente']],
+        [],
         [],
         'temporadas',
         temporadaId,

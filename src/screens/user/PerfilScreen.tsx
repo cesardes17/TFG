@@ -160,10 +160,12 @@ export default function PerfilScreen() {
       </View>
     );
   }
-
+  if (!user) {
+    return null;
+  }
   return (
     <View style={styles.container}>
-      <ShowUserInfo user={user!} />
+      <ShowUserInfo user={user} />
 
       {user?.role === 'jugador' && (
         <StyledButton

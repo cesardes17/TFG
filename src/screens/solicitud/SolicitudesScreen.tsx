@@ -7,7 +7,11 @@ import BaseConfirmationModal, {
   ConfirmationType,
 } from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Solicitud } from '../../types/Solicitud';
+import {
+  Solicitud,
+  solicitudCrearEquipo,
+  solicitudUnirseEquipo,
+} from '../../types/Solicitud';
 import {
   aceptarCrearEquipoSolicitud,
   BaseSolicitudService,
@@ -20,6 +24,9 @@ import { AddIcon } from '../../components/Icons';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
+import { rechazarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/rechazar';
+import { aceptarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/aceptar';
+import { inscripcionesService } from '../../services/inscripcionesService';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
@@ -32,7 +39,7 @@ export default function SolicitudesScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [inputError, setInputError] = useState(false);
-
+  const [dorsalInput, setDorsalInput] = useState('');
   const isAdmin =
     user?.role === 'coorganizador' || user!.role === 'organizador'; // Asumiendo que el rol 'admin' tiene el valor 'admin' en el objeto user
 
@@ -65,60 +72,98 @@ export default function SolicitudesScreen() {
 
   const handleConfirm = async () => {
     const solicitud = solicitudes.find((s) => s.id === selectedId);
+    console.log('solicitud', solicitud);
     if (!selectedId || !solicitud) return;
     if (modalType === 'delete' && !rejectReason.trim()) {
       setInputError(true);
       return;
     }
-    console.log('modalType', modalType);
-    if (modalType === 'update') {
-      const aceptacionData: Solicitud = {
-        ...solicitud,
-        id: selectedId, // Aseguramos que id esté presente
-        estado: 'aceptada',
-        fechaRespuestaAdmin: new Date().toISOString(),
-        admin: {
-          id: user!.uid,
-          nombre: user!.nombre,
-          apellidos: user!.apellidos,
-          correo: user!.correo,
-        },
-      };
-      const res = await aceptarCrearEquipoSolicitud(
-        temporada!.id,
-        aceptacionData
-      );
-      if (res.success) {
-        showToast('Solicitud aceptada', 'success');
-      } else {
-        showToast('Error al aceptar solicitud', 'error');
-      }
-    } else {
-      const rechazoData: Solicitud = {
-        ...solicitud,
-        id: selectedId, // Aseguramos que id esté presente
-        estado: 'rechazada',
-        respuestaAdmin: rejectReason,
-        fechaRespuestaAdmin: new Date().toISOString(),
-        admin: {
-          id: user!.uid,
-          nombre: user!.nombre,
-          apellidos: user!.apellidos,
-          correo: user!.correo,
-        },
-      };
 
-      const res = await rechazarCrearEquipoSolicitud(
-        temporada!.id,
-        rechazoData
-      );
+    switch (solicitud.tipo) {
+      case 'Crear Equipo':
+        if (modalType === 'update') {
+          const aceptacionData: solicitudCrearEquipo = {
+            ...(solicitud as solicitudCrearEquipo),
+            id: selectedId,
+            estado: 'aceptada',
+            fechaRespuestaAdmin: new Date().toISOString(),
+            admin: {
+              id: user!.uid,
+              nombre: user!.nombre,
+              apellidos: user!.apellidos,
+              correo: user!.correo,
+            },
+          };
+          const res = await aceptarCrearEquipoSolicitud(
+            temporada!.id,
+            aceptacionData
+          );
+          if (res.success) {
+            showToast('Solicitud aceptada', 'success');
+          } else {
+            showToast('Error al aceptar solicitud', 'error');
+          }
+        } else {
+          const rechazoData: solicitudCrearEquipo = {
+            ...(solicitud as solicitudCrearEquipo),
+            id: selectedId, // Aseguramos que id esté presente
+            estado: 'rechazada',
+            respuestaAdmin: rejectReason,
+            fechaRespuestaAdmin: new Date().toISOString(),
+            admin: {
+              id: user!.uid,
+              nombre: user!.nombre,
+              apellidos: user!.apellidos,
+              correo: user!.correo,
+            },
+          };
+          const res = await rechazarCrearEquipoSolicitud(
+            temporada!.id,
+            rechazoData
+          );
+          if (res.success) {
+            showToast('Solicitud rechazada', 'warning');
+          } else {
+            showToast('Error al rechazar solicitud', 'error');
+          }
+        }
+        break;
 
-      if (res.success) {
-        showToast('Solicitud rechazada', 'success');
-      } else {
-        showToast('Error al rechazar solicitud', 'error');
-      }
+      case 'Unirse a Equipo':
+        console.log('solicitud', solicitud);
+        if (!dorsalInput.trim()) {
+          setInputError(true);
+          return;
+        }
+        if (modalType === 'update') {
+          const res = await aceptarUnirseEquipoSolicitud(
+            temporada!.id,
+            solicitud as solicitudUnirseEquipo,
+            user!
+          );
+          if (res.success) {
+            showToast('Solicitud aceptada', 'success');
+          } else {
+            showToast('Error al aceptar solicitud', 'error');
+          }
+        } else {
+          const res = await rechazarUnirseEquipoSolicitud(
+            temporada!.id,
+            solicitud as solicitudUnirseEquipo,
+            user!,
+            rejectReason
+          );
+          if (res.success) {
+            showToast('Solicitud rechazada', 'warning');
+          } else {
+            showToast('Error al rechazar solicitud', 'error');
+          }
+        }
+        break;
+      default:
+        break;
     }
+    console.log('modalType', modalType);
 
     // refresca lista y cierra modal
     const res = await BaseSolicitudService.getSolicitudes(temporada!.id);
@@ -127,6 +172,44 @@ export default function SolicitudesScreen() {
     setModalVisible(false);
     setRejectReason('');
     setSelectedId(null);
+  };
+
+  const renderDorsalInput = async () => {
+    const solicitud = solicitudes.find((s) => s.id === selectedId);
+    if (
+      modalType === 'update' &&
+      solicitud?.tipo === 'Unirse a Equipo' &&
+      (solicitud as solicitudUnirseEquipo).jugadorObjetivo.id === user?.uid
+    ) {
+      const equipoId = (solicitud as solicitudUnirseEquipo).equipoObjetivo.id;
+      const dorsalesOcupados = await inscripcionesService.getDorsalesByTeam(
+        temporada!.id,
+        equipoId
+      );
+      if (!dorsalesOcupados.success || !dorsalesOcupados.data) return null;
+
+      // Aquí cargarías los dorsales ocupados con un useEffect una sola vez
+      return (
+        <View style={{ gap: 8 }}>
+          <StyledText style={{ fontWeight: 'bold' }}>
+            Dorsales ocupados: {dorsalesOcupados.data.join(', ')}
+          </StyledText>
+
+          <StyledTextInput
+            placeholder='Introduce el dorsal deseado'
+            keyboardType='numeric'
+            value={dorsalInput}
+            onChangeText={setDorsalInput}
+            error={inputError}
+          />
+          {inputError && (
+            <StyledText variant='error'>Este campo es obligatorio</StyledText>
+          )}
+        </View>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -187,6 +270,7 @@ export default function SolicitudesScreen() {
             )}
           </>
         )}
+        {renderDorsalInput()}
       </BaseConfirmationModal>
     </View>
   );

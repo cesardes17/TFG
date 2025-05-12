@@ -88,3 +88,11 @@ export const AddIcon = ({ size = 24, color }: IconProps) => {
 export const SendIcon = ({ size = 24, color }: IconProps) => {
   return <FontAwesome name='send' size={size} color={color} />;
 };
+
+export const CloseCircleoIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='closecircleo' size={size} color={color} />;
+};
+
+export const ClockCircleOIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='clockcircleo' size={size} color={color} />;
+};

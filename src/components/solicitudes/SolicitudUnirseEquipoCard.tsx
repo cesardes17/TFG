@@ -1,10 +1,12 @@
 import type React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { solicitudUnirseEquipo } from '../../types/Solicitud';
 import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
+import ProgressiveImage from '../common/ProgressiveImage';
 
 interface Props {
   solicitud: solicitudUnirseEquipo;
@@ -35,7 +37,6 @@ const SolicitudEquipo: React.FC<Props> = ({
     admin,
     respuestaAdmin,
   } = solicitud;
-
   const { theme } = useTheme();
   const formatearFecha = (fecha: string) => {
     return format(new Date(fecha), "d 'de' MMMM 'de' yyyy", { locale: es });
@@ -85,36 +86,55 @@ const SolicitudEquipo: React.FC<Props> = ({
   ];
 
   return (
-    <View style={styles.tarjeta}>
+    <View style={[styles.tarjeta, { backgroundColor: theme.cardDefault }]}>
       <View style={styles.cabecera}>
         <View
           style={[
             styles.estadoBadge,
-            { backgroundColor: obtenerColorEstado() },
+            {
+              backgroundColor:
+                theme.background[
+                  estado === 'pendiente'
+                    ? 'warning'
+                    : estado === 'aceptada'
+                    ? 'success'
+                    : 'error'
+                ],
+            },
           ]}
         >
-          <Text style={styles.estadoTexto}>{obtenerTextoEstado()}</Text>
+          <StyledText variant='light' size='small' style={styles.estadoTexto}>
+            {obtenerTextoEstado()}
+          </StyledText>
         </View>
-        <Text style={styles.fechaCreacion}>
+        <StyledText
+          variant='secondary'
+          size='small'
+          style={styles.fechaCreacion}
+        >
           Creada el {formatearFecha(fechaCreacion)}
-        </Text>
+        </StyledText>
       </View>
 
       <View style={styles.seccion}>
-        <Text style={styles.tituloSeccion}>Jugador</Text>
+        <StyledText variant='secondary' style={styles.tituloSeccion}>
+          Jugador
+        </StyledText>
         <View style={styles.infoJugador}>
-          <Image
-            source={{
-              uri: jugadorObjetivo.photoURL || 'https://via.placeholder.com/50',
-            }}
-            style={styles.fotoJugador}
+          <ProgressiveImage
+            uri={jugadorObjetivo.photoURL || 'https://via.placeholder.com/50'}
+            containerStyle={styles.fotoJugador}
           />
           <View style={styles.datosJugador}>
-            <Text style={styles.nombreCompleto}>
+            <StyledText variant='primary' style={styles.nombreCompleto}>
               {jugadorObjetivo.nombre} {jugadorObjetivo.apellidos}
-            </Text>
-            <Text style={styles.correo}>{jugadorObjetivo.correo}</Text>
-            <Text style={styles.dorsal}>Dorsal: {jugadorObjetivo.dorsal}</Text>
+            </StyledText>
+            <StyledText variant='secondary' style={styles.correo}>
+              {jugadorObjetivo.correo}
+            </StyledText>
+            <StyledText variant='secondary' style={styles.dorsal}>
+              Dorsal: {jugadorObjetivo.dorsal}
+            </StyledText>
           </View>
           <View style={styles.contenedorIconoEstado}>
             {aprobadoJugadorObjetivo === true ? (
@@ -129,25 +149,31 @@ const SolicitudEquipo: React.FC<Props> = ({
       </View>
 
       <View style={styles.seccion}>
-        <Text style={styles.tituloSeccion}>Equipo</Text>
+        <StyledText variant='secondary' style={styles.tituloSeccion}>
+          Equipo
+        </StyledText>
         <View style={styles.infoEquipo}>
-          <Image
-            source={{
-              uri: equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40',
-            }}
-            style={styles.escudoEquipo}
+          <ProgressiveImage
+            uri={equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40'}
+            containerStyle={styles.escudoEquipo}
           />
-          <Text style={styles.nombreEquipo}>{equipoObjetivo.nombre}</Text>
+          <StyledText variant='primary' style={styles.nombreEquipo}>
+            {equipoObjetivo.nombre}
+          </StyledText>
         </View>
       </View>
 
       <View style={estiloSeccion(true)}>
-        <Text style={styles.tituloSeccion}>Solicitante</Text>
+        <StyledText variant='secondary' style={styles.tituloSeccion}>
+          Solicitante
+        </StyledText>
         <View style={styles.infoSolicitante}>
-          <Text style={styles.nombreCompleto}>
+          <StyledText variant='primary' style={styles.nombreCompleto}>
             {solicitante.nombre} {solicitante.apellidos}
-          </Text>
-          <Text style={styles.correo}>{solicitante.correo}</Text>
+          </StyledText>
+          <StyledText variant='secondary' style={styles.correo}>
+            {solicitante.correo}
+          </StyledText>
         </View>
       </View>
 
@@ -156,23 +182,36 @@ const SolicitudEquipo: React.FC<Props> = ({
           puedeResponder ? (
             <View style={styles.botonesAccion}>
               <TouchableOpacity
-                style={[styles.boton, styles.botonAceptar]}
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.button.primary.background },
+                ]}
                 onPress={() => onAceptar(solicitud.id)}
               >
-                <Text style={styles.textoBotonAceptar}>Aceptar</Text>
+                <StyledText variant='light'>Aceptar</StyledText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.boton, styles.botonRechazar]}
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.button.error.background },
+                ]}
                 onPress={() => onRechazar(solicitud.id)}
               >
-                <Text style={styles.textoBotonRechazar}>Rechazar</Text>
+                <StyledText variant='light'>Rechazar</StyledText>
               </TouchableOpacity>
             </View>
           ) : (
-            <Text style={styles.esperandoRespuesta}>Esperando respuesta</Text>
+            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
+              Esperando respuesta
+            </StyledText>
           )
         ) : (
-          <View style={styles.infoResolucion}>
+          <View
+            style={[
+              styles.infoResolucion,
+              { backgroundColor: theme.background.primary },
+            ]}
+          >
             {(() => {
               const fechaRespuesta =
                 fechaRespuestaAdmin && fechaRespuestaJugador
@@ -203,22 +242,22 @@ const SolicitudEquipo: React.FC<Props> = ({
               return (
                 <>
                   {fechaRespuesta && (
-                    <Text style={styles.textoInfoResolucion}>
+                    <StyledText style={styles.textoInfoResolucion}>
                       Resuelta el {formatearFecha(fechaRespuesta)}
-                    </Text>
+                    </StyledText>
                   )}
-                  <Text style={styles.textoInfoResolucion}>
+                  <StyledText style={styles.textoInfoResolucion}>
                     Respondida por {nombreRespondedor} ({correoRespondedor})
-                  </Text>
+                  </StyledText>
                   {estado === 'rechazada' && motivoRespuestaJugador && (
-                    <Text style={styles.textoMotivoRechazo}>
+                    <StyledText style={styles.textoMotivoRechazo}>
                       Motivo del rechazo: {motivoRespuestaJugador}
-                    </Text>
+                    </StyledText>
                   )}
                   {estado === 'rechazada' && respuestaAdmin && (
-                    <Text style={styles.textoMotivoRechazo}>
+                    <StyledText style={styles.textoMotivoRechazo}>
                       Motivo del rechazo: {respuestaAdmin}
-                    </Text>
+                    </StyledText>
                   )}
                 </>
               );
@@ -232,7 +271,6 @@ const SolicitudEquipo: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   tarjeta: {
-    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginVertical: 8,
@@ -255,24 +293,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   estadoTexto: {
-    color: 'white',
     fontWeight: 'bold',
     fontSize: 12,
   },
   fechaCreacion: {
     fontSize: 12,
-    color: '#666',
   },
   seccion: {
     marginBottom: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   tituloSeccion: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#666',
+
     marginBottom: 8,
   },
   infoJugador: {
@@ -299,11 +334,10 @@ const styles = StyleSheet.create({
   },
   correo: {
     fontSize: 14,
-    color: '#666',
   },
   dorsal: {
     fontSize: 14,
-    color: '#666',
+
     marginTop: 4,
   },
   infoEquipo: {
@@ -319,12 +353,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  infoSolicitante: {},
+  infoSolicitante: {
+    // Estilos para la información del solicitante
+  },
   bloqueAccionesFooter: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   botonesAccion: {
     flexDirection: 'row',
@@ -359,7 +394,7 @@ const styles = StyleSheet.create({
   },
   infoResolucion: {
     padding: 12,
-    backgroundColor: '#f9f9f9',
+
     borderRadius: 8,
   },
   textoInfoResolucion: {

@@ -9,10 +9,17 @@ export default function Profile() {
   const { user, loading } = useUser();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
+    if (!user) {
+      return router.replace('/login');
+    }
+  }, [loading, user]);
 
-    if (!user) return router.push('/login');
-  }, []);
+  if (loading) {
+    return null;
+  }
 
   return (
     <PageContainer>

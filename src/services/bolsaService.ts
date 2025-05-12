@@ -81,11 +81,26 @@ export const bolsaJugadoresService = {
     }
   },
   deleteJugadorInscrito: async (
-    docId: string,
-    idTemporada: string
+    temporadaId: string,
+    jugadorId: string
   ): Promise<ResultService<Boolean>> => {
     try {
-      const path = ['temporadas', idTemporada, 'bolsaJugadores', docId];
+      const resGetDoc = await bolsaJugadoresService.getJugadorInscrito(
+        jugadorId,
+        temporadaId
+      );
+      if (!resGetDoc.success || !resGetDoc.data) {
+        throw new Error(
+          resGetDoc.errorMessage || 'Error al obtener el jugador inscrito'
+        );
+      }
+
+      const path = [
+        'temporadas',
+        temporadaId,
+        'bolsaJugadores',
+        resGetDoc.data.id,
+      ];
       const res = await FirestoreService.deleteDocumentByPath(...path);
       console.log('Bolsa Service - res: ', res);
       if (!res.success) {

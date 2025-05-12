@@ -167,7 +167,7 @@ export default function PerfilScreen() {
     <View style={styles.container}>
       <ShowUserInfo user={user} />
 
-      {user?.role === 'jugador' && (
+      {user?.role === 'jugador' && !user.equipo && (
         <StyledButton
           title={
             inscritoBolsa.inscrito

@@ -1,9 +1,11 @@
 import { Inscripcion } from '../../../types/Inscripcion';
 import { ResultService } from '../../../types/ResultService';
 import { Solicitud, solicitudUnirseEquipo } from '../../../types/Solicitud';
-import { User } from '../../../types/User';
+import { PlayerProfile, User } from '../../../types/User';
 import { getRandomUID } from '../../../utils/getRandomUID';
+import { bolsaJugadoresService } from '../../bolsaService';
 import { inscripcionesService } from '../../inscripcionesService';
+import { UserService } from '../../userService';
 import { BaseSolicitudService } from '../baseSolicitud';
 
 export const aceptarUnirseEquipoSolicitud = async (
@@ -41,12 +43,12 @@ export const aceptarUnirseEquipoSolicitud = async (
           ...solicitud,
           estado: 'aceptada',
         };
-        solicitud = {
-          ...solicitud,
-          fechaRespuestaJugador: new Date().toISOString(),
-          aprobadoJugadorObjetivo: true,
-        };
       }
+      solicitud = {
+        ...solicitud,
+        fechaRespuestaJugador: new Date().toISOString(),
+        aprobadoJugadorObjetivo: true,
+      };
     }
     solicitudModificada = true;
 
@@ -82,6 +84,34 @@ export const aceptarUnirseEquipoSolicitud = async (
           resInscripcion.errorMessage || 'Error al crear la inscripcion'
         );
       }
+      //Eliminar jugador de la bolsa de jugadores
+
+      const resBolsa = await bolsaJugadoresService.deleteJugadorInscrito(
+        temporadaId,
+        solicitud.jugadorObjetivo.id
+      );
+      if (!resBolsa.success) {
+        throw new Error(
+          resBolsa.errorMessage || 'Error al eliminar el jugador de la bolsa'
+        );
+      }
+      //actualizar la informacion del jugador
+      const jugadorActualizado: Partial<PlayerProfile> = {
+        equipo: {
+          id: solicitud.equipoObjetivo.id,
+          nombre: solicitud.equipoObjetivo.nombre,
+          escudoUrl: solicitud.equipoObjetivo.escudoUrl,
+        },
+      };
+      const resJugador = await UserService.UpdatePlayerProfile(
+        solicitud.jugadorObjetivo.id,
+        jugadorActualizado
+      );
+      if (!resJugador.success) {
+        throw new Error(
+          resJugador.errorMessage || 'Error al actualizar el jugador'
+        );
+      }
     }
 
     return {
@@ -97,7 +127,7 @@ export const aceptarUnirseEquipoSolicitud = async (
         solicitudInicial
       );
     }
-
+    console.log(error);
     return {
       success: false,
       errorMessage:

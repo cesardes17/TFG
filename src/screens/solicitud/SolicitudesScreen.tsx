@@ -1,5 +1,5 @@
 // src/screens/SolicitudesScreen.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 
 import StyledTextInput from '../../components/common/StyledTextInput';
@@ -40,8 +40,10 @@ export default function SolicitudesScreen() {
   const [rejectReason, setRejectReason] = useState('');
   const [inputError, setInputError] = useState(false);
   const [dorsalInput, setDorsalInput] = useState('');
+  const [dorsalesOcupados, setDorsalesOcupados] = useState<number[]>([]);
+
   const isAdmin =
-    user?.role === 'coorganizador' || user!.role === 'organizador'; // Asumiendo que el rol 'admin' tiene el valor 'admin' en el objeto user
+    user?.role === 'coorganizador' || user?.role === 'organizador';
 
   useFocusEffect(
     useCallback(() => {
@@ -58,21 +60,35 @@ export default function SolicitudesScreen() {
     }, [temporada])
   );
 
-  const openAcceptModal = (id: string) => {
+  const openAcceptModal = async (id: string) => {
+    const solicitud = solicitudes.find((s) => s.id === id);
     setSelectedId(id);
     setModalType('update');
     setModalVisible(true);
+
+    if (
+      solicitud?.tipo === 'Unirse a Equipo' &&
+      (solicitud as solicitudUnirseEquipo).jugadorObjetivo.id === user?.uid
+    ) {
+      const equipoId = (solicitud as solicitudUnirseEquipo).equipoObjetivo.id;
+      const res = await inscripcionesService.getDorsalesByTeam(
+        temporada!.id,
+        equipoId
+      );
+      if (res.success && res.data) {
+        setDorsalesOcupados(res.data);
+      }
+    }
   };
 
   const openRejectModal = (id: string) => {
     setSelectedId(id);
-    setModalType('delete'); // 'delete' → usamos input para motivo
+    setModalType('delete');
     setModalVisible(true);
   };
 
   const handleConfirm = async () => {
     const solicitud = solicitudes.find((s) => s.id === selectedId);
-    console.log('solicitud', solicitud);
     if (!selectedId || !solicitud) return;
     if (modalType === 'delete' && !rejectReason.trim()) {
       setInputError(true);
@@ -80,7 +96,7 @@ export default function SolicitudesScreen() {
     }
 
     switch (solicitud.tipo) {
-      case 'Crear Equipo':
+      case 'Crear Equipo': {
         if (modalType === 'update') {
           const aceptacionData: solicitudCrearEquipo = {
             ...(solicitud as solicitudCrearEquipo),
@@ -98,15 +114,14 @@ export default function SolicitudesScreen() {
             temporada!.id,
             aceptacionData
           );
-          if (res.success) {
-            showToast('Solicitud aceptada', 'success');
-          } else {
-            showToast('Error al aceptar solicitud', 'error');
-          }
+          showToast(
+            res.success ? 'Solicitud aceptada' : 'Error al aceptar solicitud',
+            res.success ? 'success' : 'error'
+          );
         } else {
           const rechazoData: solicitudCrearEquipo = {
             ...(solicitud as solicitudCrearEquipo),
-            id: selectedId, // Aseguramos que id esté presente
+            id: selectedId,
             estado: 'rechazada',
             respuestaAdmin: rejectReason,
             fechaRespuestaAdmin: new Date().toISOString(),
@@ -121,31 +136,41 @@ export default function SolicitudesScreen() {
             temporada!.id,
             rechazoData
           );
-          if (res.success) {
-            showToast('Solicitud rechazada', 'warning');
-          } else {
-            showToast('Error al rechazar solicitud', 'error');
-          }
+          showToast(
+            res.success ? 'Solicitud rechazada' : 'Error al rechazar solicitud',
+            res.success ? 'warning' : 'error'
+          );
         }
         break;
+      }
+      case 'Unirse a Equipo': {
+        console.log('Unirse a Equipo - ', user);
+        const solicitudUE = solicitud as solicitudUnirseEquipo;
 
-      case 'Unirse a Equipo':
-        console.log('solicitud', solicitud);
-        if (!dorsalInput.trim()) {
-          setInputError(true);
-          return;
+        if (user?.role === 'jugador' && modalType === 'update') {
+          console.log('Jugador - ', user);
+          const dorsal = parseInt(dorsalInput.trim(), 10);
+          const isDorsalValid =
+            !isNaN(dorsal) && !dorsalesOcupados.includes(dorsal);
+          console.log('isDorsalValid - ', isDorsalValid);
+          if (!isDorsalValid) {
+            setInputError(true);
+            return;
+          } else {
+            setInputError(false);
+            solicitudUE.jugadorObjetivo.dorsal = dorsal;
+          }
         }
         if (modalType === 'update') {
           const res = await aceptarUnirseEquipoSolicitud(
             temporada!.id,
-            solicitud as solicitudUnirseEquipo,
+            solicitudUE,
             user!
           );
-          if (res.success) {
-            showToast('Solicitud aceptada', 'success');
-          } else {
-            showToast('Error al aceptar solicitud', 'error');
-          }
+          showToast(
+            res.success ? 'Solicitud aceptada' : 'Error al aceptar solicitud',
+            res.success ? 'success' : 'error'
+          );
         } else {
           const res = await rechazarUnirseEquipoSolicitud(
             temporada!.id,
@@ -153,48 +178,36 @@ export default function SolicitudesScreen() {
             user!,
             rejectReason
           );
-          if (res.success) {
-            showToast('Solicitud rechazada', 'warning');
-          } else {
-            showToast('Error al rechazar solicitud', 'error');
-          }
+          showToast(
+            res.success ? 'Solicitud rechazada' : 'Error al rechazar solicitud',
+            res.success ? 'warning' : 'error'
+          );
         }
         break;
-      default:
-        break;
+      }
     }
-    console.log('modalType', modalType);
 
-    // refresca lista y cierra modal
     const res = await BaseSolicitudService.getSolicitudes(temporada!.id);
-    console.log(res.data);
     if (res.success && res.data) setSolicitudes(res.data);
     setModalVisible(false);
     setRejectReason('');
     setSelectedId(null);
+    setDorsalInput('');
+    setDorsalesOcupados([]);
   };
 
-  const renderDorsalInput = async () => {
+  const renderDorsalInput = () => {
     const solicitud = solicitudes.find((s) => s.id === selectedId);
     if (
       modalType === 'update' &&
       solicitud?.tipo === 'Unirse a Equipo' &&
       (solicitud as solicitudUnirseEquipo).jugadorObjetivo.id === user?.uid
     ) {
-      const equipoId = (solicitud as solicitudUnirseEquipo).equipoObjetivo.id;
-      const dorsalesOcupados = await inscripcionesService.getDorsalesByTeam(
-        temporada!.id,
-        equipoId
-      );
-      if (!dorsalesOcupados.success || !dorsalesOcupados.data) return null;
-
-      // Aquí cargarías los dorsales ocupados con un useEffect una sola vez
       return (
         <View style={{ gap: 8 }}>
           <StyledText style={{ fontWeight: 'bold' }}>
-            Dorsales ocupados: {dorsalesOcupados.data.join(', ')}
+            Dorsales ocupados: {dorsalesOcupados.join(', ')}
           </StyledText>
-
           <StyledTextInput
             placeholder='Introduce el dorsal deseado'
             keyboardType='numeric'
@@ -203,12 +216,13 @@ export default function SolicitudesScreen() {
             error={inputError}
           />
           {inputError && (
-            <StyledText variant='error'>Este campo es obligatorio</StyledText>
+            <StyledText variant='error'>
+              El dorsal no puede estar vacío y deber ser un dorsal libre
+            </StyledText>
           )}
         </View>
       );
     }
-
     return null;
   };
 
@@ -236,8 +250,8 @@ export default function SolicitudesScreen() {
       <SolicitudesList
         solicitudes={solicitudes}
         esAdmin={isAdmin}
-        onAceptar={(id) => openAcceptModal(id)}
-        onRechazar={(id) => openRejectModal(id)}
+        onAceptar={openAcceptModal}
+        onRechazar={openRejectModal}
       />
 
       <BaseConfirmationModal

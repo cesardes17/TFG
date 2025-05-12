@@ -107,4 +107,26 @@ export interface Theme {
     rowBorder: string;
     rowText: string;
   };
+  button: {
+    primary: {
+      background: string;
+      border: string;
+      text: string;
+    };
+    outline: {
+      background: string;
+      border: string;
+      text: string;
+    };
+    error: {
+      background: string;
+      border: string;
+      text: string;
+    };
+    disabled: {
+      background: string;
+      border: string;
+      text: string;
+    };
+  };
 }

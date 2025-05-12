@@ -1,5 +1,6 @@
 // src/services/solicitudesService/baseSolicitud.ts
 
+import { WhereFilterOp } from 'firebase/firestore';
 import {
   getCollectionByPathFS,
   getDocumentByPathFS,
@@ -8,7 +9,7 @@ import {
   getCollectionByPathWithFilterFS,
 } from '../../api/firestoreFirebase';
 import type { ResultService } from '../../types/ResultService';
-import type { Solicitud } from '../../types/Solicitud';
+import type { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
 import { StorageService } from '../core/storageService';
 
 export const BaseSolicitudService = {
@@ -38,16 +39,19 @@ export const BaseSolicitudService = {
   ): Promise<ResultService<string>> {
     try {
       console.log(payload);
-      if (payload.escudoUrl && !payload.escudoUrl.startsWith('http')) {
+      if (payload.tipo === 'Crear Equipo') {
         const imageRes = await StorageService.uploadFile(
           'escudos_equipos',
-          payload.escudoUrl
+          (payload as solicitudCrearEquipo).escudoUrl
         );
         if (!imageRes.success) {
           throw new Error(imageRes.errorMessage || 'Error al subir la imagen');
         }
-        payload.escudoUrl = imageRes.data;
+        (payload as solicitudCrearEquipo).escudoUrl = imageRes.data!;
       }
+
+      console.log('Subiendo solicitud con ID:', solicitudId);
+      console.log('Payload final:', payload);
 
       const id = await setDocumentByPathFS(
         'temporadas',
@@ -56,6 +60,8 @@ export const BaseSolicitudService = {
         solicitudId,
         payload
       );
+
+      console.log('Documento subido con ID:', id);
       return { success: true, data: id };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };
@@ -77,6 +83,28 @@ export const BaseSolicitudService = {
       return { success: true, data: null };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };
+    }
+  },
+
+  /** Obtener solicitudes con filtros */
+  async getSolicitudesWithFilters(
+    temporadaId: string,
+    andFilters: [string, WhereFilterOp, any][] = [],
+    orFilters: [string, WhereFilterOp, any][] = []
+  ): Promise<ResultService<Solicitud[]>> {
+    try {
+      const path = ['temporadas', temporadaId, 'solicitudes'];
+      const data = await getCollectionByPathWithFilterFS<Solicitud>(
+        andFilters,
+        orFilters,
+        ...path
+      );
+      return { success: true, data };
+    } catch (err: any) {
+      return {
+        success: false,
+        errorMessage: err.message || 'Error al obtener solicitudes',
+      };
     }
   },
 };

@@ -8,6 +8,7 @@ interface StyledButtonProps {
   title: string;
   variant?: 'primary' | 'outline' | 'error';
   fullWidth?: boolean;
+  disabled?: boolean;
 }
 
 export default function StyledButton({
@@ -15,30 +16,13 @@ export default function StyledButton({
   title,
   variant = 'primary',
   fullWidth = true,
+  disabled = false,
 }: StyledButtonProps) {
   const { theme } = useTheme();
 
   const getButtonStyle = () => {
-    switch (variant) {
-      case 'error':
-        return {
-          backgroundColor: theme.text.error,
-          borderColor: theme.text.error,
-          textColor: theme.text.light,
-        };
-      case 'outline':
-        return {
-          backgroundColor: theme.transparent,
-          borderColor: theme.border.primary,
-          textColor: theme.text.light,
-        };
-      default:
-        return {
-          backgroundColor: theme.background.primary,
-          borderColor: theme.border.primary,
-          textColor: theme.text.light,
-        };
-    }
+    if (disabled) return theme.button.disabled;
+    return theme.button[variant] || theme.button.primary;
   };
 
   const buttonStyle = getButtonStyle();
@@ -48,15 +32,17 @@ export default function StyledButton({
       style={[
         styles.button,
         {
-          backgroundColor: buttonStyle.backgroundColor,
-          borderColor: buttonStyle.borderColor,
+          backgroundColor: buttonStyle.background,
+          borderColor: buttonStyle.border,
           borderWidth: variant === 'outline' ? 2 : 0,
           width: fullWidth ? '100%' : 'auto',
+          opacity: disabled ? 0.6 : 1,
         },
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
-      <StyledText style={[styles.buttonText, { color: buttonStyle.textColor }]}>
+      <StyledText style={[styles.buttonText, { color: buttonStyle.text }]}>
         {title}
       </StyledText>
     </TouchableOpacity>

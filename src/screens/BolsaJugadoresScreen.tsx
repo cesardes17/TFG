@@ -1,0 +1,155 @@
+import React, { useState, useCallback, useEffect } from 'react';
+import { ActivityIndicator, Alert, View } from 'react-native';
+import PlayerList from '../components/bolsaJugadores/BolsaList';
+import { useTemporadaContext } from '../contexts/TemporadaContext';
+import { bolsaJugadoresService } from '../services/bolsaService';
+import { BolsaJugador } from '../types/BolsaJugador';
+import { solicitudUnirseEquipo } from '../types/Solicitud';
+import { getRandomUID } from '../utils/getRandomUID';
+import { useUser } from '../contexts/UserContext';
+import { BaseSolicitudService } from '../services/solicitudesService';
+import { useToast } from '../contexts/ToastContext';
+import { useTheme } from '../contexts/ThemeContext';
+
+const BolsaJugadoresScreen = () => {
+  const { temporada } = useTemporadaContext();
+  const { user } = useUser();
+  const { showToast } = useToast();
+  const { theme } = useTheme();
+  const usuarioActualId = user!.uid;
+  const [isLoading, setIsLodaing] = useState(true);
+
+  const [estadosSolicitudes, setEstadosSolicitudes] = useState<
+    Record<string, 'ninguna' | 'pendiente'>
+  >({});
+  const [inscripciones, setInscripciones] = useState<BolsaJugador[]>([]);
+
+  useEffect(() => {
+    if (!temporada || !user) return;
+
+    const fetchData = async () => {
+      setIsLodaing(true);
+      try {
+        // Obtener jugadores inscritos
+        const res = await bolsaJugadoresService.getJugadoresInscritos(
+          temporada.id
+        );
+        if (!res.success || !res.data) {
+          throw new Error(res.errorMessage || 'Error al obtener inscripciones');
+        }
+        setInscripciones(res.data);
+
+        // Obtener solicitudes pendientes del usuario actual
+        const resSol = await BaseSolicitudService.getSolicitudesWithFilters(
+          temporada.id,
+          [
+            ['tipo', '==', 'Unirse a Equipo'],
+            ['estado', '==', 'pendiente'],
+            ['solicitante.id', '==', usuarioActualId],
+          ],
+          []
+        );
+
+        if (!resSol.success || !resSol.data) {
+          throw new Error(
+            resSol.errorMessage || 'Error al obtener solicitudes'
+          );
+        }
+
+        // Mapear estados de solicitud por jugador objetivo
+        const estados: Record<string, 'ninguna' | 'pendiente'> = {};
+        resSol.data.forEach((sol) => {
+          const solicitud = sol as solicitudUnirseEquipo;
+          estados[solicitud.jugadorObjetivo.id] = 'pendiente';
+        });
+        console.log('Estados de solicitud:', estados);
+        setEstadosSolicitudes(estados);
+      } catch (error) {
+        console.error('Error al cargar inscripciones y solicitudes:', error);
+      }
+      setIsLodaing(false);
+    };
+
+    fetchData();
+  }, [temporada, user]);
+
+  const handleEnviarSolicitud = useCallback(
+    async (jugadorId: string) => {
+      try {
+        if (!temporada) {
+          throw new Error('No hay una temporada seleccionada');
+        }
+        console.log('Enviando solicitud para el jugador con ID:', jugadorId);
+
+        const jugador = inscripciones.find((j) => j.jugador.id === jugadorId);
+
+        if (!jugador) {
+          throw new Error('Jugador no encontrado');
+        }
+
+        const solicitud: solicitudUnirseEquipo = {
+          id: getRandomUID(),
+          tipo: 'Unirse a Equipo',
+          estado: 'pendiente',
+          fechaCreacion: new Date().toString(),
+          solicitante: {
+            id: user!.uid,
+            nombre: user!.nombre!,
+            apellidos: user!.apellidos!,
+            correo: user!.correo!,
+          },
+          jugadorObjetivo: jugador.jugador,
+        };
+
+        const res = await BaseSolicitudService.setSolicitud(
+          temporada.id,
+          solicitud.id,
+          solicitud
+        );
+        if (!res.success) {
+          throw new Error(res.errorMessage || 'Error al enviar solicitud');
+        }
+        showToast('Solicitud enviada', 'success');
+
+        setEstadosSolicitudes((prev) => ({
+          ...prev,
+          [jugador.jugador.id]: 'pendiente',
+        }));
+
+        Alert.alert(
+          'Solicitud enviada',
+          `Has enviado una solicitud al jugador con ID ${jugador.jugador.id}`,
+          [{ text: 'OK' }]
+        );
+      } catch (error) {
+        console.error('Error al enviar solicitud:', error);
+        showToast('No se pudo enviar la solicitud', 'error');
+      }
+    },
+    [temporada, user, inscripciones]
+  );
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator size='large' color={theme.text.primary} />
+      </View>
+    );
+  }
+  return (
+    <PlayerList
+      jugadores={inscripciones}
+      usuarioActualId={usuarioActualId}
+      estadosSolicitudes={estadosSolicitudes}
+      onEnviarSolicitud={handleEnviarSolicitud}
+    />
+  );
+};
+
+export default BolsaJugadoresScreen;

@@ -84,3 +84,7 @@ export const ShieldIcon = ({ size = 24, color }: IconProps) => {
 export const AddIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='plus' size={size} color={color} />;
 };
+
+export const SendIcon = ({ size = 24, color }: IconProps) => {
+  return <FontAwesome name='send' size={size} color={color} />;
+};

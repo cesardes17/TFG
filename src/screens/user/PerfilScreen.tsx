@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import StyledButton from '../../components/common/StyledButton';
 import { BolsaJugador } from '../../types/BolsaJugador';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
+import { getRandomUID } from '../../utils/getRandomUID';
 
 type accionModal = 'desinscripcion';
 
@@ -40,7 +41,7 @@ export default function PerfilScreen() {
   const handleLogout = async () => {
     try {
       await AuthService.logout();
-      router.replace('/login');
+      router.replace('/');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -55,9 +56,29 @@ export default function PerfilScreen() {
       showToast('La temporada no está abierta', 'error');
       return null;
     }
+    if (user?.role !== 'jugador') {
+      showToast('Solo los jugadores pueden inscribirse a la bolsa', 'error');
+      return null;
+    }
+    const jugadorData: BolsaJugador = {
+      id: getRandomUID(),
+      createdAt: new Date().toDateString(),
+      jugador: {
+        id: user!.uid!,
+        nombre: user!.nombre!,
+        apellidos: user!.apellidos!,
+        correo: user!.correo!,
+        dorsal: user!.dorsal!,
+        altura: user!.altura!,
+        peso: user!.peso!,
+        posicion: user!.posicion!,
+        photoURL: user!.photoURL!,
+      },
+    };
+
     const res = await bolsaJugadoresService.inscribirJugador(
-      user!.uid!,
-      temporada.id
+      temporada.id,
+      jugadorData
     );
 
     if (res.success) {
@@ -93,46 +114,22 @@ export default function PerfilScreen() {
   };
 
   const checkInscripcion = async () => {
-    if (!temporada) {
-      setInscritoBolsa({
-        inscrito: false,
-        id: '',
-      });
+    if (!temporada || !temporada.activa) {
+      setInscritoBolsa({ inscrito: false, id: '' });
       return;
     }
-    if (!temporada.activa) {
-      setInscritoBolsa({
-        inscrito: false,
-        id: '',
-      });
-      return;
-    }
+
     const res = await bolsaJugadoresService.getJugadorInscrito(
       user!.uid!,
       temporada.id
     );
 
-    if (res.success) {
-      setInscritoBolsa({
-        inscrito: true,
-        id: res.data!,
-      });
+    if (res.success && res.data) {
+      setInscritoBolsa({ inscrito: true, id: res.data.id });
     } else {
-      setInscritoBolsa({
-        inscrito: false,
-        id: '',
-      });
+      setInscritoBolsa({ inscrito: false, id: '' });
     }
   };
-
-  useEffect(() => {
-    const initCheck = async () => {
-      await checkInscripcion();
-      setIsLoading(false);
-    };
-
-    initCheck();
-  }, [user]);
 
   const handleModal = () => {
     switch (accionModal) {
@@ -144,44 +141,17 @@ export default function PerfilScreen() {
     }
     return;
   };
-
   useEffect(() => {
-    const checkInscripcion = async () => {
-      if (!temporada) {
-        setInscritoBolsa({
-          inscrito: false,
-          id: '',
-        });
-        return;
-      }
-      if (!temporada.activa) {
-        setInscritoBolsa({
-          inscrito: false,
-          id: '',
-        });
-        return;
-      }
-      const res = await bolsaJugadoresService.getJugadorInscrito(
-        user!.uid!,
-        temporada.id
-      );
-      if (res.success) {
-        setInscritoBolsa({
-          inscrito: true,
-          id: res.data!,
-        });
-      } else {
-        setInscritoBolsa({
-          inscrito: false,
-          id: '',
-        });
-      }
+    const initCheck = async () => {
+      await checkInscripcion();
 
       setIsLoading(false);
     };
 
-    checkInscripcion();
-  }, [user]); // <— añade user a la dependencia del useEffect
+    if (user && temporada) {
+      initCheck();
+    }
+  }, [user, temporada]);
 
   if (isLoading) {
     return (

@@ -38,7 +38,7 @@ export const navigationItems: NavigationItem[] = [
     id: 'bolsaJugadores',
     title: 'Bolsa de Jugadores',
     description: 'Ficha a jugadores que están listos para jugar.',
-    path: '/bolsaJugadores',
+    path: '/bolsaJugadoresMobile',
     allowedRoles: ['organizador', 'coorganizador', 'capitan'], // solo organizadores y coorganizadores
   },
 ];

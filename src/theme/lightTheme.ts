@@ -108,4 +108,26 @@ export const lightTheme: Theme = {
     rowBorder: colors.gray300, // Separadores suaves
     rowText: colors.gray900, // Texto negro
   },
+  button: {
+    primary: {
+      background: colors.primary500,
+      border: colors.primary700,
+      text: colors.white,
+    },
+    outline: {
+      background: colors.transparent,
+      border: colors.primary700,
+      text: colors.primary700,
+    },
+    error: {
+      background: colors.error.background,
+      border: colors.error.border,
+      text: colors.white,
+    },
+    disabled: {
+      background: colors.gray300,
+      border: colors.gray400,
+      text: colors.gray600,
+    },
+  },
 };

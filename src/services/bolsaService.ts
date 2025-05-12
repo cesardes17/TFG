@@ -7,20 +7,37 @@ import { temporadaService } from './temporadaService';
 const COLLECTION = 'bolsaJugadores';
 
 export const bolsaJugadoresService = {
-  getJugadoresInscritos: async (idTemporada: string) => {
-    console.warn('No implmentado todavia');
+  getJugadoresInscritos: async (
+    temporadaID: string
+  ): Promise<ResultService<BolsaJugador[]>> => {
+    try {
+      const path = ['temporadas', temporadaID, COLLECTION];
+      const res = await FirestoreService.getCollectionByPath(...path);
+      if (!res.success || !res.data) {
+        throw new Error(
+          res.errorMessage || 'Error al obtener los jugadores inscritos'
+        );
+      }
+      return {
+        success: true,
+        data: res.data as BolsaJugador[],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener jugadores inscritos de la Bolsa',
+      };
+    }
   },
 
   inscribirJugador: async (
-    idJugador: string,
-    idTemporada: string
+    idTemporada: string,
+    payload: BolsaJugador
   ): Promise<ResultService<BolsaJugador>> => {
     try {
-      const payload: BolsaJugador = {
-        id: getRandomUID(),
-        idJugador: idJugador,
-        createdAt: new Date().toISOString(),
-      };
       const path = ['temporadas', idTemporada, COLLECTION, payload.id];
 
       const res = await FirestoreService.setDocumentByPath(...path, payload);
@@ -40,7 +57,7 @@ export const bolsaJugadoresService = {
   getJugadorInscrito: async (
     userId: string,
     temporadaId: string
-  ): Promise<ResultService<string>> => {
+  ): Promise<ResultService<BolsaJugador>> => {
     try {
       const path = ['temporadas', temporadaId, COLLECTION];
       const res =
@@ -54,7 +71,7 @@ export const bolsaJugadoresService = {
         throw new Error(res.errorMessage || 'Error al inscribir jugador');
       }
 
-      return { success: true, data: res.data[0].id };
+      return { success: true, data: res.data[0] };
     } catch (error) {
       return {
         success: false,

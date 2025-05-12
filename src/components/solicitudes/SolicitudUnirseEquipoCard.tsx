@@ -38,8 +38,9 @@ const SolicitudEquipo: React.FC<Props> = ({
     respuestaAdmin,
   } = solicitud;
   const { theme } = useTheme();
+
   const formatearFecha = (fecha: string) => {
-    return format(new Date(fecha), "d 'de' MMMM 'de' yyyy", { locale: es });
+    return format(new Date(fecha), 'dd/MM/yy');
   };
 
   const esJugadorObjetivo = usuarioActual.id === jugadorObjetivo.id;
@@ -78,10 +79,13 @@ const SolicitudEquipo: React.FC<Props> = ({
 
   const estiloSeccion = (sinBorde = false) => [
     styles.seccion,
-    sinBorde && {
-      borderBottomWidth: 0,
-      marginBottom: 0,
-      paddingBottom: 0,
+    {
+      borderColor: theme.border.primary,
+      ...(sinBorde && {
+        borderBottomWidth: 0,
+        marginBottom: 0,
+        paddingBottom: 0,
+      }),
     },
   ];
 
@@ -112,11 +116,18 @@ const SolicitudEquipo: React.FC<Props> = ({
           size='small'
           style={styles.fechaCreacion}
         >
-          Creada el {formatearFecha(fechaCreacion)}
+          Solicitud de unirse al equipo
+        </StyledText>
+        <StyledText
+          variant='secondary'
+          size='small'
+          style={styles.fechaCreacion}
+        >
+          {formatearFecha(fechaCreacion)}
         </StyledText>
       </View>
 
-      <View style={styles.seccion}>
+      <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Jugador
         </StyledText>
@@ -148,7 +159,7 @@ const SolicitudEquipo: React.FC<Props> = ({
         </View>
       </View>
 
-      <View style={styles.seccion}>
+      <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Equipo
         </StyledText>
@@ -177,7 +188,12 @@ const SolicitudEquipo: React.FC<Props> = ({
         </View>
       </View>
 
-      <View style={styles.bloqueAccionesFooter}>
+      <View
+        style={[
+          styles.bloqueAccionesFooter,
+          { borderTopColor: theme.border.primary },
+        ]}
+      >
         {estado === 'pendiente' ? (
           puedeResponder ? (
             <View style={styles.botonesAccion}>
@@ -307,7 +323,6 @@ const styles = StyleSheet.create({
   tituloSeccion: {
     fontSize: 14,
     fontWeight: 'bold',
-
     marginBottom: 8,
   },
   infoJugador: {
@@ -337,7 +352,6 @@ const styles = StyleSheet.create({
   },
   dorsal: {
     fontSize: 14,
-
     marginTop: 4,
   },
   infoEquipo: {
@@ -353,9 +367,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  infoSolicitante: {
-    // Estilos para la información del solicitante
-  },
+  infoSolicitante: {},
   bloqueAccionesFooter: {
     marginTop: 16,
     paddingTop: 16,
@@ -373,20 +385,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     alignItems: 'center',
   },
-  botonAceptar: {
-    backgroundColor: '#4CAF50',
-  },
-  botonRechazar: {
-    backgroundColor: '#F44336',
-  },
-  textoBotonAceptar: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  textoBotonRechazar: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
   esperandoRespuesta: {
     textAlign: 'center',
     color: '#666',
@@ -394,7 +392,6 @@ const styles = StyleSheet.create({
   },
   infoResolucion: {
     padding: 12,
-
     borderRadius: 8,
   },
   textoInfoResolucion: {

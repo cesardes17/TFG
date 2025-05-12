@@ -32,6 +32,7 @@ export default async function registrationHelper(
         'fotos_jugadores',
         user.photoURL
       );
+      console.log('URL: ', storageRes);
       if (!storageRes.success || !storageRes.data) {
         throw new Error(storageRes.errorMessage || 'Error al subir la imagen');
       }

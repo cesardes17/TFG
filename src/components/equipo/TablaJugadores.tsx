@@ -37,7 +37,7 @@ const TableHeader = () => {
     >
       <View style={styles.photoContainer}>
         <Text style={[styles.headerText, { color: theme.table.headerText }]}>
-          Photo
+          Foto
         </Text>
       </View>
       <View style={styles.dorsalContainer}>
@@ -47,7 +47,7 @@ const TableHeader = () => {
       </View>
       <View style={styles.infoContainer}>
         <Text style={[styles.headerText, { color: theme.table.headerText }]}>
-          Player Info
+          Jugador
         </Text>
       </View>
     </View>

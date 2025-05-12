@@ -37,7 +37,7 @@ export default function SolicitudesList({
         return (
           <SolicitudCrearEquipoCard
             solicitud={item as solicitudCrearEquipo}
-            esAdmin={esAdmin}
+            usuarioActual={userActual}
             onAceptar={onAceptar}
             onRechazar={onRechazar}
           />

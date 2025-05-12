@@ -1,4 +1,5 @@
 // src/services/storageService.ts
+import { Platform } from 'react-native';
 import { uploadFileFS, deleteFileFS } from '../../api/storageFirebase';
 import type { ResultService } from '../../types/ResultService';
 import { getRandomUID } from '../../utils/getRandomUID';
@@ -19,19 +20,17 @@ export const StorageService = {
     file: Blob | File | string
   ): Promise<ResultService<string>> => {
     try {
-      // 1) Extrae extensión a partir de la ruta original (fallback a jpg)
+      const preparedFile = await prepareUploadData(file);
+
+      // Extrae extensión (solo si es string o File con nombre)
       const uri = typeof file === 'string' ? file : (file as File).name ?? '';
       const extMatch = /\.(jpg|jpeg|png|gif)$/i.exec(uri);
       const extension = extMatch ? extMatch[1] : 'jpg';
 
-      // 2) Genera nombre único
       const fileName = `${getRandomUID()}.${extension}`;
-
-      // 3) Construye ruta remota: "folder/fileName"
       const remotePath = `${folder.replace(/\/+$/, '')}/${fileName}`;
 
-      // 4) Llama al helper de bajo nivel
-      const downloadUrl = await uploadFileFS(remotePath, file);
+      const downloadUrl = await uploadFileFS(remotePath, preparedFile);
 
       return { success: true, data: downloadUrl };
     } catch (error: any) {
@@ -41,7 +40,6 @@ export const StorageService = {
       };
     }
   },
-
   /**
    * Elimina un archivo de Firebase Storage
    * @param url - url del archivo a eliminar
@@ -69,3 +67,14 @@ export const StorageService = {
     }
   },
 };
+
+async function prepareUploadData(
+  file: Blob | File | string
+): Promise<Blob | File | string> {
+  if (Platform.OS === 'web' && typeof file === 'string') {
+    const response = await fetch(file);
+    const blob = await response.blob();
+    return blob;
+  }
+  return file;
+}

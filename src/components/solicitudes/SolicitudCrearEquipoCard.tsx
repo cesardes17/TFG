@@ -1,256 +1,322 @@
-// src/components/solicitudes/SolicitudCrearEquipoCard.tsx
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { format } from 'date-fns';
+import { solicitudCrearEquipo } from '../../types/Solicitud';
+import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import type { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
-import { ShieldIcon } from '../Icons';
 import ProgressiveImage from '../common/ProgressiveImage';
 
-type Props = {
+interface Props {
   solicitud: solicitudCrearEquipo;
-  esAdmin?: boolean;
-  onAceptar?: (id: string) => void;
-  onRechazar?: (id: string) => void;
-};
+  usuarioActual: {
+    id: string;
+    esAdmin?: boolean;
+  };
+  onAceptar: (id: string) => void;
+  onRechazar: (id: string) => void;
+}
 
-export default function SolicitudCrearEquipoCard({
+const SolicitudCrearEquipo: React.FC<Props> = ({
   solicitud,
-  esAdmin = false,
+  usuarioActual,
   onAceptar,
   onRechazar,
-}: Props) {
+}) => {
+  const {
+    nombreEquipo,
+    escudoUrl,
+    solicitante,
+    estado,
+    fechaCreacion,
+    admin,
+    fechaRespuestaAdmin,
+    respuestaAdmin,
+    id,
+  } = solicitud;
   const { theme } = useTheme();
-  const [estado, setEstado] = useState(solicitud.estado);
 
-  const formatearFecha = (fechaStr: string) =>
-    new Date(fechaStr).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  const handleAceptar = () => {
-    onAceptar?.(solicitud.id);
-  };
-  const handleRechazar = () => {
-    onRechazar?.(solicitud.id);
-  };
-  const getBadgeStyle = () => {
-    switch (estado) {
-      case 'aceptada':
-        return {
-          borderColor: theme.border.success,
-          backgroundColor: theme.background.success,
-        };
-      case 'rechazada':
-        return {
-          borderColor: theme.border.error,
-          backgroundColor: theme.background.error,
-        };
-      default:
-        return {
-          borderColor: theme.border.warning,
-          backgroundColor: theme.background.warning,
-        };
-    }
+  const formatearFecha = (fecha: string) => {
+    return format(new Date(fecha), 'dd/MM/yy');
   };
 
-  const badgeStyle = getBadgeStyle();
+  const esAdmin = usuarioActual.esAdmin === true;
+  const puedeResponder =
+    estado === 'pendiente' && esAdmin && !fechaRespuestaAdmin;
+
+  const estiloSeccion = (sinBorde = false) => [
+    styles.seccion,
+    { borderColor: theme.border.primary },
+    sinBorde && {
+      borderBottomWidth: 0,
+      marginBottom: 0,
+      paddingBottom: 0,
+    },
+  ];
+
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.cardDefault,
-          borderColor: theme.border.primary,
-        },
-      ]}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <ShieldIcon size={24} color={theme.text.primary} />
-          <StyledText variant='primary' style={styles.title}>
-            {solicitud.tipo}
+    <View style={[styles.tarjeta, { backgroundColor: theme.cardDefault }]}>
+      <View style={styles.cabecera}>
+        <View
+          style={[
+            styles.estadoBadge,
+            {
+              backgroundColor: theme.background[
+                estado === 'pendiente'
+                  ? 'warning'
+                  : estado === 'aceptada'
+                  ? 'success'
+                  : 'error'
+              ] as string,
+            },
+          ]}
+        >
+          <StyledText variant='light' size='small' style={styles.estadoTexto}>
+            {estado.charAt(0).toUpperCase() + estado.slice(1)}
           </StyledText>
         </View>
-        <View style={[styles.badge, badgeStyle]}>
-          <StyledText size='small' style={styles.badgeText}>
-            {estado.toUpperCase()}
-          </StyledText>
-        </View>
+        <StyledText
+          variant='secondary'
+          size='small'
+          style={styles.fechaCreacion}
+        >
+          Crear equipo
+        </StyledText>
+        <StyledText
+          variant='secondary'
+          size='small'
+          style={styles.fechaCreacion}
+        >
+          {formatearFecha(fechaCreacion)}
+        </StyledText>
       </View>
 
-      {/* Body */}
-      <View style={styles.body}>
-        <View style={styles.teamRow}>
-          <StyledText variant='primary' style={styles.teamName}>
-            {solicitud.nombreEquipo}
-          </StyledText>
+      <View style={estiloSeccion()}>
+        <StyledText variant='secondary' style={styles.tituloSeccion}>
+          Equipo
+        </StyledText>
+        <View style={styles.infoEquipo}>
           <ProgressiveImage
-            uri={solicitud.escudoUrl}
-            containerStyle={styles.escudo}
+            uri={escudoUrl || 'https://via.placeholder.com/40'}
+            containerStyle={styles.escudoEquipo}
           />
-        </View>
-        <View>
-          <StyledText variant='secondary' size='small' style={styles.label}>
-            Solicitado por:
+          <StyledText variant='primary' style={styles.nombreEquipo}>
+            {nombreEquipo}
           </StyledText>
-          <StyledText variant='primary' size='small' style={styles.solicitante}>
-            {solicitud.solicitante.nombre +
-              ' ' +
-              solicitud.solicitante.apellidos}
-          </StyledText>
-          <StyledText variant='secondary' size='small' style={styles.date}>
-            {formatearFecha(solicitud.fechaCreacion)}
-          </StyledText>
+          <View style={styles.contenedorIconoEstado}>
+            {estado === 'pendiente' ? (
+              <ClockCircleOIcon size={24} color={theme.background.warning} />
+            ) : estado === 'aceptada' ? (
+              <CircleCheckIcon size={24} color={theme.background.success} />
+            ) : (
+              <CloseCircleoIcon size={24} color={theme.background.error} />
+            )}
+          </View>
         </View>
       </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        {esAdmin && estado === 'pendiente' ? (
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.rejectButton,
-                { backgroundColor: theme.background.error },
-              ]}
-              onPress={handleRechazar}
-            >
-              <StyledText style={styles.buttonText}>Rechazar</StyledText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.acceptButton,
-                { backgroundColor: theme.background.success },
-              ]}
-              onPress={handleAceptar}
-            >
-              <StyledText style={styles.buttonText}>Aceptar</StyledText>
-            </TouchableOpacity>
+      <View style={estiloSeccion(true)}>
+        <StyledText variant='secondary' style={styles.tituloSeccion}>
+          Solicitante
+        </StyledText>
+        <View style={styles.infoSolicitante}>
+          <ProgressiveImage
+            uri={solicitante.photoURL || ''}
+            containerStyle={styles.fotoSolicitante}
+          />
+          <View style={styles.datosSolicitante}>
+            <StyledText variant='primary' style={styles.nombreCompleto}>
+              {solicitante.nombre} {solicitante.apellidos}
+            </StyledText>
+            <StyledText variant='secondary' style={styles.correo}>
+              {solicitante.correo}
+            </StyledText>
+            <StyledText variant='secondary' style={styles.dorsal}>
+              Dorsal propuesto: {solicitante.dorsal}
+            </StyledText>
           </View>
+        </View>
+      </View>
+
+      <View
+        style={[
+          styles.bloqueAccionesFooter,
+          { borderTopColor: theme.border.primary },
+        ]}
+      >
+        {estado === 'pendiente' ? (
+          puedeResponder ? (
+            <View style={styles.botonesAccion}>
+              <TouchableOpacity
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.button.primary.background },
+                ]}
+                onPress={() => onAceptar(id)}
+              >
+                <StyledText variant='light'>Aceptar</StyledText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.boton,
+                  { backgroundColor: theme.button.error.background },
+                ]}
+                onPress={() => onRechazar(id)}
+              >
+                <StyledText variant='light'>Rechazar</StyledText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
+              Esperando respuesta
+            </StyledText>
+          )
         ) : (
-          <StyledText
-            variant={
-              estado === 'pendiente'
-                ? 'warning'
-                : estado === 'aceptada'
-                ? 'success'
-                : 'error'
-            }
-            size='small'
-            style={styles.infoText}
+          <View
+            style={[
+              styles.infoResolucion,
+              { backgroundColor: theme.background.primary },
+            ]}
           >
-            {estado === 'pendiente'
-              ? 'Esperando respuesta…'
-              : `Solicitud ${
-                  estado === 'aceptada' ? 'aceptada' : 'rechazada'
-                } por ${
-                  solicitud.admin?.nombre + ' ' + solicitud.admin?.nombre
-                } el ${
-                  solicitud.fechaRespuestaAdmin
-                    ? formatearFecha(solicitud.fechaRespuestaAdmin)
-                    : ''
-                }\n Motivo: ${
-                  solicitud.respuestaAdmin
-                }\n Para mas información contacta con ${
-                  solicitud.admin?.correo
-                }`}
-          </StyledText>
+            {fechaRespuestaAdmin && (
+              <StyledText style={styles.textoInfoResolucion}>
+                Resuelta el {formatearFecha(fechaRespuestaAdmin)}
+              </StyledText>
+            )}
+            {admin && (
+              <StyledText style={styles.textoInfoResolucion}>
+                Respondida por {admin.nombre} {admin.apellidos} ({admin.correo})
+              </StyledText>
+            )}
+            {estado === 'rechazada' && respuestaAdmin && (
+              <StyledText style={styles.textoMotivoRechazo}>
+                Motivo del rechazo: {respuestaAdmin}
+              </StyledText>
+            )}
+          </View>
         )}
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  card: {
-    width: '100%',
+  tarjeta: {
     borderRadius: 12,
-    marginVertical: 8,
     padding: 16,
-    elevation: 2,
-    borderWidth: 1,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-
-  header: {
+  cabecera: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  iconPlaceholder: { fontSize: 20, marginRight: 8 },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  badge: {
+  estadoBadge: {
+    paddingHorizontal: 12,
     paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 16,
   },
-  badgePending: {
-    borderWidth: 1,
-  },
-  badgeAccepted: {
-    borderWidth: 1,
-  },
-  badgeRejected: {
-    borderWidth: 1,
-  },
-  badgeText: {
+  estadoTexto: {
+    fontWeight: 'bold',
     fontSize: 12,
-    fontWeight: '700',
   },
-
-  body: {
-    marginTop: 12,
+  fechaCreacion: {
+    fontSize: 12,
+  },
+  seccion: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+  },
+  tituloSeccion: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  infoEquipo: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
   },
-  teamRow: { flexDirection: 'column', alignItems: 'center', marginBottom: 8 },
-  escudo: { width: 100, height: 100, borderRadius: 20, marginTop: 12 },
-  teamName: { fontSize: 16, fontWeight: '600' },
-  label: { fontSize: 12, marginBottom: 2 },
-  solicitante: { fontSize: 14, marginBottom: 2 },
-  date: { fontSize: 12 },
-
-  footer: { marginTop: 16 },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+  escudoEquipo: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+  },
+  nombreEquipo: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  contenedorIconoEstado: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoSolicitante: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fotoSolicitante: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  datosSolicitante: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  nombreCompleto: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  correo: {
+    fontSize: 14,
+  },
+  dorsal: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  bloqueAccionesFooter: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+  },
+  botonesAccion: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  boton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  esperandoRespuesta: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  infoResolucion: {
+    padding: 12,
     borderRadius: 8,
   },
-  acceptButton: {
-    // Remove theme reference from here
-    backgroundColor: 'transparent', // Will be overridden in component
-  },
-  rejectButton: {
-    // Remove theme reference from here
-    backgroundColor: 'transparent', // Will be overridden in component
-  },
-  buttonText: {
+  textoInfoResolucion: {
     fontSize: 14,
-    fontWeight: '600',
+    marginBottom: 4,
   },
-  infoText: {
-    fontSize: 12,
-    textAlign: 'center',
+  textoMotivoRechazo: {
+    fontSize: 14,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });
+
+export default SolicitudCrearEquipo;

@@ -4,9 +4,9 @@ export async function compressImage(uri: string): Promise<string> {
   try {
     const result = await ImageManipulator.manipulateAsync(
       uri,
-      [], // no redimensionamos aquí, solo comprimimos
+      [{ resize: { width: 1000 } }], // ← usa al menos una acción, nunca []
       {
-        compress: 0.5, // rango 0 (máxima compresión) a 1 (sin compresión)
+        compress: 0.5,
         format: ImageManipulator.SaveFormat.JPEG,
       }
     );

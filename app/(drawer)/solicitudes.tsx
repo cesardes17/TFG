@@ -11,12 +11,13 @@ export default function SolicitudesPage() {
     if (loading) {
       return;
     }
-    if (user) {
-      return router.replace('/');
+
+    if (!user) {
+      return router.replace('/login');
     }
   }, [loading, user]);
 
-  if (loading) {
+  if (loading || !user) {
     return null;
   }
 

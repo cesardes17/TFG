@@ -41,5 +41,12 @@ export type solicitudUnirseEquipo = baseSolicitud & {
     dorsal: number;
   };
   fechaRespuestaJugador?: string;
+  motivoRespuestaJugador?: string;
+  aprobadoJugador?: boolean;
+  equipoObjetivo: {
+    id: string;
+    nombre: string;
+    escudoUrl: string;
+  };
 };
 export type Solicitud = solicitudCrearEquipo | solicitudUnirseEquipo;

@@ -9,13 +9,13 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import type { Solicitud } from '../../types/Solicitud';
+import type { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import { ShieldIcon } from '../Icons';
 import ProgressiveImage from '../common/ProgressiveImage';
 
 type Props = {
-  solicitud: Solicitud;
+  solicitud: solicitudCrearEquipo;
   esAdmin?: boolean;
   onAceptar?: (id: string) => void;
   onRechazar?: (id: string) => void;

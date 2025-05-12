@@ -10,6 +10,8 @@ import { useUser } from '../contexts/UserContext';
 import { BaseSolicitudService } from '../services/solicitudesService';
 import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { equipoService } from '../services/equipoService';
+import { PlayerProfile } from '../types/User';
 
 const BolsaJugadoresScreen = () => {
   const { temporada } = useTemporadaContext();
@@ -62,7 +64,6 @@ const BolsaJugadoresScreen = () => {
           const solicitud = sol as solicitudUnirseEquipo;
           estados[solicitud.jugadorObjetivo.id] = 'pendiente';
         });
-        console.log('Estados de solicitud:', estados);
         setEstadosSolicitudes(estados);
       } catch (error) {
         console.error('Error al cargar inscripciones y solicitudes:', error);
@@ -87,6 +88,17 @@ const BolsaJugadoresScreen = () => {
           throw new Error('Jugador no encontrado');
         }
 
+        //obtener equipo del usuario actual(tiene equipo por ser capitan)
+
+        const equipo = await equipoService.getEquipo(
+          temporada.id,
+          (user as PlayerProfile).equipo!.id
+        );
+
+        if (!equipo.success || !equipo.data) {
+          throw new Error(equipo.errorMessage || 'Equipo no encontrado');
+        }
+
         const solicitud: solicitudUnirseEquipo = {
           id: getRandomUID(),
           tipo: 'Unirse a Equipo',
@@ -99,6 +111,11 @@ const BolsaJugadoresScreen = () => {
             correo: user!.correo!,
           },
           jugadorObjetivo: jugador.jugador,
+          equipoObjetivo: {
+            id: equipo.data.id,
+            escudoUrl: equipo.data.escudoUrl,
+            nombre: equipo.data.nombre,
+          },
         };
 
         const res = await BaseSolicitudService.setSolicitud(

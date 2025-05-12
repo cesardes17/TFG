@@ -12,7 +12,7 @@ import {
 
 interface ProgressiveImageProps extends Partial<ImageProps> {
   uri: string;
-  containerStyle?: ViewStyle;
+  containerStyle?: ViewStyle | ViewStyle[];
   imageStyle?: ImageStyle;
 }
 

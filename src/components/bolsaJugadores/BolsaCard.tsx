@@ -38,9 +38,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   usuarioActualId,
 }) => {
   const { theme } = useTheme();
-  console.log('Usuario Actual: ', usuarioActualId);
-  console.log('Jugador: ', jugador);
-  console.log('Solicitud enviada: ', solicitudEnviada);
   if (usuarioActualId === jugador.id) return null;
 
   return (
@@ -87,13 +84,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
           disabled={solicitudEnviada}
         >
           {solicitudEnviada ? (
-            <CircleCheckIcon size={20} color={theme.text.light} />
+            <CircleCheckIcon size={20} color={theme.text.primary} />
           ) : (
-            <SendIcon size={20} color={theme.text.light} />
+            <SendIcon size={20} color={theme.text.primary} />
           )}
           <StyledText
             style={{
-              color: solicitudEnviada ? theme.text.secondary : theme.text.light,
+              color: theme.text.primary,
               fontWeight: '600',
             }}
           >

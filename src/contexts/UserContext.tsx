@@ -16,11 +16,13 @@ interface UserContextValue {
   user: User | null; // ahora usa User (PlayerUser u OtherUser)
   loading: boolean;
   error?: string;
+  refetchUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
   user: null,
   loading: true,
+  refetchUser: async () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -28,7 +30,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
 
-  // Dentro de UserProvider, tras recibir fbUser...
   const loadUserProfile = async (uid: string) => {
     const MAX_RETRIES = 10;
     let retries = 0;
@@ -39,14 +40,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(result.data);
         return;
       }
-      // Espera 500 ms antes de reintentar
       await new Promise((r) => setTimeout(r, 500));
       retries++;
     } while (retries < MAX_RETRIES);
 
-    // Si tras los reintentos sigue sin data:
     console.error('Perfil de usuario no encontrado tras registro:', uid);
     setUser(null);
+  };
+
+  const refetchUser = async () => {
+    if (!user?.uid) return;
+    await loadUserProfile(user.uid); // ✅ Recargar desde Firestore
   };
 
   useEffect(() => {
@@ -56,7 +60,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
-      // en lugar de llamar una sola vez:
       await loadUserProfile(fbUser.uid);
       setLoading(false);
     });
@@ -64,7 +67,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, error }}>
+    <UserContext.Provider value={{ user, loading, error, refetchUser }}>
       {children}
     </UserContext.Provider>
   );

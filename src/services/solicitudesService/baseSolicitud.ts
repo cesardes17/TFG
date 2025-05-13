@@ -11,6 +11,7 @@ import {
 import type { ResultService } from '../../types/ResultService';
 import type { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
 import { StorageService } from '../core/storageService';
+import { User } from '../../types/User';
 
 export const BaseSolicitudService = {
   /** Listar todas las solicitudes de una subcolección: temporadas/{id}/solicitudes */
@@ -105,6 +106,57 @@ export const BaseSolicitudService = {
       return {
         success: false,
         errorMessage: err.message || 'Error al obtener solicitudes',
+      };
+    }
+  },
+  // BaseSolicitudService.ts
+
+  rechazarSolicitudesPendientes: async (
+    temporadaId: string,
+    jugadorId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const filtros: [string, WhereFilterOp, any][] = [
+        ['tipo', '==', 'Unirse a Equipo'],
+        ['estado', '==', 'pendiente'],
+        ['jugadorObjetivo.id', '==', jugadorId],
+      ];
+
+      const res = await BaseSolicitudService.getSolicitudesWithFilters(
+        temporadaId,
+        filtros,
+        []
+      );
+
+      if (!res.success || !res.data) {
+        throw new Error(
+          res.errorMessage ||
+            'No se pudieron obtener las solicitudes pendientes'
+        );
+      }
+
+      for (const solicitud of res.data) {
+        const actualizada = {
+          ...solicitud,
+          estado: 'rechazada' as const,
+          fechaRespuestaAdmin: new Date().toISOString(),
+          respuestaAdmin: 'Solicitud rechazada automáticamente',
+        };
+        await BaseSolicitudService.setSolicitud(
+          temporadaId,
+          solicitud.id,
+          actualizada
+        );
+      }
+
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al rechazar solicitudes pendientes',
       };
     }
   },

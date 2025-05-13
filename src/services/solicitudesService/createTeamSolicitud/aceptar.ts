@@ -75,7 +75,17 @@ export const aceptarCrearEquipoSolicitud = async (
     if (!resUser.success) {
       throw new Error(resUser.errorMessage || 'Error al actualizar el usuario');
     }
-
+    const resRechazar =
+      await BaseSolicitudService.rechazarSolicitudesPendientes(
+        temporadaId,
+        data.solicitante.id
+      );
+    if (!resRechazar.success) {
+      throw new Error(
+        resRechazar.errorMessage ||
+          'Error al rechazar las solicitudes pendientes'
+      );
+    }
     return {
       success: true,
       data: resSol.data,

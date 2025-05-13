@@ -1,4 +1,4 @@
-// src/screens/NuevaSolicitudForm.tsx
+// src/components/forms/solicitud/NuevaSolicitudForm.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -23,31 +23,26 @@ import { router } from 'expo-router';
 import { useUser } from '../../../contexts/UserContext';
 import { PlayerProfile } from '../../../types/User';
 
-type SolicitudTipo = 'createTeam' | 'joinTeam' | 'leaveTeam' | 'dissolveTeam';
+export type SolicitudTipo = 'createTeam' | 'leaveTeam' | 'dissolveTeam';
 
-const opciones: { label: string; description: string; value: SolicitudTipo }[] =
-  [
-    {
-      label: 'Crear equipo',
-      description: 'Solicita un nuevo equipo',
-      value: 'createTeam',
-    },
-    {
-      label: 'Unirse a equipo',
-      description: 'Pide unirte a un equipo existente',
-      value: 'joinTeam',
-    },
-    {
-      label: 'Salir de equipo',
-      description: 'Solicita abandonar tu equipo',
-      value: 'leaveTeam',
-    },
-    {
-      label: 'Disolver equipo',
-      description: 'Propón disolver un equipo',
-      value: 'dissolveTeam',
-    },
-  ];
+const opcionesBase = {
+  createTeam: {
+    label: 'Crear equipo',
+    description: 'Solicita un nuevo equipo',
+  },
+  leaveTeam: {
+    label: 'Salir de equipo',
+    description: 'Solicita abandonar tu equipo',
+  },
+  dissolveTeam: {
+    label: 'Disolver equipo',
+    description: 'Propón disolver un equipo',
+  },
+};
+
+interface Props {
+  opcionesPermitidas: SolicitudTipo[];
+}
 
 interface FormValues {
   teamName?: string;
@@ -57,7 +52,7 @@ interface FormValues {
   teamLogo?: string;
 }
 
-export default function NuevaSolicitudForm() {
+export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
   const { temporada } = useTemporadaContext();
   const { theme } = useTheme();
   const { showToast } = useToast();
@@ -71,12 +66,8 @@ export default function NuevaSolicitudForm() {
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      // TODO: Implement the actual submission logic based on the tipo
-      console.log('Form submitted:', { tipo, values });
-
-      // You can add your API calls here based on the tipo
       switch (tipo) {
-        case 'createTeam':
+        case 'createTeam': {
           const createTeamSolicitud: solicitudCrearEquipo = {
             id: getRandomUID(),
             estado: 'pendiente',
@@ -101,24 +92,14 @@ export default function NuevaSolicitudForm() {
           );
 
           if (!res.success || !res.data) {
-            throw new Error(res.errorMessage || 'Error creating team');
+            throw new Error(res.errorMessage || 'Error creando solicitud');
           }
           showToast('Solicitud enviada', 'success');
-
           router.back();
-
           break;
-        case 'joinTeam':
-          // Handle join team
-          break;
-        case 'leaveTeam':
-          // Handle leave team
-          break;
-        case 'dissolveTeam':
-          // Handle dissolve team
-          break;
+        }
         default:
-          throw new Error('Invalid request type');
+          break;
       }
     } catch (err) {
       setError((err as Error).message);
@@ -179,6 +160,12 @@ export default function NuevaSolicitudForm() {
       </View>
     );
   }
+
+  const opciones = opcionesPermitidas.map((key) => ({
+    label: opcionesBase[key].label,
+    description: opcionesBase[key].description,
+    value: key,
+  }));
 
   return (
     <>
@@ -266,7 +253,6 @@ export default function NuevaSolicitudForm() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  inner: { padding: 16 },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -275,26 +261,15 @@ const styles = StyleSheet.create({
   },
   form: { marginTop: 16 },
   label: { fontSize: 16, marginBottom: 8 },
-  input: { borderWidth: 1, borderRadius: 6, padding: 8, marginBottom: 16 },
-  footer: { padding: 16 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
   headerSection: {
     width: '100%',
     paddingHorizontal: 16,
     paddingTop: 16,
     alignItems: 'center',
   },
-  formSection: {
-    padding: 16,
-  },
-  footerSection: {
-    padding: 16,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-  },
+  formSection: { padding: 16 },
+  footerSection: { padding: 16 },
+  buttonContainer: { flexDirection: 'row', justifyContent: 'center', gap: 12 },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -303,17 +278,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 120,
   },
-  backButton: {
-    backgroundColor: 'transparent',
-  },
-  nextButton: {
-    flex: 1,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  progress: {
-    fontSize: 14,
-  },
+  backButton: { backgroundColor: 'transparent' },
+  nextButton: { flex: 1 },
+  buttonText: { fontSize: 16, fontWeight: 'bold' },
+  progress: { fontSize: 14 },
 });

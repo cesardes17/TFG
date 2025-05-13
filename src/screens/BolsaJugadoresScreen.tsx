@@ -109,6 +109,7 @@ const BolsaJugadoresScreen = () => {
             nombre: user!.nombre!,
             apellidos: user!.apellidos!,
             correo: user!.correo!,
+            photoURL: (user as PlayerProfile).photoURL,
           },
           jugadorObjetivo: jugador.jugador,
           equipoObjetivo: {

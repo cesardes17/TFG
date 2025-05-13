@@ -85,7 +85,6 @@ export const aceptarUnirseEquipoSolicitud = async (
         );
       }
       //Eliminar jugador de la bolsa de jugadores
-
       const resBolsa = await bolsaJugadoresService.deleteJugadorInscrito(
         temporadaId,
         solicitud.jugadorObjetivo.id
@@ -110,6 +109,20 @@ export const aceptarUnirseEquipoSolicitud = async (
       if (!resJugador.success) {
         throw new Error(
           resJugador.errorMessage || 'Error al actualizar el jugador'
+        );
+      }
+
+      //rechazamos la solicitudes pendientes del jugador (Unirse a equipo)
+      const resRechazar =
+        await BaseSolicitudService.rechazarSolicitudesPendientes(
+          temporadaId,
+          solicitud.jugadorObjetivo.id
+        );
+
+      if (!resRechazar.success) {
+        throw new Error(
+          resRechazar.errorMessage ||
+            'Error al rechazar las solicitudes pendientes'
         );
       }
     }

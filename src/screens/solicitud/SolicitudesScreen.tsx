@@ -11,6 +11,7 @@ import {
   Solicitud,
   solicitudCrearEquipo,
   solicitudUnirseEquipo,
+  tipoSolicitud,
 } from '../../types/Solicitud';
 import {
   aceptarCrearEquipoSolicitud,
@@ -27,6 +28,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { rechazarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/rechazar';
 import { aceptarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/aceptar';
 import { inscripcionesService } from '../../services/inscripcionesService';
+import { WhereFilterOp } from 'firebase/firestore';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
@@ -41,7 +43,9 @@ export default function SolicitudesScreen() {
   const [inputError, setInputError] = useState(false);
   const [dorsalInput, setDorsalInput] = useState('');
   const [dorsalesOcupados, setDorsalesOcupados] = useState<number[]>([]);
-
+  const [estadoSolMostrar, setEstadoSolMostrar] = useState<
+    'aceptada' | 'pendiente' | 'rechazada' | 'todos'
+  >('todos');
   const isAdmin =
     user?.role === 'coorganizador' || user?.role === 'organizador';
 
@@ -50,7 +54,26 @@ export default function SolicitudesScreen() {
       if (!temporada) return;
 
       const fetchSolicitudes = async () => {
-        const res = await BaseSolicitudService.getSolicitudes(temporada.id);
+        let andFilters: [string, WhereFilterOp, any][] = [];
+        let orFilters: [string, WhereFilterOp, any][] = [];
+
+        if (estadoSolMostrar !== 'todos') {
+          andFilters = [['estado', '==', estadoSolMostrar]];
+        }
+
+        if (!isAdmin) {
+          orFilters = [
+            ['solicitante.id', '==', user?.uid],
+            ['jugadorObjetivo.id', '==', user?.uid],
+            ['capitanObjetivo.id', '==', user?.uid],
+          ];
+        }
+
+        const res = await BaseSolicitudService.getSolicitudesWithFilters(
+          temporada.id,
+          andFilters,
+          orFilters
+        );
         if (res.success && res.data) {
           setSolicitudes(res.data);
         }
@@ -94,10 +117,11 @@ export default function SolicitudesScreen() {
       setInputError(true);
       return;
     }
-
+    console.log('handleConfirm - ', solicitud);
     switch (solicitud.tipo) {
       case 'Crear Equipo': {
         if (modalType === 'update') {
+          console.log('Aceptar Crear Equipo');
           const aceptacionData: solicitudCrearEquipo = {
             ...(solicitud as solicitudCrearEquipo),
             id: selectedId,

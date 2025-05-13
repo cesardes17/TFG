@@ -1,4 +1,4 @@
-type tipoSolicitud =
+export type tipoSolicitud =
   | 'Crear Equipo'
   | 'Unirse a Equipo'
   | 'Salir de Equipo'
@@ -56,5 +56,29 @@ export type solicitudUnirseEquipo = baseSolicitud & {
     nombre: string;
     escudoUrl: string;
   };
+};
+
+export type solicitudSalirEquipo = baseSolicitud & {
+  solicitante: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    correo: string;
+    photoURL: string;
+  };
+  equipoActual: {
+    id: string;
+    nombre: string;
+    escudoUrl: string;
+  };
+  capitanObjetivo: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    correo: string;
+  };
+  aprobadoCapitan?: boolean;
+  fechaRespuestaCapitan?: string;
+  motivoRespuestaCapitan?: string;
 };
 export type Solicitud = solicitudCrearEquipo | solicitudUnirseEquipo;

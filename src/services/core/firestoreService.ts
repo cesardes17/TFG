@@ -2,10 +2,12 @@
 
 import {
   deleteDocumentByPathFS,
+  deleteField,
   getCollectionByPathFS,
   getCollectionByPathWithFilterFS,
   getDocumentByPathFS,
   setDocumentByPathFS,
+  updateDocumentByPathFS,
 } from '../../api/firestoreFirebase';
 import type { ResultService } from '../../types/ResultService';
 
@@ -13,6 +15,11 @@ import type { ResultService } from '../../types/ResultService';
  * Servicio unificado para Firestore con rutas dinámicas
  */
 export const FirestoreService = {
+  /**
+   * Devuelve el valor especial para eliminar un campo en Firestore
+   */
+  getDeleteField: () => deleteField(),
+
   /**
    * Obtiene un documento en la ruta dada: ...'colección','docId'
    */
@@ -74,6 +81,21 @@ export const FirestoreService = {
     try {
       const id = await setDocumentByPathFS<T>(...pathSegmentsAndData);
       return { success: true, data: id };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
+    }
+  },
+
+  /**
+   * Actualiza campos específicos de un documento sin sobrescribirlo por completo
+   */
+  updateDocumentByPath: async (
+    pathSegments: string[],
+    data: Record<string, any>
+  ): Promise<ResultService<null>> => {
+    try {
+      await updateDocumentByPathFS(pathSegments, data);
+      return { success: true, data: null };
     } catch (error: any) {
       return { success: false, errorMessage: error.message };
     }

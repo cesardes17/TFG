@@ -8,8 +8,10 @@ import BaseConfirmationModal, {
 } from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
+  estadoSolicitud,
   Solicitud,
   solicitudCrearEquipo,
+  solicitudSalirEquipo,
   solicitudUnirseEquipo,
   tipoSolicitud,
 } from '../../types/Solicitud';
@@ -29,6 +31,8 @@ import { rechazarUnirseEquipoSolicitud } from '../../services/solicitudesService
 import { aceptarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/aceptar';
 import { inscripcionesService } from '../../services/inscripcionesService';
 import { WhereFilterOp } from 'firebase/firestore';
+import { rechazarSalirEquipoSolicitud } from '../../services/solicitudesService/leaveTeamSolicitud/rechazar';
+import { aceptarSalirEquipoSolicitud } from '../../services/solicitudesService/leaveTeamSolicitud/aceptar';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
@@ -44,43 +48,46 @@ export default function SolicitudesScreen() {
   const [dorsalInput, setDorsalInput] = useState('');
   const [dorsalesOcupados, setDorsalesOcupados] = useState<number[]>([]);
   const [estadoSolMostrar, setEstadoSolMostrar] = useState<
-    'aceptada' | 'pendiente' | 'rechazada' | 'todos'
-  >('todos');
+    estadoSolicitud | 'todos'
+  >('pendiente');
   const isAdmin =
     user?.role === 'coorganizador' || user?.role === 'organizador';
 
   useFocusEffect(
     useCallback(() => {
-      if (!temporada) return;
+      if (!temporada || !user) return;
 
       const fetchSolicitudes = async () => {
-        let andFilters: [string, WhereFilterOp, any][] = [];
         let orFilters: [string, WhereFilterOp, any][] = [];
 
-        if (estadoSolMostrar !== 'todos') {
-          andFilters = [['estado', '==', estadoSolMostrar]];
-        }
-
-        if (!isAdmin) {
+        if (!isAdmin && user.uid) {
           orFilters = [
-            ['solicitante.id', '==', user?.uid],
-            ['jugadorObjetivo.id', '==', user?.uid],
-            ['capitanObjetivo.id', '==', user?.uid],
+            ['solicitante.id', '==', user.uid],
+            ['jugadorObjetivo.id', '==', user.uid],
+            ['capitanObjetivo.id', '==', user.uid],
           ];
         }
 
         const res = await BaseSolicitudService.getSolicitudesWithFilters(
           temporada.id,
-          andFilters,
+          [],
           orFilters
         );
         if (res.success && res.data) {
-          setSolicitudes(res.data);
+          estadoSolMostrar === 'todos'
+            ? setSolicitudes(res.data)
+            : setSolicitudes(
+                res.data.filter(
+                  (solicitud) => solicitud.estado === estadoSolMostrar
+                )
+              );
+        } else {
+          console.warn('Error al obtener solicitudes:', res.errorMessage);
         }
       };
 
       fetchSolicitudes();
-    }, [temporada])
+    }, [temporada, user, estadoSolMostrar, isAdmin])
   );
 
   const openAcceptModal = async (id: string) => {
@@ -117,7 +124,6 @@ export default function SolicitudesScreen() {
       setInputError(true);
       return;
     }
-    console.log('handleConfirm - ', solicitud);
     switch (solicitud.tipo) {
       case 'Crear Equipo': {
         if (modalType === 'update') {
@@ -209,10 +215,47 @@ export default function SolicitudesScreen() {
         }
         break;
       }
+      case 'Salir de Equipo': {
+        const solicitudSE = solicitud as solicitudSalirEquipo;
+
+        if (modalType === 'update') {
+          console.log('Salir de Equipo - ', user);
+          const res = await aceptarSalirEquipoSolicitud(
+            temporada!.id,
+            solicitudSE,
+            user!
+          );
+          if (res.success) {
+            showToast('Solicitud aceptada', 'success');
+          } else {
+            showToast('Error al aceptar la solicitud', 'error');
+          }
+        } else {
+          const res = await rechazarSalirEquipoSolicitud(
+            temporada!.id,
+            solicitudSE,
+            user!,
+            rejectReason
+          );
+          if (res.success) {
+            showToast('Solicitud rechazada', 'success');
+          } else {
+            showToast('Error al rechazar solicitud', 'error');
+          }
+        }
+      }
     }
 
     const res = await BaseSolicitudService.getSolicitudes(temporada!.id);
-    if (res.success && res.data) setSolicitudes(res.data);
+    if (res.success && res.data) {
+      estadoSolMostrar === 'todos'
+        ? setSolicitudes(res.data)
+        : setSolicitudes(
+            res.data.filter(
+              (solicitud) => solicitud.estado === estadoSolMostrar
+            )
+          );
+    }
     setModalVisible(false);
     setRejectReason('');
     setSelectedId(null);

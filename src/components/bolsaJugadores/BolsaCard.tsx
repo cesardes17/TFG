@@ -86,11 +86,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
           {solicitudEnviada ? (
             <CircleCheckIcon size={20} color={theme.text.primary} />
           ) : (
-            <SendIcon size={20} color={theme.text.primary} />
+            <SendIcon size={20} color={theme.text.light} />
           )}
           <StyledText
             style={{
-              color: theme.text.primary,
+              color: solicitudEnviada ? theme.text.primary : theme.text.light,
               fontWeight: '600',
             }}
           >
@@ -101,8 +101,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     </View>
   );
 };
-
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   card: {

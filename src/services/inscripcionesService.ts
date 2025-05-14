@@ -90,4 +90,67 @@ export const inscripcionesService = {
       };
     }
   },
+
+  getInscripcion: async (
+    temporadaId: string,
+    jugadorId: string
+  ): Promise<ResultService<Inscripcion>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECTION];
+      const res = await FirestoreService.getDocumentsWithFilterByPath(
+        [['jugador.id', '==', jugadorId]],
+        [],
+        ...path
+      );
+      if (!res.success || !res.data || res.data.length === 0) {
+        throw new Error(res.errorMessage || 'Error al obtener la inscripcion');
+      }
+      return {
+        success: true,
+        data: res.data[0] as Inscripcion,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener la inscripcion',
+      };
+    }
+  },
+
+  deleteInscripcion: async (
+    temporadaId: string,
+    jugadorId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const solicitud = await inscripcionesService.getInscripcion(
+        temporadaId,
+        jugadorId
+      );
+      if (!solicitud.success || !solicitud.data) {
+        throw new Error(
+          solicitud.errorMessage || 'Error al eliminar la inscripcion'
+        );
+      }
+      const path = ['temporadas', temporadaId, COLLECTION, solicitud.data.id];
+      const res = await FirestoreService.deleteDocumentByPath(...path);
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al eliminar la inscripcion');
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al eliminar la inscripcion',
+      };
+    }
+  },
 };

@@ -4,9 +4,11 @@ export type tipoSolicitud =
   | 'Salir de Equipo'
   | 'Disolver Equipo';
 
+export type estadoSolicitud = 'aceptada' | 'rechazada' | 'pendiente';
+
 type baseSolicitud = {
   id: string;
-  estado: 'aceptada' | 'rechazada' | 'pendiente';
+  estado: estadoSolicitud;
   tipo: tipoSolicitud;
 
   fechaCreacion: string;

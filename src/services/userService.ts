@@ -86,7 +86,7 @@ export const UserService = {
     updatedData: Partial<PlayerUser>
   ): Promise<ResultService<User>> => {
     try {
-      //obtenemos los datos actuales del usuario
+      // Comprobación del usuario actual
       const res = await UserService.getUserProfile(uid);
       if (!res.success || !res.data) {
         return { success: false, errorMessage: 'Usuario no encontrado' };
@@ -95,20 +95,24 @@ export const UserService = {
         return { success: false, errorMessage: 'El usuario no es un jugador' };
       }
 
-      const payload: PlayerUser = {
-        ...res.data,
-        ...updatedData,
-      };
-
-      const resUpdate = await FirestoreService.setDocumentByPath<User>(
-        'users',
-        uid,
-        payload
+      console.log('userService updatedData - ', updatedData);
+      // Actualización parcial del documento
+      const resUpdate = await FirestoreService.updateDocumentByPath(
+        ['users', uid],
+        updatedData
       );
+
       if (!resUpdate.success) {
         return { success: false, errorMessage: resUpdate.errorMessage };
       }
-      return { success: true, data: payload };
+      console.log('userService resUpdate - ', resUpdate.data);
+      // Devolver el nuevo perfil fusionado (a nivel local)
+      const nuevoPerfil = {
+        ...res.data,
+        ...updatedData,
+      } as PlayerUser;
+
+      return { success: true, data: nuevoPerfil };
     } catch (error: any) {
       return {
         success: false,

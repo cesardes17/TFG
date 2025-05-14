@@ -80,5 +80,9 @@ export type solicitudSalirEquipo = baseSolicitud & {
   aprobadoCapitan?: boolean;
   fechaRespuestaCapitan?: string;
   motivoRespuestaCapitan?: string;
+  motivoSalida: string;
 };
-export type Solicitud = solicitudCrearEquipo | solicitudUnirseEquipo;
+export type Solicitud =
+  | solicitudCrearEquipo
+  | solicitudUnirseEquipo
+  | solicitudSalirEquipo;

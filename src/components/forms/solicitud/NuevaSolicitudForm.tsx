@@ -14,7 +14,10 @@ import SelectableCardGroup from '../../common/SelectableCardGroup';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
 import StyledAlert from '../../common/StyledAlert';
-import { solicitudCrearEquipo } from '../../../types/Solicitud';
+import {
+  solicitudCrearEquipo,
+  solicitudSalirEquipo,
+} from '../../../types/Solicitud';
 import { BaseSolicitudService } from '../../../services/solicitudesService';
 import { getRandomUID } from '../../../utils/getRandomUID';
 import { useTemporadaContext } from '../../../contexts/TemporadaContext';
@@ -22,6 +25,7 @@ import { useToast } from '../../../contexts/ToastContext';
 import { router } from 'expo-router';
 import { useUser } from '../../../contexts/UserContext';
 import { PlayerProfile } from '../../../types/User';
+import { equipoService } from '../../../services/equipoService';
 
 export type SolicitudTipo = 'createTeam' | 'leaveTeam' | 'dissolveTeam';
 
@@ -91,6 +95,53 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
             createTeamSolicitud
           );
 
+          if (!res.success || !res.data) {
+            throw new Error(res.errorMessage || 'Error creando solicitud');
+          }
+          showToast('Solicitud enviada', 'success');
+          router.back();
+          break;
+        }
+        case 'leaveTeam': {
+          if (!values.leaveReason) {
+            throw new Error('Por favor, ingresa un motivo');
+          }
+          const resEquipo = await equipoService.getEquipo(
+            temporada!.id,
+            (user as PlayerProfile)!.equipo!.id
+          );
+          if (!resEquipo.success || !resEquipo.data) {
+            throw new Error(
+              resEquipo.errorMessage ||
+                'Error al obtener la informacion del equipo'
+            );
+          }
+          const leaveTeamSolicitud: solicitudSalirEquipo = {
+            id: getRandomUID(),
+            estado: 'pendiente',
+            tipo: 'Salir de Equipo',
+            solicitante: {
+              id: user!.uid,
+              nombre: user!.nombre,
+              apellidos: user!.apellidos,
+              correo: user!.correo,
+              photoURL: (user as PlayerProfile).photoURL,
+            },
+            fechaCreacion: new Date().toISOString(),
+            motivoSalida: values.leaveReason,
+            equipoActual: (user as PlayerProfile)!.equipo!,
+            capitanObjetivo: {
+              id: resEquipo.data.capitan.id,
+              nombre: resEquipo.data.capitan.nombre,
+              apellidos: resEquipo.data.capitan.apellidos,
+              correo: resEquipo.data.capitan.correo,
+            },
+          };
+          const res = await BaseSolicitudService.setSolicitud(
+            temporada!.id,
+            leaveTeamSolicitud.id,
+            leaveTeamSolicitud
+          );
           if (!res.success || !res.data) {
             throw new Error(res.errorMessage || 'Error creando solicitud');
           }

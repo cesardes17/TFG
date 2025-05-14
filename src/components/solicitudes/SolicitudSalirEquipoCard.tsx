@@ -1,15 +1,14 @@
-import type React from 'react';
+import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { solicitudUnirseEquipo } from '../../types/Solicitud';
-import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { solicitudSalirEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
+import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 
 interface Props {
-  solicitud: solicitudUnirseEquipo;
+  solicitud: solicitudSalirEquipo;
   usuarioActual: {
     id: string;
     esAdmin?: boolean;
@@ -18,51 +17,37 @@ interface Props {
   onRechazar: (id: string) => void;
 }
 
-export default function SolicitudUnirseEquipoCard({
+export default function SolicitudSalirEquipoCard({
   solicitud,
   usuarioActual,
   onAceptar,
   onRechazar,
 }: Props) {
   const {
-    jugadorObjetivo,
-    equipoObjetivo,
     solicitante,
+    equipoActual,
+    capitanObjetivo,
     estado,
     fechaCreacion,
-    fechaRespuestaJugador,
+    aprobadoCapitan,
+    fechaRespuestaCapitan,
+    motivoRespuestaCapitan,
     fechaRespuestaAdmin,
-    aprobadoJugadorObjetivo,
-    motivoRespuestaJugador,
     admin,
     respuestaAdmin,
+    motivoSalida,
   } = solicitud;
   const { theme } = useTheme();
 
-  const formatearFecha = (fecha: string) => {
-    return format(new Date(fecha), 'dd/MM/yy');
-  };
+  const formatearFecha = (fecha: string) => format(new Date(fecha), 'dd/MM/yy');
 
-  const esJugadorObjetivo = usuarioActual.id === jugadorObjetivo.id;
+  const esCapitan = usuarioActual.id === capitanObjetivo.id;
   const esAdmin = usuarioActual.esAdmin === true;
 
   const puedeResponder =
     estado === 'pendiente' &&
-    ((esJugadorObjetivo && !fechaRespuestaJugador) ||
+    ((esCapitan && !fechaRespuestaCapitan) ||
       (esAdmin && !fechaRespuestaAdmin));
-
-  const obtenerColorEstado = () => {
-    switch (estado) {
-      case 'pendiente':
-        return '#FFC107';
-      case 'aceptada':
-        return '#4CAF50';
-      case 'rechazada':
-        return '#F44336';
-      default:
-        return '#9E9E9E';
-    }
-  };
 
   const obtenerTextoEstado = () => {
     switch (estado) {
@@ -116,7 +101,7 @@ export default function SolicitudUnirseEquipoCard({
           size='small'
           style={styles.fechaCreacion}
         >
-          Solicitud de unirse al equipo
+          Solicitud de salir del equipo
         </StyledText>
         <StyledText
           variant='secondary'
@@ -133,24 +118,21 @@ export default function SolicitudUnirseEquipoCard({
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
-            uri={jugadorObjetivo.photoURL || 'https://via.placeholder.com/50'}
+            uri={solicitante.photoURL || 'https://via.placeholder.com/50'}
             containerStyle={styles.fotoJugador}
           />
           <View style={styles.datosJugador}>
             <StyledText variant='primary' style={styles.nombreCompleto}>
-              {jugadorObjetivo.nombre} {jugadorObjetivo.apellidos}
+              {solicitante.nombre} {solicitante.apellidos}
             </StyledText>
             <StyledText variant='secondary' style={styles.correo}>
-              {jugadorObjetivo.correo}
-            </StyledText>
-            <StyledText variant='secondary' style={styles.dorsal}>
-              Dorsal: {jugadorObjetivo.dorsal}
+              {solicitante.correo}
             </StyledText>
           </View>
           <View style={styles.contenedorIconoEstado}>
-            {aprobadoJugadorObjetivo === true ? (
+            {aprobadoCapitan === true ? (
               <CircleCheckIcon size={24} color={theme.background.success} />
-            ) : aprobadoJugadorObjetivo === false ? (
+            ) : aprobadoCapitan === false ? (
               <CloseCircleoIcon size={24} color={theme.background.error} />
             ) : estado === 'pendiente' ? (
               <ClockCircleOIcon size={24} color={theme.background.warning} />
@@ -161,31 +143,24 @@ export default function SolicitudUnirseEquipoCard({
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Equipo
+          Equipo actual
         </StyledText>
         <View style={styles.infoEquipo}>
           <ProgressiveImage
-            uri={equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40'}
+            uri={equipoActual.escudoUrl || 'https://via.placeholder.com/40'}
             containerStyle={styles.escudoEquipo}
           />
           <StyledText variant='primary' style={styles.nombreEquipo}>
-            {equipoObjetivo.nombre}
+            {equipoActual.nombre}
           </StyledText>
         </View>
       </View>
 
       <View style={estiloSeccion(true)}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Solicitante
+          Motivo
         </StyledText>
-        <View style={styles.infoSolicitante}>
-          <StyledText variant='primary' style={styles.nombreCompleto}>
-            {solicitante.nombre} {solicitante.apellidos}
-          </StyledText>
-          <StyledText variant='secondary' style={styles.correo}>
-            {solicitante.correo}
-          </StyledText>
-        </View>
+        <StyledText variant='primary'>{motivoSalida}</StyledText>
       </View>
 
       <View
@@ -228,56 +203,35 @@ export default function SolicitudUnirseEquipoCard({
               { backgroundColor: theme.background.primary },
             ]}
           >
-            {(() => {
-              const fechaRespuesta =
-                fechaRespuestaAdmin && fechaRespuestaJugador
-                  ? new Date(fechaRespuestaAdmin) >
-                    new Date(fechaRespuestaJugador)
-                    ? fechaRespuestaAdmin
-                    : fechaRespuestaJugador
-                  : fechaRespuestaAdmin || fechaRespuestaJugador;
-
-              const esRespuestaAdmin =
-                fechaRespuestaAdmin &&
-                (!fechaRespuestaJugador ||
-                  new Date(fechaRespuestaAdmin) >
-                    new Date(fechaRespuestaJugador));
-
-              const nombreRespondedor = esRespuestaAdmin
-                ? admin
-                  ? `${admin.nombre} ${admin.apellidos}`
-                  : 'Administrador'
-                : `${jugadorObjetivo.nombre} ${jugadorObjetivo.apellidos}`;
-
-              const correoRespondedor = esRespuestaAdmin
-                ? admin
-                  ? admin.correo
-                  : ''
-                : jugadorObjetivo.correo;
-
-              return (
-                <>
-                  {fechaRespuesta && (
-                    <StyledText style={styles.textoInfoResolucion}>
-                      Resuelta el {formatearFecha(fechaRespuesta)}
-                    </StyledText>
-                  )}
-                  <StyledText style={styles.textoInfoResolucion}>
-                    Respondida por {nombreRespondedor} ({correoRespondedor})
-                  </StyledText>
-                  {estado === 'rechazada' && motivoRespuestaJugador && (
-                    <StyledText style={styles.textoMotivoRechazo}>
-                      Motivo del rechazo: {motivoRespuestaJugador}
-                    </StyledText>
-                  )}
-                  {estado === 'rechazada' && respuestaAdmin && (
-                    <StyledText style={styles.textoMotivoRechazo}>
-                      Motivo del rechazo: {respuestaAdmin}
-                    </StyledText>
-                  )}
-                </>
-              );
-            })()}
+            {fechaRespuestaAdmin || fechaRespuestaCapitan ? (
+              <StyledText style={styles.textoInfoResolucion}>
+                Resuelta el{' '}
+                {formatearFecha(fechaRespuestaAdmin || fechaRespuestaCapitan!)}
+              </StyledText>
+            ) : null}
+            <StyledText style={styles.textoInfoResolucion}>
+              Respondida por{' '}
+              {fechaRespuestaAdmin
+                ? `${admin?.nombre ?? 'Administrador'} ${
+                    admin?.apellidos ?? ''
+                  }`
+                : `${capitanObjetivo.nombre} ${capitanObjetivo.apellidos}`}{' '}
+              (
+              {fechaRespuestaAdmin
+                ? admin?.correo ?? ''
+                : capitanObjetivo.correo}
+              )
+            </StyledText>
+            {estado === 'rechazada' && motivoRespuestaCapitan && (
+              <StyledText style={styles.textoMotivoRechazo}>
+                Motivo del rechazo: {motivoRespuestaCapitan}
+              </StyledText>
+            )}
+            {estado === 'rechazada' && respuestaAdmin && (
+              <StyledText style={styles.textoMotivoRechazo}>
+                Motivo del rechazo: {respuestaAdmin}
+              </StyledText>
+            )}
           </View>
         )}
       </View>

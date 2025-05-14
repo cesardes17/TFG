@@ -4,13 +4,16 @@ import { View, FlatList, StyleSheet } from 'react-native';
 import type {
   Solicitud,
   solicitudCrearEquipo,
+  solicitudSalirEquipo,
   solicitudUnirseEquipo,
 } from '../../types/Solicitud';
 import SolicitudCrearEquipoCard from './SolicitudCrearEquipoCard';
 
 import StyledAlert from '../common/StyledAlert';
-import SolicitudEquipo from './SolicitudUnirseEquipoCard';
+import SolicitudUnirseEquipoCard from './SolicitudUnirseEquipoCard';
 import { useUser } from '../../contexts/UserContext';
+import StyledText from '../common/StyledText';
+import SolicitudSalirEquipoCard from './SolicitudSalirEquipoCard';
 
 type Props = {
   solicitudes: Solicitud[];
@@ -44,8 +47,18 @@ export default function SolicitudesList({
         );
       case 'Unirse a Equipo':
         return (
-          <SolicitudEquipo
+          <SolicitudUnirseEquipoCard
             solicitud={item as solicitudUnirseEquipo}
+            usuarioActual={userActual}
+            onAceptar={onAceptar}
+            onRechazar={onRechazar}
+          />
+        );
+
+      case 'Salir de Equipo':
+        return (
+          <SolicitudSalirEquipoCard
+            solicitud={item as solicitudSalirEquipo}
             usuarioActual={userActual}
             onAceptar={onAceptar}
             onRechazar={onRechazar}

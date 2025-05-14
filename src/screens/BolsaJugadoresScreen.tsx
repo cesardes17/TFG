@@ -19,6 +19,8 @@ const BolsaJugadoresScreen = () => {
   const { showToast } = useToast();
   const { theme } = useTheme();
   const usuarioActualId = user!.uid;
+  const isAdmin =
+    user!.role === 'organizador' || user!.role === 'coorganizador';
   const [isLoading, setIsLodaing] = useState(true);
 
   const [estadosSolicitudes, setEstadosSolicitudes] = useState<
@@ -32,7 +34,6 @@ const BolsaJugadoresScreen = () => {
     const fetchData = async () => {
       setIsLodaing(true);
       try {
-        // Obtener jugadores inscritos
         const res = await bolsaJugadoresService.getJugadoresInscritos(
           temporada.id
         );
@@ -41,7 +42,6 @@ const BolsaJugadoresScreen = () => {
         }
         setInscripciones(res.data);
 
-        // Obtener solicitudes pendientes del usuario actual
         const resSol = await BaseSolicitudService.getSolicitudesWithFilters(
           temporada.id,
           [
@@ -58,7 +58,6 @@ const BolsaJugadoresScreen = () => {
           );
         }
 
-        // Mapear estados de solicitud por jugador objetivo
         const estados: Record<string, 'ninguna' | 'pendiente'> = {};
         resSol.data.forEach((sol) => {
           const solicitud = sol as solicitudUnirseEquipo;
@@ -80,7 +79,6 @@ const BolsaJugadoresScreen = () => {
         if (!temporada) {
           throw new Error('No hay una temporada seleccionada');
         }
-        console.log('Enviando solicitud para el jugador con ID:', jugadorId);
 
         const jugador = inscripciones.find((j) => j.jugador.id === jugadorId);
 
@@ -88,15 +86,22 @@ const BolsaJugadoresScreen = () => {
           throw new Error('Jugador no encontrado');
         }
 
-        //obtener equipo del usuario actual(tiene equipo por ser capitan)
+        const perfilUsuario = user as PlayerProfile;
+        if (!perfilUsuario.equipo) {
+          throw new Error('El usuario no tiene equipo');
+        }
 
         const equipo = await equipoService.getEquipo(
           temporada.id,
-          (user as PlayerProfile).equipo!.id
+          perfilUsuario.equipo.id
         );
 
         if (!equipo.success || !equipo.data) {
           throw new Error(equipo.errorMessage || 'Equipo no encontrado');
+        }
+
+        if (!jugador.jugador) {
+          throw new Error('Jugador incompleto');
         }
 
         const solicitud: solicitudUnirseEquipo = {
@@ -109,7 +114,7 @@ const BolsaJugadoresScreen = () => {
             nombre: user!.nombre!,
             apellidos: user!.apellidos!,
             correo: user!.correo!,
-            photoURL: (user as PlayerProfile).photoURL,
+            photoURL: perfilUsuario.photoURL,
           },
           jugadorObjetivo: jugador.jugador,
           equipoObjetivo: {
@@ -124,23 +129,18 @@ const BolsaJugadoresScreen = () => {
           solicitud.id,
           solicitud
         );
+
         if (!res.success) {
           throw new Error(res.errorMessage || 'Error al enviar solicitud');
         }
+
         showToast('Solicitud enviada', 'success');
 
         setEstadosSolicitudes((prev) => ({
           ...prev,
           [jugador.jugador.id]: 'pendiente',
         }));
-
-        Alert.alert(
-          'Solicitud enviada',
-          `Has enviado una solicitud al jugador con ID ${jugador.jugador.id}`,
-          [{ text: 'OK' }]
-        );
       } catch (error) {
-        console.error('Error al enviar solicitud:', error);
         showToast('No se pudo enviar la solicitud', 'error');
       }
     },
@@ -160,12 +160,14 @@ const BolsaJugadoresScreen = () => {
       </View>
     );
   }
+
   return (
     <PlayerList
       jugadores={inscripciones}
       usuarioActualId={usuarioActualId}
       estadosSolicitudes={estadosSolicitudes}
       onEnviarSolicitud={handleEnviarSolicitud}
+      isAdmin={isAdmin}
     />
   );
 };

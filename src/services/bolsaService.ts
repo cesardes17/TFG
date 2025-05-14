@@ -55,8 +55,8 @@ export const bolsaJugadoresService = {
     }
   },
   getJugadorInscrito: async (
-    userId: string,
-    temporadaId: string
+    temporadaId: string,
+    userId: string
   ): Promise<ResultService<BolsaJugador>> => {
     try {
       const path = ['temporadas', temporadaId, COLLECTION];

@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E6BE86242A555C70CB52039 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C7AD56FD331F00A0A99B69CB /* PrivacyInfo.xcprivacy */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		27A890DCD05D47AD4CA15121 /* Pods_glmba.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AE1FC568106EFC352B411BB /* Pods_glmba.framework */; };
+		37F6A72BA7B142FA90AEBE1E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ADDDACDE9C504D9485CDCE9A /* GoogleService-Info.plist */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		570C2670AB248FDE183017F8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3A903008E791472B38A4938F /* PrivacyInfo.xcprivacy */; };
-		64D79F720428489787282FCE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 28DE2809EAB54FFEBFA2C5E5 /* GoogleService-Info.plist */; };
-		8AC000EB330442FC3357A6C0 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F5BE8D0D26CBB58E8578AD /* ExpoModulesProvider.swift */; };
-		936499E64C4B56703E8E7FAE /* Pods_glmba.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F732CB2E3F2C6A5BA4C495 /* Pods_glmba.framework */; };
+		9589D1D8FF1B6FF30432CE54 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C87BE7964CA9FBC848FE3 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -21,14 +21,14 @@
 		13B07F961A680F5B00A75B9A /* glmba.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = glmba.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = glmba/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = glmba/Info.plist; sourceTree = "<group>"; };
-		28DE2809EAB54FFEBFA2C5E5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "glmba/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		3A903008E791472B38A4938F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = glmba/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		43F732CB2E3F2C6A5BA4C495 /* Pods_glmba.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_glmba.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		50F5BE8D0D26CBB58E8578AD /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-glmba/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		226C87BE7964CA9FBC848FE3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-glmba/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		2941D515291488C16E5052BD /* Pods-glmba.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glmba.debug.xcconfig"; path = "Target Support Files/Pods-glmba/Pods-glmba.debug.xcconfig"; sourceTree = "<group>"; };
+		3876CE8A5C1B96AB949C8866 /* Pods-glmba.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glmba.release.xcconfig"; path = "Target Support Files/Pods-glmba/Pods-glmba.release.xcconfig"; sourceTree = "<group>"; };
+		9AE1FC568106EFC352B411BB /* Pods_glmba.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_glmba.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = glmba/SplashScreen.storyboard; sourceTree = "<group>"; };
+		ADDDACDE9C504D9485CDCE9A /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "glmba/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		DD320148BAE7A25B97C704AE /* Pods-glmba.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glmba.debug.xcconfig"; path = "Target Support Files/Pods-glmba/Pods-glmba.debug.xcconfig"; sourceTree = "<group>"; };
-		E8A13B03FC8CF3EBF256BE50 /* Pods-glmba.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-glmba.release.xcconfig"; path = "Target Support Files/Pods-glmba/Pods-glmba.release.xcconfig"; sourceTree = "<group>"; };
+		C7AD56FD331F00A0A99B69CB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = glmba/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = glmba/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* glmba-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "glmba-Bridging-Header.h"; path = "glmba/glmba-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -39,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				936499E64C4B56703E8E7FAE /* Pods_glmba.framework in Frameworks */,
+				27A890DCD05D47AD4CA15121 /* Pods_glmba.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,8 +55,8 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				28DE2809EAB54FFEBFA2C5E5 /* GoogleService-Info.plist */,
-				3A903008E791472B38A4938F /* PrivacyInfo.xcprivacy */,
+				ADDDACDE9C504D9485CDCE9A /* GoogleService-Info.plist */,
+				C7AD56FD331F00A0A99B69CB /* PrivacyInfo.xcprivacy */,
 			);
 			name = glmba;
 			sourceTree = "<group>";
@@ -65,7 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				43F732CB2E3F2C6A5BA4C495 /* Pods_glmba.framework */,
+				9AE1FC568106EFC352B411BB /* Pods_glmba.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -84,8 +84,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				EE1353CB819133DE0EC006D9 /* Pods */,
-				C296F8AC451CB7F7B89DE549 /* ExpoModulesProviders */,
+				A7C7A895A093C5A6EE2CBFEF /* Pods */,
+				B9E843B38E3A70F44D59AD0F /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -100,6 +100,24 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A7C7A895A093C5A6EE2CBFEF /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2941D515291488C16E5052BD /* Pods-glmba.debug.xcconfig */,
+				3876CE8A5C1B96AB949C8866 /* Pods-glmba.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		B9E843B38E3A70F44D59AD0F /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				C89F000269333CF41E435A2E /* glmba */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -109,28 +127,10 @@
 			path = glmba/Supporting;
 			sourceTree = "<group>";
 		};
-		C296F8AC451CB7F7B89DE549 /* ExpoModulesProviders */ = {
+		C89F000269333CF41E435A2E /* glmba */ = {
 			isa = PBXGroup;
 			children = (
-				FD591D6159241914246030A8 /* glmba */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		EE1353CB819133DE0EC006D9 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				DD320148BAE7A25B97C704AE /* Pods-glmba.debug.xcconfig */,
-				E8A13B03FC8CF3EBF256BE50 /* Pods-glmba.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		FD591D6159241914246030A8 /* glmba */ = {
-			isa = PBXGroup;
-			children = (
-				50F5BE8D0D26CBB58E8578AD /* ExpoModulesProvider.swift */,
+				226C87BE7964CA9FBC848FE3 /* ExpoModulesProvider.swift */,
 			);
 			name = glmba;
 			sourceTree = "<group>";
@@ -143,14 +143,14 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "glmba" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				921925928C64ABB0C31DA351 /* [Expo] Configure project */,
+				1523D3648A05D1EA4DB4F9F1 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				123DA2B1D380D7A0D44B4190 /* [CP] Embed Pods Frameworks */,
-				F52ECD121A2DC21719FC9915 /* [CP-User] [RNFB] Core Configuration */,
+				B3E1944C7B10FAB92A3723D2 /* [CP] Embed Pods Frameworks */,
+				DDA0C7AA4C6E9BDBBF99E0C5 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -200,8 +200,8 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				64D79F720428489787282FCE /* GoogleService-Info.plist in Resources */,
-				570C2670AB248FDE183017F8 /* PrivacyInfo.xcprivacy in Resources */,
+				37F6A72BA7B142FA90AEBE1E /* GoogleService-Info.plist in Resources */,
+				0E6BE86242A555C70CB52039 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,23 +245,24 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		123DA2B1D380D7A0D44B4190 /* [CP] Embed Pods Frameworks */ = {
+		1523D3648A05D1EA4DB4F9F1 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-glmba/Pods-glmba-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-glmba/Pods-glmba-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-glmba/expo-configure-project.sh\"\n";
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -333,26 +334,25 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-glmba/Pods-glmba-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		921925928C64ABB0C31DA351 /* [Expo] Configure project */ = {
+		B3E1944C7B10FAB92A3723D2 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-glmba/Pods-glmba-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
 			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-glmba/expo-configure-project.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-glmba/Pods-glmba-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
-		F52ECD121A2DC21719FC9915 /* [CP-User] [RNFB] Core Configuration */ = {
+		DDA0C7AA4C6E9BDBBF99E0C5 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -373,7 +373,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				8AC000EB330442FC3357A6C0 /* ExpoModulesProvider.swift in Sources */,
+				9589D1D8FF1B6FF30432CE54 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,7 +382,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DD320148BAE7A25B97C704AE /* Pods-glmba.debug.xcconfig */;
+			baseConfigurationReference = 2941D515291488C16E5052BD /* Pods-glmba.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -407,18 +407,18 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cesardelgado.glmba;
-				PRODUCT_NAME = "glmba";
+				PRODUCT_NAME = glmba;
 				SWIFT_OBJC_BRIDGING_HEADER = "glmba/glmba-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E8A13B03FC8CF3EBF256BE50 /* Pods-glmba.release.xcconfig */;
+			baseConfigurationReference = 3876CE8A5C1B96AB949C8866 /* Pods-glmba.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -438,10 +438,10 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cesardelgado.glmba;
-				PRODUCT_NAME = "glmba";
+				PRODUCT_NAME = glmba;
 				SWIFT_OBJC_BRIDGING_HEADER = "glmba/glmba-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

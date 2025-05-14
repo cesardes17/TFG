@@ -1,90 +1,137 @@
-// src/components/solicitudes/SolicitudesList.tsx
-import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import type {
-  Solicitud,
-  solicitudCrearEquipo,
-  solicitudSalirEquipo,
-  solicitudUnirseEquipo,
-} from '../../types/Solicitud';
-import SolicitudCrearEquipoCard from './SolicitudCrearEquipoCard';
-
-import StyledAlert from '../common/StyledAlert';
-import SolicitudUnirseEquipoCard from './SolicitudUnirseEquipoCard';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { BaseSolicitudService } from '../../services/solicitudesService';
+import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
+import type { WhereFilterOp } from 'firebase/firestore';
+import { FlatList, StyleSheet, View } from 'react-native';
+import StyledAlert from '../common/StyledAlert';
+import { Solicitud } from '../../types/Solicitud';
+import SolicitudCard from './SolicitudCard';
+import BaseConfirmationModal, {
+  ConfirmationType,
+} from '../common/BaseConfirmationModal';
 import StyledText from '../common/StyledText';
-import SolicitudSalirEquipoCard from './SolicitudSalirEquipoCard';
+import StyledTextInput from '../common/StyledTextInput';
 
-type Props = {
-  solicitudes: Solicitud[];
-  esAdmin: boolean;
-  onAceptar: (id: string) => void;
-  onRechazar: (id: string) => void;
-};
+interface SolicitudesListProps {
+  screenLoading: (isLoading: boolean) => void;
+}
 
 export default function SolicitudesList({
-  solicitudes,
-  esAdmin,
-  onAceptar,
-  onRechazar,
-}: Props) {
+  screenLoading,
+}: SolicitudesListProps) {
+  const { temporada } = useTemporadaContext();
   const { user } = useUser();
-  const userActual = {
-    id: user!.uid,
-    esAdmin: esAdmin,
+  const [modalVisible, setModalVisible] = useState(false);
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [inputModal, setInputModal] = useState('');
+  const [inputError, setInputError] = useState('');
+  const [mostrarInputModal, setMostrarInputModal] = useState(false);
+  const [modalType, setModalType] = useState<ConfirmationType>('update');
+
+  const isAdmin =
+    user?.role === 'organizador' || user?.role === 'coorganizador';
+
+  const fetchSolicitudes = useCallback(async () => {
+    if (!temporada) return;
+
+    // Construye tus filtros AND / OR
+    const andFilters: [string, WhereFilterOp, any][] = [];
+    const orFilters: [string, WhereFilterOp, any][] = !isAdmin
+      ? [
+          ['solicitante.id', '==', user!.uid],
+          ['jugadorObjetivo.id', '==', user!.uid],
+          ['capitanObjetivo.id', '==', user!.uid],
+        ]
+      : [];
+
+    const res = await BaseSolicitudService.getSolicitudesWithFilters(
+      temporada.id,
+      andFilters,
+      orFilters
+    );
+
+    if (res.success) {
+      const filteredSolicitudes = res.data || [];
+      setSolicitudes(filteredSolicitudes);
+    }
+  }, [temporada?.id, user?.uid, isAdmin]);
+
+  useFocusEffect(
+    useCallback(() => {
+      screenLoading(true);
+      fetchSolicitudes();
+      screenLoading(false);
+      // opcional: return () => { cancelar peticiones si usas abortController }
+    }, [fetchSolicitudes])
+  );
+
+  const onAcept = (solicitud: Solicitud) => {
+    console.log('aceptar Solicitud: ', solicitud);
+  };
+  const onRechazar = (solicitud: Solicitud) => {
+    console.log('rechazar Solicitud: ', solicitud);
+  };
+
+  const handleConfirm = () => {};
+
+  const renderInputModal = () => {
+    return (
+      <StyledTextInput
+        multiline
+        placeholder='Introduce el motivo de rechazo'
+        value={inputModal}
+        onChangeText={setInputModal}
+        error={!!inputError}
+      />
+    );
   };
 
   const renderItem = ({ item }: { item: Solicitud }) => {
-    switch (item.tipo) {
-      case 'Crear Equipo':
-        return (
-          <SolicitudCrearEquipoCard
-            solicitud={item as solicitudCrearEquipo}
-            usuarioActual={userActual}
-            onAceptar={onAceptar}
-            onRechazar={onRechazar}
-          />
-        );
-      case 'Unirse a Equipo':
-        return (
-          <SolicitudUnirseEquipoCard
-            solicitud={item as solicitudUnirseEquipo}
-            usuarioActual={userActual}
-            onAceptar={onAceptar}
-            onRechazar={onRechazar}
-          />
-        );
-
-      case 'Salir de Equipo':
-        return (
-          <SolicitudSalirEquipoCard
-            solicitud={item as solicitudSalirEquipo}
-            usuarioActual={userActual}
-            onAceptar={onAceptar}
-            onRechazar={onRechazar}
-          />
-        );
-      default:
-        return null;
-    }
+    return (
+      <SolicitudCard
+        solicitud={item}
+        onAceptar={onAcept}
+        onRechazar={onRechazar}
+      />
+    );
   };
-
   return (
-    <FlatList
-      data={solicitudes}
-      keyExtractor={(i) => i.id}
-      renderItem={renderItem}
-      contentContainerStyle={styles.listContent}
-      style={{ marginTop: 16 }}
-      ListEmptyComponent={
-        <View style={{ alignItems: 'center' }}>
-          <StyledAlert variant='info' message='No hay solicitudes' />
-        </View>
-      }
-    />
+    <>
+      <FlatList
+        data={solicitudes}
+        keyExtractor={(i) => i.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.listContent}
+        style={{ marginTop: 16 }}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center' }}>
+            <StyledAlert variant='info' message='No hay solicitudes' />
+          </View>
+        }
+      />
+      <BaseConfirmationModal
+        visible={modalVisible}
+        type={modalType}
+        title={
+          modalType === 'update'
+            ? '¿Confirmar aceptación?'
+            : '¿Motivo de rechazo?'
+        }
+        confirmLabel={modalType === 'update' ? 'Aceptar' : 'Rechazar'}
+        cancelLabel='Cancelar'
+        onCancel={() => {
+          setModalVisible(false);
+          setInputModal('');
+        }}
+        onConfirm={handleConfirm}
+      >
+        {mostrarInputModal && renderInputModal()}
+      </BaseConfirmationModal>
+    </>
   );
 }
-
 const styles = StyleSheet.create({
   listContent: { paddingBottom: 16 },
 });

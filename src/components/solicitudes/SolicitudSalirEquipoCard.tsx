@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { useTheme } from '../../contexts/ThemeContext';
-import { solicitudSalirEquipo } from '../../types/Solicitud';
+import { Solicitud, solicitudSalirEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
 import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
@@ -13,8 +13,8 @@ interface Props {
     id: string;
     esAdmin?: boolean;
   };
-  onAceptar: (id: string) => void;
-  onRechazar: (id: string) => void;
+  onAceptar: (solicitud: Solicitud) => void;
+  onRechazar: (solicitud: Solicitud) => void;
 }
 
 export default function SolicitudSalirEquipoCard({
@@ -177,7 +177,7 @@ export default function SolicitudSalirEquipoCard({
                   styles.boton,
                   { backgroundColor: theme.button.primary.background },
                 ]}
-                onPress={() => onAceptar(solicitud.id)}
+                onPress={() => onAceptar(solicitud)}
               >
                 <StyledText variant='light'>Aceptar</StyledText>
               </TouchableOpacity>
@@ -186,7 +186,7 @@ export default function SolicitudSalirEquipoCard({
                   styles.boton,
                   { backgroundColor: theme.button.error.background },
                 ]}
-                onPress={() => onRechazar(solicitud.id)}
+                onPress={() => onRechazar(solicitud)}
               >
                 <StyledText variant='light'>Rechazar</StyledText>
               </TouchableOpacity>

@@ -95,10 +95,6 @@ export const BaseSolicitudService = {
     orFilters: [string, WhereFilterOp, any][] = []
   ): Promise<ResultService<Solicitud[]>> {
     try {
-      console.log('Obteniendo solicitudes con filtros...');
-      console.log('Filtros AND:', andFilters);
-      console.log('Filtros OR:', orFilters);
-
       const path = ['temporadas', temporadaId, 'solicitudes'];
 
       const data = await getCollectionByPathWithFilterFS<Solicitud>(

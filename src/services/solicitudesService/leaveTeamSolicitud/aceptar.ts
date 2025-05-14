@@ -15,6 +15,9 @@ export const aceptarSalirEquipoSolicitud = async (
     usuario.role === 'organizador' || usuario.role === 'coorganizador';
   const aprobadaAdmin = !!solicitud.admin;
   const aprobadoCapitan = solicitud.aprobadoCapitan === true;
+  console.log('esAdmin: ', esAdmin);
+  console.log('aprobadaAdmin: ', aprobadaAdmin);
+  console.log('aprobadoCapitan: ', aprobadoCapitan);
 
   try {
     // Actualiza el estado de la solicitud según el rol
@@ -49,6 +52,7 @@ export const aceptarSalirEquipoSolicitud = async (
       );
     }
 
+    console.log('solicitud: ', solicitud);
     // Si fue aceptada, ejecutar efectos secundarios
     if (solicitud.estado === 'aceptada') {
       const resInscripcion = await inscripcionesService.deleteInscripcion(
@@ -65,6 +69,8 @@ export const aceptarSalirEquipoSolicitud = async (
       const campo = {
         equipo: FirestoreService.getDeleteField(),
       };
+
+      console.log('campo: ', campo); // TODO: Borrar este log una vez que se tenga confirmad
 
       const jugador = await UserService.UpdatePlayerProfile(
         solicitud.solicitante.id,

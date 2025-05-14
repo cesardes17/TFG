@@ -14,20 +14,20 @@ import { UserService } from '../services/userService';
 
 interface UserContextValue {
   user: User | null; // ahora usa User (PlayerUser u OtherUser)
-  loading: boolean;
+  loadingUser: boolean;
   error?: string;
   refetchUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
   user: null,
-  loading: true,
+  loadingUser: true,
   refetchUser: async () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState<string>();
 
   const loadUserProfile = async (uid: string) => {
@@ -57,17 +57,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = AuthService.onAuthChange(async (fbUser) => {
       if (!fbUser) {
         setUser(null);
-        setLoading(false);
+        setLoadingUser(false);
         return;
       }
       await loadUserProfile(fbUser.uid);
-      setLoading(false);
+      setLoadingUser(false);
     });
     return unsubscribe;
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, error, refetchUser }}>
+    <UserContext.Provider value={{ user, loadingUser, error, refetchUser }}>
       {children}
     </UserContext.Provider>
   );

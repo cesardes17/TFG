@@ -84,8 +84,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   text: {
     fontSize: 14,

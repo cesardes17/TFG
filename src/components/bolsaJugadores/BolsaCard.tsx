@@ -29,6 +29,7 @@ interface PlayerCardProps {
   solicitudEnviada: boolean;
   onEnviarSolicitud: () => void;
   usuarioActualId?: string;
+  isAdmin?: boolean;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -36,6 +37,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   solicitudEnviada,
   onEnviarSolicitud,
   usuarioActualId,
+  isAdmin,
 }) => {
   const { theme } = useTheme();
   if (usuarioActualId === jugador.id) return null;
@@ -71,32 +73,34 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
           </StyledText>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              backgroundColor: solicitudEnviada
-                ? theme.border.secondary
-                : theme.background.navigation,
-            },
-          ]}
-          onPress={onEnviarSolicitud}
-          disabled={solicitudEnviada}
-        >
-          {solicitudEnviada ? (
-            <CircleCheckIcon size={20} color={theme.text.primary} />
-          ) : (
-            <SendIcon size={20} color={theme.text.light} />
-          )}
-          <StyledText
-            style={{
-              color: solicitudEnviada ? theme.text.primary : theme.text.light,
-              fontWeight: '600',
-            }}
+        {!isAdmin && (
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                backgroundColor: solicitudEnviada
+                  ? theme.border.secondary
+                  : theme.background.navigation,
+              },
+            ]}
+            onPress={onEnviarSolicitud}
+            disabled={solicitudEnviada}
           >
-            {solicitudEnviada ? 'Solicitud enviada' : 'Enviar solicitud'}
-          </StyledText>
-        </TouchableOpacity>
+            {solicitudEnviada ? (
+              <CircleCheckIcon size={20} color={theme.text.primary} />
+            ) : (
+              <SendIcon size={20} color={theme.text.light} />
+            )}
+            <StyledText
+              style={{
+                color: solicitudEnviada ? theme.text.primary : theme.text.light,
+                fontWeight: '600',
+              }}
+            >
+              {solicitudEnviada ? 'Solicitud enviada' : 'Enviar solicitud'}
+            </StyledText>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

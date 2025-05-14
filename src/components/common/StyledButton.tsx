@@ -6,7 +6,7 @@ import StyledText from './StyledText';
 interface StyledButtonProps {
   onPress: () => void;
   title: string;
-  variant?: 'primary' | 'outline' | 'error';
+  variant?: 'primary' | 'outline' | 'error' | 'error-outline';
   fullWidth?: boolean;
   disabled?: boolean;
 }
@@ -22,6 +22,13 @@ export default function StyledButton({
 
   const getButtonStyle = () => {
     if (disabled) return theme.button.disabled;
+    if (variant === 'error-outline') {
+      return {
+        background: 'transparent',
+        border: theme.button.error.background,
+        text: theme.button.error.background,
+      };
+    }
     return theme.button[variant] || theme.button.primary;
   };
 
@@ -34,7 +41,7 @@ export default function StyledButton({
         {
           backgroundColor: buttonStyle.background,
           borderColor: buttonStyle.border,
-          borderWidth: variant === 'outline' ? 2 : 0,
+          borderWidth: variant.includes('outline') ? 2 : 0,
           width: fullWidth ? '100%' : 'auto',
           opacity: disabled ? 0.6 : 1,
         },

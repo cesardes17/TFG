@@ -5,7 +5,7 @@ import { temporadaService } from '../services/temporadaService';
 
 type TemporadaContextType = {
   temporada: Temporada | null;
-  loading: boolean;
+  loadingTemporada: boolean;
   refetchTemporada: () => Promise<void>;
 };
 
@@ -19,10 +19,10 @@ export const TemporadaProvider = ({
   children: React.ReactNode;
 }) => {
   const [temporada, setTemporada] = useState<Temporada | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingTemporada, setloadingTemporada] = useState(true);
 
   const fetchTemporada = async () => {
-    setLoading(true);
+    setloadingTemporada(true);
     const result = await temporadaService.getTemporadaActual();
     if (result.success && result.data) {
       setTemporada(result.data);
@@ -30,7 +30,7 @@ export const TemporadaProvider = ({
       console.warn(result.errorMessage || 'No hay temporada activa');
       setTemporada(null);
     }
-    setLoading(false);
+    setloadingTemporada(false);
   };
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const TemporadaProvider = ({
     <TemporadaContext.Provider
       value={{
         temporada,
-        loading,
+        loadingTemporada,
         refetchTemporada: fetchTemporada,
       }}
     >

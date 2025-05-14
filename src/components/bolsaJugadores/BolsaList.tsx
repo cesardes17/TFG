@@ -22,6 +22,7 @@ interface PlayerListProps {
   usuarioActualId?: string;
   estadosSolicitudes?: Record<string, 'ninguna' | 'pendiente'>;
   onEnviarSolicitud?: (jugadorId: string) => void;
+  isAdmin: boolean;
 }
 
 const PlayerList: React.FC<PlayerListProps> = ({
@@ -29,6 +30,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
   usuarioActualId,
   estadosSolicitudes,
   onEnviarSolicitud,
+  isAdmin,
 }) => {
   return (
     <View style={styles.container}>
@@ -44,6 +46,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
             }
             onEnviarSolicitud={() => onEnviarSolicitud?.(item.jugador.id)}
             usuarioActualId={usuarioActualId}
+            isAdmin={isAdmin}
           />
         )}
         showsVerticalScrollIndicator={false}

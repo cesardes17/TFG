@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
-import { solicitudCrearEquipo } from '../../types/Solicitud';
+import { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
 import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
@@ -13,16 +13,16 @@ interface Props {
     id: string;
     esAdmin?: boolean;
   };
-  onAceptar: (id: string) => void;
-  onRechazar: (id: string) => void;
+  onAceptar: (solicitud: Solicitud) => void;
+  onRechazar: (solicitud: Solicitud) => void;
 }
 
-const SolicitudCrearEquipo: React.FC<Props> = ({
+export default function ({
   solicitud,
   usuarioActual,
   onAceptar,
   onRechazar,
-}) => {
+}: Props) {
   const {
     nombreEquipo,
     escudoUrl,
@@ -152,7 +152,7 @@ const SolicitudCrearEquipo: React.FC<Props> = ({
                   styles.boton,
                   { backgroundColor: theme.button.primary.background },
                 ]}
-                onPress={() => onAceptar(id)}
+                onPress={() => onAceptar(solicitud)}
               >
                 <StyledText variant='light'>Aceptar</StyledText>
               </TouchableOpacity>
@@ -161,7 +161,7 @@ const SolicitudCrearEquipo: React.FC<Props> = ({
                   styles.boton,
                   { backgroundColor: theme.button.error.background },
                 ]}
-                onPress={() => onRechazar(id)}
+                onPress={() => onRechazar(solicitud)}
               >
                 <StyledText variant='light'>Rechazar</StyledText>
               </TouchableOpacity>
@@ -198,7 +198,7 @@ const SolicitudCrearEquipo: React.FC<Props> = ({
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   tarjeta: {
@@ -318,5 +318,3 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
-
-export default SolicitudCrearEquipo;

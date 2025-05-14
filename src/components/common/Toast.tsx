@@ -3,9 +3,11 @@ import { Animated, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
 interface ToastProps {
   message: string;
-  type?: 'success' | 'error' | 'info' | 'warning';
+  type?: ToastType;
   duration?: number;
   onHide: () => void;
 }

@@ -5,19 +5,19 @@ import SolicitudesScreen from '../../src/screens/solicitud/SolicitudesScreen';
 import { router } from 'expo-router';
 
 export default function SolicitudesPage() {
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
 
   useEffect(() => {
-    if (loading) {
+    if (loadingUser) {
       return;
     }
 
     if (!user) {
       return router.replace('/login');
     }
-  }, [loading, user]);
+  }, [loadingUser, user]);
 
-  if (loading || !user) {
+  if (loadingUser || !user) {
     return null;
   }
 

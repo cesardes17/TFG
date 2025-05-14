@@ -21,7 +21,7 @@ export default function PerfilScreen() {
 
   if (!user) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { justifyContent: 'center' }]}>
         <StyledAlert variant='error' message='No hay usuario Activo' />
       </View>
     );
@@ -29,7 +29,9 @@ export default function PerfilScreen() {
   return (
     <View style={styles.container}>
       <ShowUserInfo screenLoading={setIsLoading} />
-      <InscripcionBolsa screenLoading={setIsLoading} />
+      {user.role === 'jugador' && !user.equipo && (
+        <InscripcionBolsa screenLoading={setIsLoading} />
+      )}
       <StyledButton
         variant='error'
         onPress={() => {

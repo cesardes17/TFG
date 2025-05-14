@@ -17,7 +17,11 @@ export default function SolicitudesScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   if (loadingTemporada || loadingUser || isLoading) {
-    return <ActivityIndicator size='large' color={theme.text.primary} />;
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size='large' color={theme.text.primary} />
+      </View>
+    );
   }
 
   if (!user || !temporada) {
@@ -39,6 +43,5 @@ export default function SolicitudesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
   },
 });

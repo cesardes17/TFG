@@ -6,13 +6,21 @@ import { useUser } from '../../contexts/UserContext';
 import type { WhereFilterOp } from 'firebase/firestore';
 import { FlatList, StyleSheet, View } from 'react-native';
 import StyledAlert from '../common/StyledAlert';
-import { Solicitud } from '../../types/Solicitud';
+import {
+  Solicitud,
+  solicitudSalirEquipo,
+  solicitudUnirseEquipo,
+} from '../../types/Solicitud';
 import SolicitudCard from './SolicitudCard';
 import BaseConfirmationModal, {
   ConfirmationType,
 } from '../common/BaseConfirmationModal';
 import StyledText from '../common/StyledText';
 import StyledTextInput from '../common/StyledTextInput';
+import rechazarSolicitud from '../../utils/solicitudes/rechazarSolicitud';
+import { useToast } from '../../contexts/ToastContext';
+import aceptarSolicitud from '../../utils/solicitudes/aceptarSolicitud';
+import { inscripcionesService } from '../../services/inscripcionesService';
 
 interface SolicitudesListProps {
   screenLoading: (isLoading: boolean) => void;
@@ -23,8 +31,14 @@ export default function SolicitudesList({
 }: SolicitudesListProps) {
   const { temporada } = useTemporadaContext();
   const { user } = useUser();
+  const { showToast } = useToast();
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(
+    null
+  );
+  const [dorsalesOcupados, setDorsalesOcupados] = useState<number[]>([]);
   const [inputModal, setInputModal] = useState('');
   const [inputError, setInputError] = useState('');
   const [mostrarInputModal, setMostrarInputModal] = useState(false);
@@ -53,7 +67,8 @@ export default function SolicitudesList({
     );
 
     if (res.success) {
-      const filteredSolicitudes = res.data || [];
+      const filteredSolicitudes =
+        res.data?.filter((sol) => sol.estado === 'pendiente') || [];
       setSolicitudes(filteredSolicitudes);
     }
   }, [temporada?.id, user?.uid, isAdmin]);
@@ -67,24 +82,118 @@ export default function SolicitudesList({
     }, [fetchSolicitudes])
   );
 
-  const onAcept = (solicitud: Solicitud) => {
+  const onAceptar = async (solicitud: Solicitud) => {
     console.log('aceptar Solicitud: ', solicitud);
-  };
-  const onRechazar = (solicitud: Solicitud) => {
-    console.log('rechazar Solicitud: ', solicitud);
+
+    // Si es “Unirse a Equipo” y el usuario es jugador...
+    if (solicitud.tipo === 'Unirse a Equipo' && user?.role === 'jugador') {
+      console.log('OBTENIENDO DORSALES');
+
+      // Usa directamente `solicitud.equipoObjetivo.id`, no selectedSolicitud
+      const equipoId = (solicitud as solicitudUnirseEquipo).equipoObjetivo.id;
+      const res = await inscripcionesService.getDorsalesByTeam(
+        temporada!.id,
+        equipoId
+      );
+      console.log('RESULTADO DE OBTENER DORSALES - ', res);
+      if (!res.success) {
+        throw new Error('Error al obtener los dorsales del equipo');
+      }
+      setDorsalesOcupados(res.data!);
+      setMostrarInputModal(true);
+    } else {
+      setDorsalesOcupados([]);
+      setMostrarInputModal(false);
+    }
+
+    // Ahora sí setea la solicitud seleccionada
+    setSelectedSolicitud(solicitud);
+    setModalTitle(
+      solicitud.tipo === 'Unirse a Equipo' && user?.role === 'jugador'
+        ? 'Introduzca su Dorsal para confirmar inscripción'
+        : '¿Está seguro de confirmar la solicitud?'
+    );
+    setModalType('update');
+    setModalVisible(true);
   };
 
-  const handleConfirm = () => {};
+  const onRechazar = (solicitud: Solicitud) => {
+    console.log('rechazar Solicitud: ', solicitud);
+    setModalTitle('¿Está seguro de rechazar la solicitud?');
+    setModalVisible(true);
+    setSelectedSolicitud(solicitud);
+    setMostrarInputModal(true);
+    setModalType('delete');
+  };
+
+  const handleConfirm = async () => {
+    screenLoading(true);
+    if (!selectedSolicitud || !temporada || !user) {
+      console.error(
+        'No hay temporada, no hay usuario, o no hay solicitud seleccionada'
+      );
+      return;
+    }
+
+    if (modalType === 'update') {
+      //validacion previa de input si es dorsal
+      if (
+        selectedSolicitud.tipo === 'Unirse a Equipo' &&
+        user.role === 'jugador'
+      ) {
+        const dorsal = parseInt(inputModal);
+        const isValidDorsal =
+          !isNaN(dorsal) && !dorsalesOcupados.includes(dorsal);
+        if (!isValidDorsal) {
+          setInputError('Dorsal no válido');
+          screenLoading(false);
+          return;
+        }
+      }
+
+      const res = await aceptarSolicitud(
+        temporada.id,
+        selectedSolicitud,
+        user,
+        inputModal
+      );
+      showToast(res.message, res.type);
+    } else {
+      const res = await rechazarSolicitud(
+        temporada.id,
+        selectedSolicitud,
+        user,
+        inputModal
+      );
+      showToast(res.message, res.type);
+    }
+    screenLoading(false);
+  };
 
   const renderInputModal = () => {
     return (
-      <StyledTextInput
-        multiline
-        placeholder='Introduce el motivo de rechazo'
-        value={inputModal}
-        onChangeText={setInputModal}
-        error={!!inputError}
-      />
+      <>
+        {dorsalesOcupados.length > 0 && (
+          <StyledText variant='secondary' style={{ marginBottom: 8 }}>
+            Dorsales ocupados: {dorsalesOcupados.join(', ')}
+          </StyledText>
+        )}
+        <StyledTextInput
+          multiline
+          placeholder={
+            selectedSolicitud!.tipo === 'Unirse a Equipo' &&
+            modalType === 'update'
+              ? 'Introduce tu dorsal'
+              : 'Motivo del rechazo'
+          }
+          value={inputModal}
+          onChangeText={setInputModal}
+          error={!!inputError}
+        />
+        {inputError.trim() !== '' && (
+          <StyledText variant='error'>{inputError}</StyledText>
+        )}
+      </>
     );
   };
 
@@ -92,13 +201,17 @@ export default function SolicitudesList({
     return (
       <SolicitudCard
         solicitud={item}
-        onAceptar={onAcept}
+        onAceptar={onAceptar}
         onRechazar={onRechazar}
       />
     );
   };
   return (
-    <>
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <FlatList
         data={solicitudes}
         keyExtractor={(i) => i.id}
@@ -114,11 +227,7 @@ export default function SolicitudesList({
       <BaseConfirmationModal
         visible={modalVisible}
         type={modalType}
-        title={
-          modalType === 'update'
-            ? '¿Confirmar aceptación?'
-            : '¿Motivo de rechazo?'
-        }
+        title={modalTitle}
         confirmLabel={modalType === 'update' ? 'Aceptar' : 'Rechazar'}
         cancelLabel='Cancelar'
         onCancel={() => {
@@ -129,7 +238,7 @@ export default function SolicitudesList({
       >
         {mostrarInputModal && renderInputModal()}
       </BaseConfirmationModal>
-    </>
+    </View>
   );
 }
 const styles = StyleSheet.create({

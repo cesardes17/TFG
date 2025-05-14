@@ -84,10 +84,11 @@ export const bolsaJugadoresService = {
     temporadaId: string,
     jugadorId: string
   ): Promise<ResultService<Boolean>> => {
+    console.log('jugadorID: ', jugadorId);
     try {
       const resGetDoc = await bolsaJugadoresService.getJugadorInscrito(
-        jugadorId,
-        temporadaId
+        temporadaId,
+        jugadorId
       );
       if (!resGetDoc.success || !resGetDoc.data) {
         throw new Error(

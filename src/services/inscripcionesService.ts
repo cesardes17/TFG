@@ -153,4 +153,29 @@ export const inscripcionesService = {
       };
     }
   },
+
+  deleteInscripcionById: async (
+    temporadaId: string,
+    docId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECTION, docId];
+      const res = await FirestoreService.deleteDocumentByPath(...path);
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al eliminar la inscripcion');
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al eliminar la inscripcion',
+      };
+    }
+  },
 };

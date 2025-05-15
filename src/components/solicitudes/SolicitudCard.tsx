@@ -2,10 +2,12 @@ import { useUser } from '../../contexts/UserContext';
 import {
   Solicitud,
   solicitudCrearEquipo,
+  solicitudDisolverEquipo,
   solicitudSalirEquipo,
   solicitudUnirseEquipo,
 } from '../../types/Solicitud';
 import SolicitudCrearEquipoCard from './SolicitudCrearEquipoCard';
+import SolicitudDisolverEquipoCard from './SolicitudDisolverEquipo';
 import SolicitudSalirEquipoCard from './SolicitudSalirEquipoCard';
 import SolicitudUnirseEquipoCard from './SolicitudUnirseEquipoCard';
 interface SolicitudCardProps {
@@ -47,6 +49,15 @@ export default function SolicitudCard({
       return (
         <SolicitudSalirEquipoCard
           solicitud={solicitud as solicitudSalirEquipo}
+          usuarioActual={userActual}
+          onAceptar={onAceptar}
+          onRechazar={onRechazar}
+        />
+      );
+    case 'Disolver Equipo':
+      return (
+        <SolicitudDisolverEquipoCard
+          solicitud={solicitud as solicitudDisolverEquipo}
           usuarioActual={userActual}
           onAceptar={onAceptar}
           onRechazar={onRechazar}

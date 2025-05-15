@@ -16,6 +16,7 @@ import InputFormik from '../InputFormik';
 import StyledAlert from '../../common/StyledAlert';
 import {
   solicitudCrearEquipo,
+  solicitudDisolverEquipo,
   solicitudSalirEquipo,
 } from '../../../types/Solicitud';
 import { BaseSolicitudService } from '../../../services/solicitudesService';
@@ -24,8 +25,9 @@ import { useTemporadaContext } from '../../../contexts/TemporadaContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { router } from 'expo-router';
 import { useUser } from '../../../contexts/UserContext';
-import { PlayerProfile } from '../../../types/User';
+import { PlayerProfile, PlayerUser } from '../../../types/User';
 import { equipoService } from '../../../services/equipoService';
+import { UserService } from '../../../services/userService';
 
 export type SolicitudTipo = 'createTeam' | 'leaveTeam' | 'dissolveTeam';
 
@@ -116,6 +118,15 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
                 'Error al obtener la informacion del equipo'
             );
           }
+          const capitanRes = await UserService.getUserProfile(
+            resEquipo.data.capitan.id
+          );
+          if (!capitanRes.success || !capitanRes.data) {
+            throw new Error(
+              capitanRes.errorMessage ||
+                'Error al obtener la informacion del capitan'
+            );
+          }
           const leaveTeamSolicitud: solicitudSalirEquipo = {
             id: getRandomUID(),
             estado: 'pendiente',
@@ -131,16 +142,48 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
             motivoSalida: values.leaveReason,
             equipoActual: (user as PlayerProfile)!.equipo!,
             capitanObjetivo: {
-              id: resEquipo.data.capitan.id,
-              nombre: resEquipo.data.capitan.nombre,
-              apellidos: resEquipo.data.capitan.apellidos,
-              correo: resEquipo.data.capitan.correo,
+              id: capitanRes.data.uid,
+              nombre: capitanRes.data.nombre,
+              apellidos: capitanRes.data.apellidos,
+              correo: capitanRes.data.correo,
+              photoURL: (capitanRes.data as PlayerUser).photoURL,
             },
           };
           const res = await BaseSolicitudService.setSolicitud(
             temporada!.id,
             leaveTeamSolicitud.id,
             leaveTeamSolicitud
+          );
+          if (!res.success || !res.data) {
+            throw new Error(res.errorMessage || 'Error creando solicitud');
+          }
+          showToast('Solicitud enviada', 'success');
+          router.back();
+          break;
+        }
+        case 'dissolveTeam': {
+          if (!values.dissolveReason) {
+            throw new Error('Por favor, ingresa un motivo');
+          }
+          const solicitud: solicitudDisolverEquipo = {
+            id: getRandomUID(),
+            estado: 'pendiente',
+            tipo: 'Disolver Equipo',
+            solicitante: {
+              id: user!.uid,
+              nombre: user!.nombre,
+              apellidos: user!.apellidos,
+              correo: user!.correo,
+              photoURL: (user as PlayerProfile).photoURL,
+            },
+            fechaCreacion: new Date().toISOString(),
+            motivoDisolucion: values.dissolveReason,
+            equipo: (user as PlayerProfile)!.equipo!,
+          };
+          const res = await BaseSolicitudService.setSolicitud(
+            temporada!.id,
+            solicitud.id,
+            solicitud
           );
           if (!res.success || !res.data) {
             throw new Error(res.errorMessage || 'Error creando solicitud');

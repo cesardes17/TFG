@@ -52,10 +52,8 @@ export const aceptarSalirEquipoSolicitud = async (
       );
     }
 
-    console.log('solicitud - Aceptar salida de equipo: ', solicitud);
     // Si fue aceptada, ejecutar efectos secundarios
     if (solicitud.estado === 'aceptada') {
-      console.log('❌ BORRANDO INSCRIPCION DEL JUGADOR');
       const resInscripcion = await inscripcionesService.deleteInscripcion(
         temporadaId,
         solicitud.solicitante.id
@@ -66,13 +64,10 @@ export const aceptarSalirEquipoSolicitud = async (
             'Error al eliminar la inscripción del jugador'
         );
       }
-      console.log('❌ ELIMINANDO EQUIPO DEL JUGADOR');
 
       const campo = {
         equipo: FirestoreService.getDeleteField(),
       };
-
-      console.log('❌ELIMINANDO CAMPO EQUIPO: ', campo); // TODO: Borrar este log una vez que se tenga confirmad
 
       const jugador = await UserService.UpdatePlayerProfile(
         solicitud.solicitante.id,

@@ -78,13 +78,32 @@ export type solicitudSalirEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
+    photoURL: string;
   };
   aprobadoCapitan?: boolean;
   fechaRespuestaCapitan?: string;
   motivoRespuestaCapitan?: string;
   motivoSalida: string;
 };
+
+export type solicitudDisolverEquipo = baseSolicitud & {
+  solicitante: {
+    id: string;
+    nombre: string;
+    apellidos: string;
+    correo: string;
+    photoURL: string;
+  };
+  equipo: {
+    id: string;
+    nombre: string;
+    escudoUrl: string;
+  };
+  motivoDisolucion: string;
+};
+
 export type Solicitud =
   | solicitudCrearEquipo
   | solicitudUnirseEquipo
-  | solicitudSalirEquipo;
+  | solicitudSalirEquipo
+  | solicitudDisolverEquipo;

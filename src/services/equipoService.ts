@@ -50,4 +50,28 @@ export const equipoService = {
       };
     }
   },
+  deleteEquipo: async (
+    temporadaId: string,
+    id: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECION, id];
+      const res = await FirestoreService.deleteDocumentByPath(...path);
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al eliminar el equipo');
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al eliminar el equipo',
+      };
+    }
+  },
 };

@@ -1,10 +1,12 @@
 import { ToastType } from '../../components/common/Toast';
 import { aceptarCrearEquipoSolicitud } from '../../services/solicitudesService';
+import { aceptarDisolverEquipoSolicitud } from '../../services/solicitudesService/disolveTeamSolicitud/aceptar';
 import { aceptarUnirseEquipoSolicitud } from '../../services/solicitudesService/joinTeamSolicitud/aceptar';
 import { aceptarSalirEquipoSolicitud } from '../../services/solicitudesService/leaveTeamSolicitud/aceptar';
 import {
   Solicitud,
   solicitudCrearEquipo,
+  solicitudDisolverEquipo,
   solicitudSalirEquipo,
   solicitudUnirseEquipo,
 } from '../../types/Solicitud';
@@ -63,6 +65,19 @@ export default async function (
       const res = await aceptarSalirEquipoSolicitud(
         temporadaId,
         solicitud as solicitudSalirEquipo,
+        usuarioActor
+      );
+      return {
+        type: res.success ? 'success' : 'error',
+        message: res.success
+          ? 'Solicitud aceptada'
+          : 'Error al aceptar la solicitud',
+      };
+    }
+    case 'Disolver Equipo': {
+      const res = await aceptarDisolverEquipoSolicitud(
+        temporadaId,
+        solicitud as solicitudDisolverEquipo,
         usuarioActor
       );
       return {

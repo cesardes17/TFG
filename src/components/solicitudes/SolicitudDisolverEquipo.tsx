@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
+import { solicitudDisolverEquipo, Solicitud } from '../../types/Solicitud';
+import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Solicitud, solicitudSalirEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
-import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 
 interface Props {
-  solicitud: solicitudSalirEquipo;
+  solicitud: solicitudDisolverEquipo;
   usuarioActual: {
     id: string;
     esAdmin?: boolean;
@@ -17,60 +17,35 @@ interface Props {
   onRechazar: (solicitud: Solicitud) => void;
 }
 
-export default function SolicitudSalirEquipoCard({
+export default function SolicitudDisolverEquipoCard({
   solicitud,
   usuarioActual,
   onAceptar,
   onRechazar,
 }: Props) {
   const {
-    solicitante,
-    equipoActual,
-    capitanObjetivo,
+    equipo,
+    motivoDisolucion,
     estado,
     fechaCreacion,
-    aprobadoCapitan,
-    fechaRespuestaCapitan,
-    motivoRespuestaCapitan,
-    fechaRespuestaAdmin,
+    solicitante,
     admin,
+    fechaRespuestaAdmin,
     respuestaAdmin,
-    motivoSalida,
   } = solicitud;
   const { theme } = useTheme();
 
   const formatearFecha = (fecha: string) => format(new Date(fecha), 'dd/MM/yy');
-
-  const esCapitan = usuarioActual.id === capitanObjetivo.id;
-  const esAdmin = usuarioActual.esAdmin === true;
-
   const puedeResponder =
-    estado === 'pendiente' &&
-    ((esCapitan && !fechaRespuestaCapitan) ||
-      (esAdmin && !fechaRespuestaAdmin));
-
-  const obtenerTextoEstado = () => {
-    switch (estado) {
-      case 'pendiente':
-        return 'Pendiente';
-      case 'aceptada':
-        return 'Aceptada';
-      case 'rechazada':
-        return 'Rechazada';
-      default:
-        return 'Desconocido';
-    }
-  };
+    estado === 'pendiente' && usuarioActual.esAdmin && !fechaRespuestaAdmin;
 
   const estiloSeccion = (sinBorde = false) => [
     styles.seccion,
-    {
-      borderColor: theme.border.primary,
-      ...(sinBorde && {
-        borderBottomWidth: 0,
-        marginBottom: 0,
-        paddingBottom: 0,
-      }),
+    { borderColor: theme.border.primary },
+    sinBorde && {
+      borderBottomWidth: 0,
+      marginBottom: 0,
+      paddingBottom: 0,
     },
   ];
 
@@ -81,19 +56,18 @@ export default function SolicitudSalirEquipoCard({
           style={[
             styles.estadoBadge,
             {
-              backgroundColor:
-                theme.background[
-                  estado === 'pendiente'
-                    ? 'warning'
-                    : estado === 'aceptada'
-                    ? 'success'
-                    : 'error'
-                ],
+              backgroundColor: theme.background[
+                estado === 'pendiente'
+                  ? 'warning'
+                  : estado === 'aceptada'
+                  ? 'success'
+                  : 'error'
+              ] as string,
             },
           ]}
         >
           <StyledText variant='light' size='small' style={styles.estadoTexto}>
-            {obtenerTextoEstado()}
+            {estado.charAt(0).toUpperCase() + estado.slice(1)}
           </StyledText>
         </View>
         <StyledText
@@ -101,7 +75,7 @@ export default function SolicitudSalirEquipoCard({
           size='small'
           style={styles.fechaCreacion}
         >
-          Solicitud de salir del equipo
+          Disolver equipo
         </StyledText>
         <StyledText
           variant='secondary'
@@ -114,53 +88,44 @@ export default function SolicitudSalirEquipoCard({
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Jugador
+          Equipo a disolver
         </StyledText>
-        <View style={styles.infoJugador}>
+        <View style={styles.infoEquipo}>
           <ProgressiveImage
-            uri={capitanObjetivo.photoURL || 'https://via.placeholder.com/50'}
-            containerStyle={styles.fotoJugador}
+            uri={equipo.escudoUrl || 'https://via.placeholder.com/40'}
+            containerStyle={styles.escudoEquipo}
           />
-          <View style={styles.datosJugador}>
-            <StyledText variant='primary' style={styles.nombreCompleto}>
-              {capitanObjetivo.nombre} {capitanObjetivo.apellidos}
-            </StyledText>
-            <StyledText variant='secondary' style={styles.correo}>
-              {capitanObjetivo.correo}
-            </StyledText>
-          </View>
-          <View style={styles.contenedorIconoEstado}>
-            {aprobadoCapitan === true ? (
-              <CircleCheckIcon size={24} color={theme.background.success} />
-            ) : aprobadoCapitan === false ? (
-              <CloseCircleoIcon size={24} color={theme.background.error} />
-            ) : estado === 'pendiente' ? (
-              <ClockCircleOIcon size={24} color={theme.background.warning} />
-            ) : null}
-          </View>
+          <StyledText variant='primary' style={styles.nombreEquipo}>
+            {equipo.nombre}
+          </StyledText>
         </View>
       </View>
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Equipo actual
+          Motivo
         </StyledText>
-        <View style={styles.infoEquipo}>
-          <ProgressiveImage
-            uri={equipoActual.escudoUrl || 'https://via.placeholder.com/40'}
-            containerStyle={styles.escudoEquipo}
-          />
-          <StyledText variant='primary' style={styles.nombreEquipo}>
-            {equipoActual.nombre}
-          </StyledText>
-        </View>
+        <StyledText variant='primary'>{motivoDisolucion}</StyledText>
       </View>
 
       <View style={estiloSeccion(true)}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Motivo
+          Solicitante
         </StyledText>
-        <StyledText variant='primary'>{motivoSalida}</StyledText>
+        <View style={styles.infoSolicitante}>
+          <ProgressiveImage
+            uri={solicitante.photoURL}
+            containerStyle={styles.fotoSolicitante}
+          />
+          <View style={styles.datosSolicitante}>
+            <StyledText variant='primary' style={styles.nombreCompleto}>
+              {solicitante.nombre} {solicitante.apellidos}
+            </StyledText>
+            <StyledText variant='secondary' style={styles.correo}>
+              {solicitante.correo}
+            </StyledText>
+          </View>
+        </View>
       </View>
 
       <View
@@ -203,28 +168,14 @@ export default function SolicitudSalirEquipoCard({
               { backgroundColor: theme.background.primary },
             ]}
           >
-            {fechaRespuestaAdmin || fechaRespuestaCapitan ? (
+            {fechaRespuestaAdmin && (
               <StyledText style={styles.textoInfoResolucion}>
-                Resuelta el{' '}
-                {formatearFecha(fechaRespuestaAdmin || fechaRespuestaCapitan!)}
+                Resuelta el {formatearFecha(fechaRespuestaAdmin)}
               </StyledText>
-            ) : null}
-            <StyledText style={styles.textoInfoResolucion}>
-              Respondida por{' '}
-              {fechaRespuestaAdmin
-                ? `${admin?.nombre ?? 'Administrador'} ${
-                    admin?.apellidos ?? ''
-                  }`
-                : `${capitanObjetivo.nombre} ${capitanObjetivo.apellidos}`}{' '}
-              (
-              {fechaRespuestaAdmin
-                ? admin?.correo ?? ''
-                : capitanObjetivo.correo}
-              )
-            </StyledText>
-            {estado === 'rechazada' && motivoRespuestaCapitan && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {motivoRespuestaCapitan}
+            )}
+            {admin && (
+              <StyledText style={styles.textoInfoResolucion}>
+                Respondida por {admin.nombre} {admin.apellidos} ({admin.correo})
               </StyledText>
             )}
             {estado === 'rechazada' && respuestaAdmin && (
@@ -279,35 +230,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
-  infoJugador: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fotoJugador: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  datosJugador: {
-    flex: 1,
-    marginHorizontal: 12,
-  },
-  contenedorIconoEstado: {
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nombreCompleto: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  correo: {
-    fontSize: 14,
-  },
-  dorsal: {
-    fontSize: 14,
-    marginTop: 4,
-  },
   infoEquipo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -320,8 +242,37 @@ const styles = StyleSheet.create({
   nombreEquipo: {
     fontSize: 16,
     fontWeight: 'bold',
+    flex: 1,
   },
-  infoSolicitante: {},
+  contenedorIconoEstado: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoSolicitante: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fotoSolicitante: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  datosSolicitante: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  nombreCompleto: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  correo: {
+    fontSize: 14,
+  },
+  dorsal: {
+    fontSize: 14,
+    marginTop: 4,
+  },
   bloqueAccionesFooter: {
     marginTop: 16,
     paddingTop: 16,
@@ -341,7 +292,6 @@ const styles = StyleSheet.create({
   },
   esperandoRespuesta: {
     textAlign: 'center',
-    color: '#666',
     fontStyle: 'italic',
   },
   infoResolucion: {
@@ -350,12 +300,10 @@ const styles = StyleSheet.create({
   },
   textoInfoResolucion: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 4,
   },
   textoMotivoRechazo: {
     fontSize: 14,
-    color: '#F44336',
     marginTop: 8,
     fontStyle: 'italic',
   },

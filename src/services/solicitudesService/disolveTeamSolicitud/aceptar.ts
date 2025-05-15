@@ -1,0 +1,100 @@
+import { ResultService } from '../../../types/ResultService';
+import { solicitudDisolverEquipo } from '../../../types/Solicitud';
+import { User } from '../../../types/User';
+import { FirestoreService } from '../../core/firestoreService';
+import { equipoService } from '../../equipoService';
+import { inscripcionesService } from '../../inscripcionesService';
+import { UserService } from '../../userService';
+import { BaseSolicitudService } from '../baseSolicitud';
+
+export const aceptarDisolverEquipoSolicitud = async (
+  temporadaId: string,
+  solicitud: solicitudDisolverEquipo,
+  usuario: User
+): Promise<ResultService<solicitudDisolverEquipo>> => {
+  try {
+    //PASO 1: OBTENEMOS INSCRIPCIONES DEL EQUIPO
+    const res = await inscripcionesService.getInscripcionesByTeam(
+      temporadaId,
+      solicitud.equipo.id
+    );
+    if (!res.success || !res.data || res.data.length === 0) {
+      throw new Error(res.errorMessage);
+    }
+    const inscripciones = res.data;
+    //PASO 2: PARA CADA INSCRIPCION, LA ELIMINAMOS, Y ACTUALIZAMOS EL PERFIL DEL JUGADOR
+    inscripciones.forEach(async (inscripcion) => {
+      //PASO 2.1: ELIMINAMOS LA INSCRIPCION
+      await inscripcionesService.deleteInscripcionById(
+        temporadaId,
+        inscripcion.id
+      );
+      //PASO 2.2: QUITAMOS EL EQUIPO DEL PERFIL DEL JUGADOR
+      const campo = {
+        equipo: FirestoreService.getDeleteField(),
+      };
+
+      const jugador = await UserService.UpdatePlayerProfile(
+        solicitud.solicitante.id,
+        campo
+      );
+      if (!jugador.success || !jugador.data) {
+        throw new Error(jugador.errorMessage);
+      }
+    });
+
+    //PASO 3: ACTUALIZAMOS LA SOLICITUD
+    solicitud = {
+      ...solicitud,
+      estado: 'aceptada',
+      fechaRespuestaAdmin: new Date().toString(),
+      admin: {
+        id: usuario.uid,
+        nombre: usuario.nombre,
+        apellidos: usuario.apellidos,
+        correo: usuario.correo,
+      },
+    };
+    const resSol = await BaseSolicitudService.setSolicitud(
+      temporadaId,
+      solicitud.id,
+      solicitud
+    );
+    if (!resSol.success) {
+      throw new Error(resSol.errorMessage);
+    }
+
+    //PASO 4: ACTUALIZAMOS EL ROLE DEL SOLICITANTE
+    const roleRes = await UserService.UpdatePlayerProfile(
+      solicitud.solicitante.id,
+      {
+        role: 'jugador',
+      }
+    );
+    if (!roleRes.success) {
+      throw new Error(roleRes.errorMessage);
+    }
+
+    //PASO 5: Eliminamos el equipo
+    const resEquipo = await equipoService.deleteEquipo(
+      temporadaId,
+      solicitud.equipo.id
+    );
+    if (!resEquipo.success) {
+      throw new Error(resEquipo.errorMessage);
+    }
+
+    return {
+      success: true,
+      data: solicitud,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      errorMessage:
+        error instanceof Error
+          ? error.message
+          : 'Error al aceptar la solicitud',
+    };
+  }
+};

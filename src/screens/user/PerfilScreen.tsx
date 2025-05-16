@@ -1,28 +1,28 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
-import StyledAlert from '../../components/common/StyledAlert';
+
 import StyledButton from '../../components/common/StyledButton';
 import { AuthService } from '../../services/core/authService';
 import ShowUserInfo from '../../components/user/ShowUserInfo';
 import InscripcionBolsa from '../../components/bolsaJugadores/InscripcionBolsa';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { router } from 'expo-router';
 
 export default function PerfilScreen() {
-  const { theme } = useTheme();
   const { loadingTemporada } = useTemporadaContext();
   const { user, loadingUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
   if (loadingTemporada || loadingUser || isLoading) {
-    return <ActivityIndicator size='large' color={theme.text.primary} />;
+    return <LoadingIndicator text='Cargando informacion...' />;
   }
 
   if (!user) {
     return (
       <View style={[styles.container, { justifyContent: 'center' }]}>
-        <StyledAlert variant='error' message='No hay usuario Activo' />
+        <LoadingIndicator text='Cargando informacion...' />
       </View>
     );
   }
@@ -38,6 +38,7 @@ export default function PerfilScreen() {
           setIsLoading(true);
           AuthService.logout();
           setIsLoading(false);
+          router.replace('/');
         }}
         title='Cerrar Sesión'
       />

@@ -82,11 +82,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderRadius: 8,
+    marginTop: 8,
     marginBottom: 16,
     flexDirection: 'row',
+    justifyContent: 'center',
   },
   text: {
     fontSize: 14,
     textAlign: 'center',
+    alignSelf: 'center',
   },
 });

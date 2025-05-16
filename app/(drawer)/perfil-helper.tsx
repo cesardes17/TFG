@@ -1,23 +1,30 @@
 // app/profile.tsx
-import { View, Text } from 'react-native';
 import { useUser } from '../../src/contexts/UserContext';
-import { useEffect } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import PageContainer from '../../src/components/layout/PageContainer';
 import PerfilScreen from '../../src/screens/user/PerfilScreen';
 export default function Profile() {
-  const { user, loading } = useUser();
+  const { user, loadingUser, refetchUser } = useUser();
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log('focus');
+      refetchUser();
+    }, [refetchUser])
+  );
 
   useEffect(() => {
-    if (loading) {
+    if (loadingUser) {
       return;
     }
     if (!user) {
+      console.log('no user');
       return router.replace('/login');
     }
-  }, [loading, user]);
+  }, [loadingUser, user]);
 
-  if (loading) {
+  if (loadingUser) {
     return null;
   }
 

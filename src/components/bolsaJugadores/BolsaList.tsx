@@ -3,6 +3,8 @@ import { FlatList, StyleSheet, View, Text } from 'react-native';
 import PlayerCard from './BolsaCard';
 import { BolsaJugador } from '../../types/BolsaJugador';
 import StyledAlert from '../common/StyledAlert';
+import { useState } from 'react';
+import BaseConfirmationModal from '../common/BaseConfirmationModal';
 
 interface Jugador {
   id: string;
@@ -32,6 +34,9 @@ const PlayerList: React.FC<PlayerListProps> = ({
   onEnviarSolicitud,
   isAdmin,
 }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [jugadorSeleccionado, setJugadorSeleccionado] =
+    useState<Jugador | null>(null);
   return (
     <View style={styles.container}>
       <FlatList
@@ -44,7 +49,10 @@ const PlayerList: React.FC<PlayerListProps> = ({
             solicitudEnviada={
               estadosSolicitudes?.[item.jugador.id] === 'pendiente'
             }
-            onEnviarSolicitud={() => onEnviarSolicitud?.(item.jugador.id)}
+            onEnviarSolicitud={() => {
+              setJugadorSeleccionado(item.jugador);
+              setModalVisible(true);
+            }}
             usuarioActualId={usuarioActualId}
             isAdmin={isAdmin}
           />
@@ -57,6 +65,21 @@ const PlayerList: React.FC<PlayerListProps> = ({
           );
         }}
       />
+      {jugadorSeleccionado && (
+        <BaseConfirmationModal
+          visible={modalVisible}
+          title='Confirmar solicitud'
+          description={`¿Deseas enviar una solicitud a ${jugadorSeleccionado.nombre} ${jugadorSeleccionado.apellidos}?`}
+          type='create'
+          onCancel={() => setModalVisible(false)}
+          onConfirm={async () => {
+            if (jugadorSeleccionado) {
+              onEnviarSolicitud?.(jugadorSeleccionado.id);
+              setModalVisible(false);
+            }
+          }}
+        />
+      )}
     </View>
   );
 };

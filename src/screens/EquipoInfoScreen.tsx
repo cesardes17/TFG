@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { equipoService } from '../services/equipoService';
 import { Equipo } from '../types/Equipo';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import StyledAlert from '../components/common/StyledAlert';
 import EquipoInfoCard from '../components/equipo/EquipoInfoCard';
 import TablaJugadores from '../components/equipo/TablaJugadores';
 import { Inscripcion } from '../types/Inscripcion';
 import { inscripcionesService } from '../services/inscripcionesService';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 
 interface EquipoInfoScreenProps {
   equipoId: string;
@@ -53,17 +54,7 @@ export default function EquipoInfoScreen({ equipoId }: EquipoInfoScreenProps) {
   }, [temporada]);
 
   if (isLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <ActivityIndicator size='large' color={theme.text.primary} />
-      </View>
-    );
+    return <LoadingIndicator text='Cargando información...' />;
   }
   if (errorMsg || !equipoInfo || !jugadores) {
     return (

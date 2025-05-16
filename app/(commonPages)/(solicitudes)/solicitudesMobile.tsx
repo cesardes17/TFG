@@ -1,8 +1,23 @@
+import { useEffect } from 'react';
 import HeaderConfig from '../../../src/components/layout/HeaderConfig';
 import PageContainer from '../../../src/components/layout/PageContainer';
+import { useUser } from '../../../src/contexts/UserContext';
 import SolicitudesScreen from '../../../src/screens/solicitud/SolicitudesScreen';
+import { router } from 'expo-router';
 
 export default function SolicitudesPage() {
+  const { user, loadingUser } = useUser();
+
+  useEffect(() => {
+    if (loadingUser) return;
+    if (!user) return router.replace('/');
+    //no tienen acceso a esta pagina
+    if (user.role === 'arbitro' || user.role === 'espectador')
+      return router.replace('/');
+  }, []);
+
+  if (loadingUser) return null;
+
   return (
     <PageContainer>
       <HeaderConfig title='Solicitudes' backLabel='Más' />

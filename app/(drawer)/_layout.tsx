@@ -7,9 +7,9 @@ import { useTheme } from '../../src/contexts/ThemeContext';
 
 export default function WebLayout() {
   const { theme } = useTheme();
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
 
-  if (loading) return null;
+  if (loadingUser) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

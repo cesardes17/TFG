@@ -1,4 +1,3 @@
-// src/context/UserContext.tsx
 import React, {
   createContext,
   useState,
@@ -6,14 +5,12 @@ import React, {
   useContext,
   ReactNode,
 } from 'react';
-
 import { AuthService } from '../services/core/authService';
-
-import type { User } from '../types/User'; // <— importa tu tipo User
 import { UserService } from '../services/userService';
+import type { User } from '../types/User';
 
 interface UserContextValue {
-  user: User | null; // ahora usa User (PlayerUser u OtherUser)
+  user: User | null;
   loadingUser: boolean;
   error?: string;
   refetchUser: () => Promise<void>;
@@ -30,29 +27,62 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState<string>();
 
-  const loadUserProfile = async (uid: string) => {
-    const MAX_RETRIES = 10;
-    let retries = 0;
-    let result;
-    do {
-      result = await UserService.getUserProfile(uid);
+  /**
+   * Carga el perfil desde Firestore con retry
+   */
+  const loadUserProfile = async (uid: string): Promise<void> => {
+    setLoadingUser(true); // solo se usa aquí en el ciclo de vida inicial
+    try {
+      const MAX_RETRIES = 10;
+      let retries = 0;
+      let result;
+
+      do {
+        result = await UserService.getUserProfile(uid);
+        if (result.success && result.data) {
+          setUser(result.data);
+          setError(undefined);
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 300));
+        retries++;
+      } while (retries < MAX_RETRIES);
+
+      if (!result?.success || !result.data) {
+        console.error('❌ No se pudo obtener el perfil de usuario');
+        setUser(null);
+        setError('Usuario no encontrado');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar usuario');
+      setUser(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+
+  /**
+   * Refresca el usuario manualmente desde cualquier componente
+   * pero SIN afectar el `loadingUser` global ni resetear el estado
+   */
+  const refetchUser = async (): Promise<void> => {
+    try {
+      const current = await AuthService.getCurrentUser();
+      if (!current?.uid) return;
+
+      const result = await UserService.getUserProfile(current.uid);
       if (result.success && result.data) {
         setUser(result.data);
-        return;
+        setError(undefined);
       }
-      await new Promise((r) => setTimeout(r, 500));
-      retries++;
-    } while (retries < MAX_RETRIES);
-
-    console.error('Perfil de usuario no encontrado tras registro:', uid);
-    setUser(null);
+    } catch (err: any) {
+      console.error('Error al refetch del usuario:', err.message);
+    }
   };
 
-  const refetchUser = async () => {
-    if (!user?.uid) return;
-    await loadUserProfile(user.uid); // ✅ Recargar desde Firestore
-  };
-
+  /**
+   * Suscripción al estado de autenticación
+   */
   useEffect(() => {
     const unsubscribe = AuthService.onAuthChange(async (fbUser) => {
       if (!fbUser) {
@@ -61,13 +91,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       await loadUserProfile(fbUser.uid);
-      setLoadingUser(false);
     });
     return unsubscribe;
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loadingUser, error, refetchUser }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loadingUser,
+        error,
+        refetchUser,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

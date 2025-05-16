@@ -4,6 +4,7 @@ import {
   signOutUser,
   onAuthStateChangedListener,
   deleteCurrentUser, // 👈 importa la nueva función
+  getCurrentUser as getCurrentUserFromFirebase, // ⬅ alias para evitar colisión
 } from '../../api/authFirebase';
 import type { ResultService } from '../../types/ResultService';
 import { translateAuthError } from '../../utils/errorTranslator';
@@ -59,6 +60,17 @@ export const AuthService = {
         errorMessage:
           error?.message ?? 'No se pudo eliminar el usuario actual.',
       };
+    }
+  },
+
+  getCurrentUser: async (): Promise<any> => {
+    try {
+      const user = await getCurrentUserFromFirebase();
+      if (!user) throw new Error('No hay usuario autenticado');
+      return user;
+    } catch (error) {
+      console.error('Error al obtener el usuario actual:', error);
+      return null;
     }
   },
 

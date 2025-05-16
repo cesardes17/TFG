@@ -1,27 +1,41 @@
-// app/profile.tsx
-
+// app/(tabs)/perfil-helper.tsx
 import PageContainer from '../../src/components/layout/PageContainer';
-import StyledText from '../../src/components/common/StyledText';
 import { useUser } from '../../src/contexts/UserContext';
-import { useEffect } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import PerfilScreen from '../../src/screens/user/PerfilScreen';
+import LoadingIndicator from '../../src/components/common/LoadingIndicator';
 
 export default function Profile() {
-  const { user, loading } = useUser();
+  const { user, loadingUser, refetchUser } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true); // esto no es necesario, pero lo dejo por si acaso
+      refetchUser().then(() => {
+        setIsLoading(false);
+      }); // ya maneja loadingUser internamente
+    }, [])
+  );
 
   useEffect(() => {
-    if (loading) {
-      return;
-    }
+    console.log('loadingUser: ', loadingUser);
+    console.log('user: ', user);
+    if (loadingUser || isLoading) return;
     if (!user) {
-      return router.replace('/login');
+      return router.push('/login');
     }
-  }, [loading, user]);
+  }, [loadingUser, user]);
 
-  if (loading) {
-    return null;
+  if (loadingUser || isLoading) {
+    return (
+      <PageContainer>
+        <LoadingIndicator text='Cargando datos' />
+      </PageContainer>
+    );
   }
+
   return (
     <PageContainer>
       <PerfilScreen />

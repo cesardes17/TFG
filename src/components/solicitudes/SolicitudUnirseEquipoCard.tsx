@@ -1,7 +1,6 @@
 import type React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Solicitud, solicitudUnirseEquipo } from '../../types/Solicitud';
 import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -39,9 +38,7 @@ export default function SolicitudUnirseEquipoCard({
   } = solicitud;
   const { theme } = useTheme();
 
-  const formatearFecha = (fecha: string) => {
-    return format(new Date(fecha), 'dd/MM/yy');
-  };
+  const formatearFecha = (fecha: string) => format(new Date(fecha), 'dd/MM/yy');
 
   const esJugadorObjetivo = usuarioActual.id === jugadorObjetivo.id;
   const esAdmin = usuarioActual.esAdmin === true;
@@ -50,19 +47,6 @@ export default function SolicitudUnirseEquipoCard({
     estado === 'pendiente' &&
     ((esJugadorObjetivo && !fechaRespuestaJugador) ||
       (esAdmin && !fechaRespuestaAdmin));
-
-  const obtenerColorEstado = () => {
-    switch (estado) {
-      case 'pendiente':
-        return '#FFC107';
-      case 'aceptada':
-        return '#4CAF50';
-      case 'rechazada':
-        return '#F44336';
-      default:
-        return '#9E9E9E';
-    }
-  };
 
   const obtenerTextoEstado = () => {
     switch (estado) {
@@ -77,16 +61,9 @@ export default function SolicitudUnirseEquipoCard({
     }
   };
 
-  const estiloSeccion = (sinBorde = false) => [
+  const estiloSeccion = () => [
     styles.seccion,
-    {
-      borderColor: theme.border.primary,
-      ...(sinBorde && {
-        borderBottomWidth: 0,
-        marginBottom: 0,
-        paddingBottom: 0,
-      }),
-    },
+    { borderColor: theme.border.primary },
   ];
 
   return (
@@ -127,6 +104,7 @@ export default function SolicitudUnirseEquipoCard({
         </StyledText>
       </View>
 
+      {/* Jugador que debe aprobar */}
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Jugador
@@ -159,41 +137,43 @@ export default function SolicitudUnirseEquipoCard({
         </View>
       </View>
 
+      {/* Solicitante y equipo en la misma fila */}
       <View style={estiloSeccion()}>
-        <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Equipo
-        </StyledText>
-        <View style={styles.infoEquipo}>
-          <ProgressiveImage
-            uri={equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40'}
-            containerStyle={styles.escudoEquipo}
-          />
-          <StyledText variant='primary' style={styles.nombreEquipo}>
-            {equipoObjetivo.nombre}
-          </StyledText>
+        <View style={styles.filaDual}>
+          {/* Solicitante */}
+          <View style={styles.columnaMitad}>
+            <StyledText variant='secondary' style={styles.tituloSeccion}>
+              Solicitante
+            </StyledText>
+            <StyledText variant='primary' style={styles.nombreCompleto}>
+              {solicitante.nombre} {solicitante.apellidos}
+            </StyledText>
+            <StyledText variant='secondary' style={styles.correo}>
+              {solicitante.correo}
+            </StyledText>
+          </View>
+          {/* Equipo */}
+          <View style={styles.columnaMitad}>
+            <StyledText variant='secondary' style={styles.tituloSeccion}>
+              Equipo
+            </StyledText>
+            <View style={styles.infoEquipo}>
+              <ProgressiveImage
+                uri={
+                  equipoObjetivo.escudoUrl || 'https://via.placeholder.com/40'
+                }
+                containerStyle={styles.escudoEquipo}
+              />
+              <StyledText variant='primary' style={styles.nombreEquipo}>
+                {equipoObjetivo.nombre}
+              </StyledText>
+            </View>
+          </View>
         </View>
       </View>
 
-      <View style={estiloSeccion(true)}>
-        <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Solicitante
-        </StyledText>
-        <View style={styles.infoSolicitante}>
-          <StyledText variant='primary' style={styles.nombreCompleto}>
-            {solicitante.nombre} {solicitante.apellidos}
-          </StyledText>
-          <StyledText variant='secondary' style={styles.correo}>
-            {solicitante.correo}
-          </StyledText>
-        </View>
-      </View>
-
-      <View
-        style={[
-          styles.bloqueAccionesFooter,
-          { borderTopColor: theme.border.primary },
-        ]}
-      >
+      {/* Acciones o resultado */}
+      <View>
         {estado === 'pendiente' ? (
           puedeResponder ? (
             <View style={styles.botonesAccion}>
@@ -228,56 +208,35 @@ export default function SolicitudUnirseEquipoCard({
               { backgroundColor: theme.background.primary },
             ]}
           >
-            {(() => {
-              const fechaRespuesta =
-                fechaRespuestaAdmin && fechaRespuestaJugador
-                  ? new Date(fechaRespuestaAdmin) >
-                    new Date(fechaRespuestaJugador)
-                    ? fechaRespuestaAdmin
-                    : fechaRespuestaJugador
-                  : fechaRespuestaAdmin || fechaRespuestaJugador;
-
-              const esRespuestaAdmin =
-                fechaRespuestaAdmin &&
-                (!fechaRespuestaJugador ||
-                  new Date(fechaRespuestaAdmin) >
-                    new Date(fechaRespuestaJugador));
-
-              const nombreRespondedor = esRespuestaAdmin
-                ? admin
-                  ? `${admin.nombre} ${admin.apellidos}`
-                  : 'Administrador'
-                : `${jugadorObjetivo.nombre} ${jugadorObjetivo.apellidos}`;
-
-              const correoRespondedor = esRespuestaAdmin
-                ? admin
-                  ? admin.correo
-                  : ''
-                : jugadorObjetivo.correo;
-
-              return (
-                <>
-                  {fechaRespuesta && (
-                    <StyledText style={styles.textoInfoResolucion}>
-                      Resuelta el {formatearFecha(fechaRespuesta)}
-                    </StyledText>
-                  )}
-                  <StyledText style={styles.textoInfoResolucion}>
-                    Respondida por {nombreRespondedor} ({correoRespondedor})
-                  </StyledText>
-                  {estado === 'rechazada' && motivoRespuestaJugador && (
-                    <StyledText style={styles.textoMotivoRechazo}>
-                      Motivo del rechazo: {motivoRespuestaJugador}
-                    </StyledText>
-                  )}
-                  {estado === 'rechazada' && respuestaAdmin && (
-                    <StyledText style={styles.textoMotivoRechazo}>
-                      Motivo del rechazo: {respuestaAdmin}
-                    </StyledText>
-                  )}
-                </>
-              );
-            })()}
+            {fechaRespuestaAdmin || fechaRespuestaJugador ? (
+              <StyledText style={styles.textoInfoResolucion}>
+                Resuelta el{' '}
+                {formatearFecha(fechaRespuestaAdmin || fechaRespuestaJugador!)}
+              </StyledText>
+            ) : null}
+            <StyledText style={styles.textoInfoResolucion}>
+              Respondida por{' '}
+              {fechaRespuestaAdmin
+                ? `${admin?.nombre ?? 'Administrador'} ${
+                    admin?.apellidos ?? ''
+                  }`
+                : `${jugadorObjetivo.nombre} ${jugadorObjetivo.apellidos}`}{' '}
+              (
+              {fechaRespuestaAdmin
+                ? admin?.correo ?? ''
+                : jugadorObjetivo.correo}
+              )
+            </StyledText>
+            {estado === 'rechazada' && motivoRespuestaJugador && (
+              <StyledText style={styles.textoMotivoRechazo}>
+                Motivo del rechazo: {motivoRespuestaJugador}
+              </StyledText>
+            )}
+            {estado === 'rechazada' && respuestaAdmin && (
+              <StyledText style={styles.textoMotivoRechazo}>
+                Motivo del rechazo: {respuestaAdmin}
+              </StyledText>
+            )}
           </View>
         )}
       </View>
@@ -367,15 +326,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  infoSolicitante: {},
-  bloqueAccionesFooter: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
+
+  filaDual: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  columnaMitad: {
+    flex: 1,
   },
   botonesAccion: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
   },
   boton: {
     paddingVertical: 10,

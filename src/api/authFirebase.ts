@@ -76,3 +76,12 @@ export async function deleteCurrentUser(): Promise<void> {
 
   throw new Error('No hay usuario autenticado');
 }
+
+export async function getCurrentUser() {
+  if (isWeb) {
+    const { getAuth } = await import('firebase/auth');
+    const auth = getAuth();
+    return auth.currentUser;
+  }
+  return nativeAuth.currentUser;
+}

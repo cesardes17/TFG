@@ -114,7 +114,7 @@ export default function SolicitudSalirEquipoCard({
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Jugador
+          Capitán
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
@@ -143,16 +143,39 @@ export default function SolicitudSalirEquipoCard({
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Equipo actual
+          Información
         </StyledText>
-        <View style={styles.infoEquipo}>
-          <ProgressiveImage
-            uri={equipoActual.escudoUrl || 'https://via.placeholder.com/40'}
-            containerStyle={styles.escudoEquipo}
-          />
-          <StyledText variant='primary' style={styles.nombreEquipo}>
-            {equipoActual.nombre}
-          </StyledText>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1 }}>
+            <StyledText variant='secondary'>Solicitante</StyledText>
+            <View style={styles.infoJugador}>
+              <ProgressiveImage
+                uri={solicitante.photoURL || 'https://via.placeholder.com/40'}
+                containerStyle={styles.fotoJugador}
+              />
+              <View style={styles.datosJugador}>
+                <StyledText variant='primary' style={styles.nombreCompleto}>
+                  {solicitante.nombre} {solicitante.apellidos}
+                </StyledText>
+                <StyledText variant='secondary' style={styles.correo}>
+                  {solicitante.correo}
+                </StyledText>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <StyledText variant='secondary'>Equipo actual</StyledText>
+            <View style={styles.infoEquipo}>
+              <ProgressiveImage
+                uri={equipoActual.escudoUrl || 'https://via.placeholder.com/40'}
+                containerStyle={styles.escudoEquipo}
+              />
+              <StyledText variant='primary' style={styles.nombreEquipo}>
+                {equipoActual.nombre}
+              </StyledText>
+            </View>
+          </View>
         </View>
       </View>
 

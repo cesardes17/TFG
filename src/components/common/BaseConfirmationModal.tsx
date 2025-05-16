@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, View, Text, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 
@@ -9,7 +9,7 @@ type Props = {
   visible: boolean;
   title: string;
   description?: string;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>; // O async callback
   onCancel: () => void;
   type?: ConfirmationType;
   confirmLabel?: string;
@@ -29,6 +29,7 @@ export default function BaseConfirmationModal({
   children,
 }: Props) {
   const { theme } = useTheme();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const getConfirmColor = () => {
     switch (type) {
@@ -43,6 +44,15 @@ export default function BaseConfirmationModal({
     }
   };
 
+  const handleConfirm = async () => {
+    setIsProcessing(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsProcessing(false); // Se podría eliminar el modal desde fuera
+    }
+  };
+
   return (
     <Modal animationType='fade' transparent visible={visible}>
       <Pressable
@@ -52,7 +62,7 @@ export default function BaseConfirmationModal({
           alignItems: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         }}
-        onPress={onCancel}
+        onPress={!isProcessing ? onCancel : undefined}
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
@@ -76,40 +86,52 @@ export default function BaseConfirmationModal({
           >
             {title}
           </StyledText>
-          {description && (
+
+          {description && !isProcessing && (
             <Text style={{ color: theme.text.secondary, marginBottom: 20 }}>
               {description}
             </Text>
           )}
 
-          {children && <View style={{ marginBottom: 20 }}>{children}</View>}
+          {children && !isProcessing && (
+            <View style={{ marginBottom: 20 }}>{children}</View>
+          )}
 
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-            <Pressable
-              onPress={onCancel}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                backgroundColor: '#B6B3B3B0',
-                borderRadius: 8,
-                marginRight: 10,
-              }}
-            >
-              <Text style={{ color: theme.text.primary }}>{cancelLabel}</Text>
-            </Pressable>
+          {isProcessing ? (
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
+              <ActivityIndicator size='small' color={theme.text.primary} />
+              <Text style={{ color: theme.text.secondary, marginTop: 8 }}>
+                Procesando...
+              </Text>
+            </View>
+          ) : (
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <Pressable
+                onPress={onCancel}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  backgroundColor: '#B6B3B3B0',
+                  borderRadius: 8,
+                  marginRight: 10,
+                }}
+              >
+                <Text style={{ color: theme.text.primary }}>{cancelLabel}</Text>
+              </Pressable>
 
-            <Pressable
-              onPress={onConfirm}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                backgroundColor: getConfirmColor(),
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ color: 'white' }}>{confirmLabel}</Text>
-            </Pressable>
-          </View>
+              <Pressable
+                onPress={handleConfirm}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  backgroundColor: getConfirmColor(),
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: 'white' }}>{confirmLabel}</Text>
+              </Pressable>
+            </View>
+          )}
         </Pressable>
       </Pressable>
     </Modal>

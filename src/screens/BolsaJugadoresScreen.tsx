@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { View } from 'react-native';
 import PlayerList from '../components/bolsaJugadores/BolsaList';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { bolsaJugadoresService } from '../services/bolsaService';
@@ -12,6 +12,7 @@ import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { equipoService } from '../services/equipoService';
 import { PlayerProfile } from '../types/User';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 
 const BolsaJugadoresScreen = () => {
   const { temporada } = useTemporadaContext();
@@ -148,17 +149,7 @@ const BolsaJugadoresScreen = () => {
   );
 
   if (isLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <ActivityIndicator size='large' color={theme.text.primary} />
-      </View>
-    );
+    return <LoadingIndicator text='Cargando inscripciones...' />;
   }
 
   return (

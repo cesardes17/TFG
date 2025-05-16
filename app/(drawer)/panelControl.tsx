@@ -6,20 +6,17 @@ import PanelControlScreen from '../../src/screens/admin/PanelControlScreen';
 import { router } from 'expo-router';
 
 export default function PanelControlPage() {
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
 
   useEffect(() => {
-    if (loading || !user) {
-      return;
-    }
-    if (user.role !== 'coorganizador' && user.role !== 'organizador') {
+    if (loadingUser) return;
+    if (!user) return router.replace('/');
+    //no tienen acceso a esta pagina
+    if (user.role !== 'coorganizador' && user.role !== 'organizador')
       return router.replace('/');
-    }
-  }, [loading, user]);
+  }, []);
 
-  if (loading) {
-    return null;
-  }
+  if (loadingUser) return null;
 
   return (
     <PageContainer>

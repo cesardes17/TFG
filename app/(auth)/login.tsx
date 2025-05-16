@@ -9,14 +9,14 @@ import { useUser } from '../../src/contexts/UserContext';
 
 export default function Login() {
   const router = useRouter();
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
 
   useEffect(() => {
-    if (loading) return;
+    if (loadingUser) return;
     if (user) return router.push('/');
   }, []);
 
-  if (loading) return null;
+  if (loadingUser) return null;
 
   return (
     <PageContainer>

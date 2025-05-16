@@ -173,7 +173,7 @@ export default function SolicitudesList({
   const renderInputModal = () => {
     return (
       <>
-        {dorsalesOcupados.length > 0 && (
+        {dorsalesOcupados.length > 0 && modalType === 'update' && (
           <StyledText variant='secondary' style={{ marginBottom: 8 }}>
             Dorsales ocupados: {dorsalesOcupados.join(', ')}
           </StyledText>

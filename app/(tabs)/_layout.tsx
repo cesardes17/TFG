@@ -12,9 +12,9 @@ import {
 
 export default function NativeLayout() {
   const { theme } = useTheme();
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
 
-  if (loading) return null;
+  if (loadingUser) return null;
   return (
     <Tabs
       screenOptions={{

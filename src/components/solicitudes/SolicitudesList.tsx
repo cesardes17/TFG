@@ -70,6 +70,7 @@ export default function SolicitudesList({
       const filteredSolicitudes =
         res.data?.filter((sol) => sol.estado === 'pendiente') || [];
       setSolicitudes(filteredSolicitudes);
+      // setSolicitudes(res.data!);
     }
   }, [temporada?.id, user?.uid, isAdmin]);
 

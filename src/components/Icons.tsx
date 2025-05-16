@@ -96,3 +96,11 @@ export const CloseCircleoIcon = ({ size = 24, color }: IconProps) => {
 export const ClockCircleOIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='clockcircleo' size={size} color={color} />;
 };
+
+export const MegaphoneIcon = ({ size = 24, color }: IconProps) => {
+  return <Ionicons name='megaphone' size={size} color={color} />;
+};
+
+export const PaperClipIcon = ({ size = 24, color }: IconProps) => {
+  return <Feather name='paperclip' size={size} color={color} />;
+};

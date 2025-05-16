@@ -14,13 +14,6 @@ export interface NavigationItem {
 
 export const navigationItems: NavigationItem[] = [
   {
-    id: 'ajustes',
-    title: 'Ajustes',
-    description: 'Configura tu experiencia en la aplicación.',
-    path: '/ajustesMobile',
-    allowedRoles: ['*'], // cualquier usuario, incluso invitado
-  },
-  {
     id: 'solicitudes',
     title: 'Solicitudes',
     description: 'Gestiona tus solicitudes de unión a equipos.',
@@ -40,5 +33,19 @@ export const navigationItems: NavigationItem[] = [
     description: 'Ficha a jugadores que están listos para jugar.',
     path: '/bolsaJugadoresMobile',
     allowedRoles: ['organizador', 'coorganizador', 'capitan'], // solo organizadores y coorganizadores
+  },
+  {
+    id: 'tablonAnuncios',
+    title: 'Tablon de Anuncios',
+    description: 'Consulta los anuncios de la Liga.',
+    path: '/tablonAnunciosMobile',
+    allowedRoles: ['*'], // cualquier usuario, incluso invitado
+  },
+  {
+    id: 'ajustes',
+    title: 'Ajustes',
+    description: 'Configura tu experiencia en la aplicación.',
+    path: '/ajustesMobile',
+    allowedRoles: ['*'], // cualquier usuario, incluso invitado
   },
 ];

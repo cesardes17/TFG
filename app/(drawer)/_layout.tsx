@@ -42,12 +42,48 @@ export default function WebLayout() {
           name='panelControl'
           options={{
             drawerLabel: 'Panel de Control',
+            title: 'Panel de Control',
             drawerItemStyle: {
               display:
                 user?.role === 'organizador' || user?.role === 'coorganizador'
                   ? 'flex'
                   : 'none',
             },
+          }}
+        />
+        <Drawer.Screen
+          name='solicitudes'
+          options={{
+            drawerLabel: 'Solicitudes',
+            title: 'Solicitudes',
+            drawerItemStyle: {
+              display:
+                user?.role !== 'espectador' && user?.role !== 'arbitro'
+                  ? 'flex'
+                  : 'none',
+            },
+          }}
+        />
+        <Drawer.Screen
+          name='bolsaJugadores'
+          options={{
+            drawerLabel: 'Bolsa de Jugadores',
+            title: 'Bolsa de Jugadores',
+            drawerItemStyle: {
+              display:
+                user?.role !== 'espectador' &&
+                user?.role !== 'arbitro' &&
+                user?.role !== 'jugador'
+                  ? 'flex'
+                  : 'none',
+            },
+          }}
+        />
+        <Drawer.Screen
+          name='tablonAnuncios'
+          options={{
+            drawerLabel: 'Tablon de Anuncios',
+            title: 'Tablon de Anuncios',
           }}
         />
 

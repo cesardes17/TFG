@@ -34,9 +34,9 @@ export default function PerfilScreen() {
       )}
       <StyledButton
         variant='error'
-        onPress={() => {
+        onPress={async () => {
           setIsLoading(true);
-          AuthService.logout();
+          await AuthService.logout();
           setIsLoading(false);
           router.replace('/');
         }}

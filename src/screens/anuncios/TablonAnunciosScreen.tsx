@@ -1,17 +1,14 @@
-// src/screens/solicitud/SolicitudesScreen.tsx:
-
 import { useState } from 'react';
-import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
-import { ActivityIndicator, StyleSheet } from 'react-native';
-import StyledAlert from '../../components/common/StyledAlert';
-import SolicitudesList from '../../components/solicitudes/SolicitudesList';
-import { View } from 'react-native';
-import HeaderListSolicitudes from '../../components/solicitudes/HeaderListSolicitudes';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { StyleSheet, View } from 'react-native';
+import StyledAlert from '../../components/common/StyledAlert';
+import HeaderTablon from '../../components/anuncios/HeaderTablon';
+import AnunciosList from '../../components/anuncios/AnunciosList';
 
-export default function SolicitudesScreen() {
+export default function TablonAnunciosScreen() {
   const { theme } = useTheme();
   const { temporada, loadingTemporada } = useTemporadaContext();
   const { user, loadingUser } = useUser();
@@ -31,8 +28,8 @@ export default function SolicitudesScreen() {
 
   return (
     <View style={styles.container}>
-      <HeaderListSolicitudes />
-      <SolicitudesList screenLoading={setIsLoading} />
+      <HeaderTablon />
+      <AnunciosList />
     </View>
   );
 }

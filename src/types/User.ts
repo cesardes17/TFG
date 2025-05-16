@@ -22,6 +22,7 @@ export interface UserBase {
   apellidos: string;
   role: Role;
   createdAt: FirebaseFirestoreTypes.Timestamp;
+  ultimaVisitaTablon?: FirebaseFirestoreTypes.Timestamp;
 }
 
 /**

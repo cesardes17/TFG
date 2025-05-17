@@ -26,30 +26,83 @@ export function deleteField() {
   }
 }
 
-/**
- * Actualiza parcialmente un documento según path
- */
-export async function updateDocumentByPathFS(
-  pathSegments: string[],
-  data: Record<string, any>
-): Promise<void> {
-  const db = await getDb();
+type WhereClause = [string, import('firebase/firestore').WhereFilterOp, any];
+type OrderClause = [string, 'asc' | 'desc'];
 
-  if (Platform.OS === 'web') {
-    const { doc, updateDoc } = await import('firebase/firestore');
-    const ref = (doc as any)(
-      db as import('firebase/firestore').Firestore,
-      ...pathSegments
+/**
+ * Obtiene documentos de colección con filtros, OR, orden y paginación.
+ * @param pathSegments       Ruta dinámica, e.g. ['coleccion','idDoc','subColec']
+ * @param andFilters         Condiciones AND
+ * @param orFilters          Condiciones OR dentro de un único OR
+ * @param orderBy            Campo y dirección para ordenar
+ * @param limit              Máximo de documentos
+ * @param startAfter         Cursor para paginación
+ */
+export async function getCollectionWithOptionsFS<T>(
+  pathSegments: string[],
+  andFilters: WhereClause[] = [],
+  orFilters: WhereClause[] = [],
+  orderBy: OrderClause[] = [],
+  limit?: number,
+  startAfter?: any
+): Promise<T[]> {
+  // Debe terminar en colección (longitud impar)
+  if (pathSegments.length % 2 === 0) {
+    throw new Error(
+      'getCollectionWithOptionsFS: debe terminar en colección (longitud impar)'
     );
-    await (updateDoc as any)(ref, data);
-  } else {
-    const { doc, updateDoc } = await import('@react-native-firebase/firestore');
-    const ref = (doc as any)(
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
-      ...pathSegments
-    );
-    await (updateDoc as any)(ref, data);
   }
+  const db = await getDb();
+  const isWeb = Platform.OS === 'web';
+
+  // Import dinámico del SDK correcto
+  const mod = isWeb
+    ? await import('firebase/firestore')
+    : await import('@react-native-firebase/firestore');
+  const {
+    collection,
+    query,
+    where,
+    orderBy: _orderBy,
+    limit: _limit,
+    startAfter: _startAfter,
+    getDocs,
+    or,
+  } = mod;
+
+  // Referencia a colección
+  const collRef = (collection as any)(db as any, ...pathSegments);
+
+  // Construcción de constraints
+  const constraints: any[] = [];
+
+  andFilters.forEach(([field, op, val]) => {
+    const value = val instanceof Date ? mod.Timestamp.fromDate(val) : val;
+    constraints.push((where as any)(field, op, value));
+  });
+
+  if (orFilters.length > 0 && (or as any)) {
+    const orClauses = orFilters.map(([field, op, val]) => {
+      const value = val instanceof Date ? mod.Timestamp.fromDate(val) : val;
+      return (where as any)(field, op, value);
+    });
+    constraints.push((or as any)(...orClauses));
+  }
+
+  orderBy.forEach(([field, dir]) => {
+    constraints.push((_orderBy as any)(field, dir));
+  });
+
+  if (limit != null) {
+    constraints.push((_limit as any)(limit));
+  }
+  if (startAfter != null) {
+    constraints.push((_startAfter as any)(startAfter));
+  }
+
+  const q = (query as any)(collRef, ...constraints);
+  const snap = await (getDocs as any)(q);
+  return snap.docs.map((d: any) => d.data() as T);
 }
 
 /**
@@ -66,53 +119,14 @@ export async function getDocumentByPathFS<T>(
   const db = await getDb();
   if (Platform.OS === 'web') {
     const { doc, getDoc } = await import('firebase/firestore');
-    const ref = (doc as any)(
-      db as import('firebase/firestore').Firestore,
-      ...pathSegments
-    );
+    const ref = (doc as any)(db as any, ...pathSegments);
     const snap = await (getDoc as any)(ref);
     return snap.exists() ? (snap.data() as T) : null;
   } else {
     const { doc, getDoc } = await import('@react-native-firebase/firestore');
-    const ref = (doc as any)(
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
-      ...pathSegments
-    );
+    const ref = (doc as any)(db as any, ...pathSegments);
     const snap = await (getDoc as any)(ref);
     return snap.exists ? (snap.data() as T) : null;
-  }
-}
-
-/**
- * Obtiene una colección por path dinámico: ...'colección','docId','subcolección',... terminando en colección
- */
-export async function getCollectionByPathFS<T>(
-  ...pathSegments: string[]
-): Promise<T[]> {
-  if (pathSegments.length % 2 === 0) {
-    throw new Error(
-      'getCollectionByPathFS: pathSegments debe terminar en colección (長idad impar)'
-    );
-  }
-  const db = await getDb();
-  if (Platform.OS === 'web') {
-    const { collection, getDocs } = await import('firebase/firestore');
-    const collRef = (collection as any)(
-      db as import('firebase/firestore').Firestore,
-      ...pathSegments
-    );
-    const snap = await (getDocs as any)(collRef);
-    return snap.docs.map((d: any) => d.data() as T);
-  } else {
-    const { collection, getDocs } = await import(
-      '@react-native-firebase/firestore'
-    );
-    const collRef = (collection as any)(
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
-      ...pathSegments
-    );
-    const snap = await (getDocs as any)(collRef);
-    return snap.docs.map((d: any) => d.data() as T);
   }
 }
 
@@ -132,7 +146,7 @@ export async function setDocumentByPathFS<T extends Record<string, any>>(
     const { collection, doc, setDoc, addDoc, serverTimestamp } = await import(
       'firebase/firestore'
     );
-    const fdb = db as import('firebase/firestore').Firestore;
+    const fdb = db as any;
     const payload = { ...data, createdAt: serverTimestamp() };
     if (isAutoId) {
       const collRef = (collection as any)(fdb, ...segments);
@@ -147,8 +161,7 @@ export async function setDocumentByPathFS<T extends Record<string, any>>(
     const { collection, doc, setDoc, addDoc, serverTimestamp } = await import(
       '@react-native-firebase/firestore'
     );
-    const fdb =
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module;
+    const fdb = db as any;
     const payload = { ...data, createdAt: serverTimestamp() };
     if (isAutoId) {
       const collRef = (collection as any)(fdb, ...segments);
@@ -163,7 +176,26 @@ export async function setDocumentByPathFS<T extends Record<string, any>>(
 }
 
 /**
- * Elimina un documento en la ruta dada: ...'colección','docId', etc
+ * Actualiza parcialmente un documento según path
+ */
+export async function updateDocumentByPathFS(
+  pathSegments: string[],
+  data: Record<string, any>
+): Promise<void> {
+  const db = await getDb();
+  if (Platform.OS === 'web') {
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const ref = (doc as any)(db as any, ...pathSegments);
+    await (updateDoc as any)(ref, data);
+  } else {
+    const { doc, updateDoc } = await import('@react-native-firebase/firestore');
+    const ref = (doc as any)(db as any, ...pathSegments);
+    await (updateDoc as any)(ref, data);
+  }
+}
+
+/**
+ * Elimina un documento en la ruta dada: ...'colección','docId'
  */
 export async function deleteDocumentByPathFS(
   ...pathSegments: string[]
@@ -174,59 +206,11 @@ export async function deleteDocumentByPathFS(
   const db = await getDb();
   if (Platform.OS === 'web') {
     const { doc, deleteDoc } = await import('firebase/firestore');
-    const ref = (doc as any)(
-      db as import('firebase/firestore').Firestore,
-      ...pathSegments
-    );
+    const ref = (doc as any)(db as any, ...pathSegments);
     await (deleteDoc as any)(ref);
   } else {
     const { doc, deleteDoc } = await import('@react-native-firebase/firestore');
-    const ref = (doc as any)(
-      db as import('@react-native-firebase/firestore').FirebaseFirestoreTypes.Module,
-      ...pathSegments
-    );
+    const ref = (doc as any)(db as any, ...pathSegments);
     await (deleteDoc as any)(ref);
   }
-}
-
-/**
- * Obtiene documentos con lógica AND + OR en una ruta arbitraria.
- * @param andFilters Arreglo de tuplas [campo, operador, valor] que se combinan en AND
- * @param orFilters Arreglo de tuplas [campo, operador, valor] que se agrupan bajo un único OR
- * @param pathSegments Ruta: 'colección', 'docId', 'subcolección', ... terminando en colección
- */
-export async function getCollectionByPathWithFilterFS<T>(
-  andFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
-  orFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
-  ...pathSegments: string[]
-): Promise<T[]> {
-  if (pathSegments.length % 2 === 0) {
-    throw new Error(
-      'getCollectionByPathWithFilterFS: path debe terminar en colección'
-    );
-  }
-  const db = await getDb();
-  const isWeb = Platform.OS === 'web';
-
-  const mod = isWeb
-    ? await import('firebase/firestore')
-    : await import('@react-native-firebase/firestore');
-  const { collection, query, where, getDocs, or } = mod;
-
-  const collRef = (collection as any)(db as any, ...pathSegments);
-
-  const constraints: any[] = [];
-  for (const [field, op, val] of andFilters) {
-    constraints.push((where as any)(field, op, val));
-  }
-  if (orFilters.length > 0) {
-    const orClauses = orFilters.map(([field, op, val]) =>
-      (where as any)(field, op, val)
-    );
-    constraints.push((or as any)(...orClauses));
-  }
-
-  const q = (query as any)(collRef, ...constraints);
-  const snap = await (getDocs as any)(q);
-  return snap.docs.map((d: any) => d.data() as T);
 }

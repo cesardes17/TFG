@@ -8,6 +8,8 @@ import React, {
 import { AuthService } from '../services/core/authService';
 import { UserService } from '../services/userService';
 import type { User } from '../types/User';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Timestamp } from '@react-native-firebase/firestore';
 
 interface UserContextValue {
   user: User | null;
@@ -42,6 +44,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (result.success && result.data) {
           setUser(result.data);
           setError(undefined);
+
+          // Si el usuario no tiene registrada la visita pero hay una en localStorage, se migra
+          if (!result.data.ultimaVisitaTablon) {
+            const localVisita = await AsyncStorage.getItem(
+              'ultimaVisitaTablon'
+            );
+            if (localVisita) {
+              const parsedDate = new Date(localVisita);
+              await UserService.updateUserProfile(result.data.uid, {
+                ultimaVisitaTablon: Timestamp.fromDate(parsedDate),
+              });
+              await AsyncStorage.removeItem('ultimaVisitaTablon');
+            }
+          }
+
           break;
         }
         await new Promise((r) => setTimeout(r, 300));

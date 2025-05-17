@@ -1,15 +1,18 @@
 // src/services/firestoreService.ts
 
+import { WhereFilterOp } from 'firebase/firestore';
 import {
   deleteDocumentByPathFS,
   deleteField,
-  getCollectionByPathFS,
-  getCollectionByPathWithFilterFS,
+  getCollectionWithOptionsFS,
   getDocumentByPathFS,
   setDocumentByPathFS,
   updateDocumentByPathFS,
 } from '../../api/firestoreFirebase';
 import type { ResultService } from '../../types/ResultService';
+
+export type WhereClause = [string, WhereFilterOp, any];
+export type OrderClause = [string, 'asc' | 'desc'];
 
 /**
  * Servicio unificado para Firestore con rutas dinámicas
@@ -39,31 +42,21 @@ export const FirestoreService = {
    * ...'colección','docId','subcolección', etc
    */
   getCollectionByPath: async <T>(
-    ...pathSegments: string[]
+    pathSegments: string[],
+    andFilters: WhereClause[] = [],
+    orFilters: WhereClause[] = [],
+    orderBy: OrderClause[] = [],
+    limit?: number,
+    startAfter?: any
   ): Promise<ResultService<T[]>> => {
     try {
-      const data = await getCollectionByPathFS<T>(...pathSegments);
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, errorMessage: error.message };
-    }
-  },
-
-  /**
-   * Obtiene documentos con filtros en una ruta dada:
-   * filters: [['field','==',value],...]
-   * pathSegments: ... 'colección','docId','subcolección', etc
-   */
-  getDocumentsWithFilterByPath: async <T>(
-    andFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
-    orFilters: [string, import('firebase/firestore').WhereFilterOp, any][],
-    ...pathSegments: string[]
-  ): Promise<ResultService<T[]>> => {
-    try {
-      const data = await getCollectionByPathWithFilterFS<T>(
+      const data = await getCollectionWithOptionsFS<T>(
+        pathSegments,
         andFilters,
         orFilters,
-        ...pathSegments
+        orderBy,
+        limit,
+        startAfter
       );
       return { success: true, data };
     } catch (error: any) {

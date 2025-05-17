@@ -1,34 +1,40 @@
 import { BolsaJugador } from '../types/BolsaJugador';
 import { ResultService } from '../types/ResultService';
 import { getRandomUID } from '../utils/getRandomUID';
-import { FirestoreService } from './core/firestoreService';
+import { FirestoreService, WhereClause } from './core/firestoreService';
 import { temporadaService } from './temporadaService';
 
 const COLLECTION = 'bolsaJugadores';
 
 export const bolsaJugadoresService = {
   getJugadoresInscritos: async (
-    temporadaID: string
+    temporadaId: string
   ): Promise<ResultService<BolsaJugador[]>> => {
     try {
-      const path = ['temporadas', temporadaID, COLLECTION];
-      const res = await FirestoreService.getCollectionByPath(...path);
+      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+
+      // Ahora le pasamos el array completo como primer parámetro
+      const res = await FirestoreService.getCollectionByPath<BolsaJugador>(
+        pathSegments
+      );
+
       if (!res.success || !res.data) {
         throw new Error(
           res.errorMessage || 'Error al obtener los jugadores inscritos'
         );
       }
+
       return {
         success: true,
-        data: res.data as BolsaJugador[],
+        data: res.data,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'Error al obtener jugadores inscritos de la Bolsa',
+            : 'Error al obtener jugadores inscritos de la bolsa',
       };
     }
   },
@@ -54,32 +60,40 @@ export const bolsaJugadoresService = {
       };
     }
   },
+
   getJugadorInscrito: async (
     temporadaId: string,
     userId: string
   ): Promise<ResultService<BolsaJugador>> => {
     try {
-      const path = ['temporadas', temporadaId, COLLECTION];
-      const res =
-        await FirestoreService.getDocumentsWithFilterByPath<BolsaJugador>(
-          [['jugador.id', '==', userId]],
-          [], //filtros or vacios
-          ...path
-        );
+      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+      const andFilters: WhereClause[] = [['jugador.id', '==', userId]];
 
-      if (!res.success || !res.data) {
-        throw new Error(res.errorMessage || 'Error al inscribir jugador');
+      // Usamos getCollectionByPath para filtrar dentro de la subcolección
+      const res = await FirestoreService.getCollectionByPath<BolsaJugador>(
+        pathSegments,
+        andFilters
+      );
+
+      if (!res.success || !res.data || res.data.length === 0) {
+        throw new Error(res.errorMessage || 'Jugador no inscrito en la bolsa');
       }
 
-      return { success: true, data: res.data[0] };
-    } catch (error) {
+      return {
+        success: true,
+        data: res.data[0],
+      };
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
-          error instanceof Error ? error.message : 'Error al inscribir jugador',
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener la inscripción del jugador',
       };
     }
   },
+
   deleteJugadorInscrito: async (
     temporadaId: string,
     jugadorId: string

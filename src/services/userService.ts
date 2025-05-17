@@ -9,7 +9,7 @@ import type {
 import type { ResultService } from '../types/ResultService';
 import { AuthService } from './core/authService';
 import { FirestoreService } from './core/firestoreService';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from '@react-native-firebase/firestore';
 
 /**
  * Servicio de usuario: registro y lectura de perfil
@@ -121,6 +121,64 @@ export const UserService = {
             ? error.message
             : 'Error al actualizar perfil de usuario',
       };
+    }
+  },
+
+  updateUserProfile: async (
+    uid: string,
+    updatedData: Partial<User>
+  ): Promise<ResultService<User>> => {
+    try {
+      const path = ['users', uid];
+      const resUpdate = await FirestoreService.updateDocumentByPath(
+        path,
+        updatedData
+      );
+      if (!resUpdate.success || !resUpdate.data) {
+        throw new Error(
+          resUpdate.errorMessage || 'Error al actualizar usuario'
+        );
+      }
+
+      return { success: true, data: resUpdate.data };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al actualizar perfil de usuario',
+      };
+    }
+  },
+
+  marcarVisitaTablon: async (uid: string): Promise<ResultService<null>> => {
+    try {
+      // usamos Timestamp de Firestore
+      const ahora = new Date();
+      const res = await FirestoreService.updateDocumentByPath(['users', uid], {
+        ultimaVisitaTablon: Timestamp.fromDate(ahora),
+      });
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
+    }
+  },
+
+  /**
+   * Recupera la fecha de ultimaVisitaTablon o null
+   */
+  obtenerVisitaTablon: async (
+    uid: string
+  ): Promise<ResultService<Timestamp | null>> => {
+    try {
+      const res = await FirestoreService.getDocumentByPath<User>('users', uid);
+      if (!res.success) throw new Error(res.errorMessage);
+      const ts = res.data?.ultimaVisitaTablon ?? null;
+      return { success: true, data: ts };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
     }
   },
 };

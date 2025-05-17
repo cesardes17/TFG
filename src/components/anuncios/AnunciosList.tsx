@@ -6,7 +6,7 @@ import { Anuncio } from '../../types/Anuncio';
 import { useUser } from '../../contexts/UserContext';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useFocusEffect } from 'expo-router';
-import { anunciosCrudService } from '../../services/anunciosService/crudService';
+import { anunciosService } from '../../services/anunciosService';
 import AnuncioCard from './AnuncioCard';
 import AnuncioCompactoCard from './AnuncioCompactoCard';
 
@@ -18,7 +18,7 @@ export default function AnunciosList() {
 
   const fetchAnuncios = useCallback(async () => {
     if (!temporada) return;
-    const res = await anunciosCrudService.getAllAnuncios(temporada.id);
+    const res = await anunciosService.getAllAnuncios(temporada.id);
     if (res.success) {
       setAnuncios(res.data!);
     } else {

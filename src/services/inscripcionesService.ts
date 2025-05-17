@@ -1,6 +1,6 @@
 import { Inscripcion } from '../types/Inscripcion';
 import { ResultService } from '../types/ResultService';
-import { FirestoreService } from './core/firestoreService';
+import { FirestoreService, WhereClause } from './core/firestoreService';
 
 const COLLECTION = 'inscripciones';
 export const inscripcionesService = {
@@ -32,22 +32,42 @@ export const inscripcionesService = {
       };
     }
   },
+
   getInscripcionesByTeam: async (
     temporadaId: string,
-    id: string
+    equipoId: string
   ): Promise<ResultService<Inscripcion[]>> => {
     try {
-      const path = ['temporadas', temporadaId, COLLECTION];
-      const res = await FirestoreService.getDocumentsWithFilterByPath(
-        [['equipoId', '==', id]],
-        [],
-        ...path
+      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+      const andFilters: [
+        string,
+        import('firebase/firestore').WhereFilterOp,
+        any
+      ][] = [['equipoId', '==', equipoId]];
+      const orFilters: [
+        string,
+        import('firebase/firestore').WhereFilterOp,
+        any
+      ][] = [];
+
+      // Ahora use getCollectionByPath en lugar de getDocumentsWithFilterByPath
+      const res = await FirestoreService.getCollectionByPath<Inscripcion>(
+        pathSegments,
+        andFilters,
+        orFilters
       );
+
+      if (!res.success) {
+        throw new Error(
+          res.errorMessage || 'Error al obtener los jugadores del equipo'
+        );
+      }
+
       return {
         success: true,
-        data: res.data as Inscripcion[],
+        data: res.data!,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
@@ -63,24 +83,23 @@ export const inscripcionesService = {
     equipoId: string
   ): Promise<ResultService<number[]>> => {
     try {
-      const path = ['temporadas', temporadaId, COLLECTION];
-      const res = await FirestoreService.getDocumentsWithFilterByPath(
-        [['equipoId', '==', equipoId]],
-        [],
-        ...path
+      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+      const andFilters: WhereClause[] = [['equipoId', '==', equipoId]];
+
+      const res = await FirestoreService.getCollectionByPath<Inscripcion>(
+        pathSegments,
+        andFilters
       );
+
       if (!res.success) {
         throw new Error(res.errorMessage || 'Error al obtener los dorsales');
       }
-      const inscripciones = res.data as Inscripcion[];
-      const dorsales = inscripciones.map(
-        (inscripcion) => inscripcion.jugador.dorsal
-      );
-      return {
-        success: true,
-        data: dorsales,
-      };
-    } catch (error) {
+
+      const inscripciones = res.data!;
+      const dorsales = inscripciones.map((i) => i.jugador.dorsal);
+
+      return { success: true, data: dorsales };
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
@@ -96,26 +115,29 @@ export const inscripcionesService = {
     jugadorId: string
   ): Promise<ResultService<Inscripcion>> => {
     try {
-      const path = ['temporadas', temporadaId, COLLECTION];
-      const res = await FirestoreService.getDocumentsWithFilterByPath(
-        [['jugador.id', '==', jugadorId]],
-        [],
-        ...path
+      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+      const andFilters: WhereClause[] = [['jugador.id', '==', jugadorId]];
+
+      const res = await FirestoreService.getCollectionByPath<Inscripcion>(
+        pathSegments,
+        andFilters
       );
+
       if (!res.success || !res.data || res.data.length === 0) {
-        throw new Error(res.errorMessage || 'Error al obtener la inscripcion');
+        throw new Error(res.errorMessage || 'Inscripción no encontrada');
       }
+
       return {
         success: true,
-        data: res.data[0] as Inscripcion,
+        data: res.data[0],
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'Error al obtener la inscripcion',
+            : 'Error al obtener la inscripción',
       };
     }
   },

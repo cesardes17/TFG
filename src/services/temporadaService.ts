@@ -2,7 +2,7 @@
 import type { ResultService } from '../types/ResultService';
 import type { Temporada } from '../types/Temporada';
 import { getRandomUID } from '../utils/getRandomUID';
-import { FirestoreService } from './core/firestoreService';
+import { FirestoreService, WhereClause } from './core/firestoreService';
 
 export const temporadaService = {
   /**
@@ -10,27 +10,28 @@ export const temporadaService = {
    */
   getTemporadaActual: async (): Promise<ResultService<Temporada>> => {
     try {
-      // Usa la API de filtros sobre la colección raíz
-      const snapshot = await FirestoreService.getDocumentsWithFilterByPath<
+      // Filtros AND sobre la colección raíz
+      const andFilters: WhereClause[] = [['activa', '==', true]];
+
+      // Recuperamos las temporadas activas
+      const res = await FirestoreService.getCollectionByPath<
         Temporada & { id: string }
       >(
-        [['activa', '==', true]],
-        [], //filtros or vacios
-        'temporadas'
+        ['temporadas'], // pathSegments
+        andFilters
       );
-      if (!snapshot.success || !snapshot.data || snapshot.data.length === 0) {
+
+      if (!res.success || !res.data || res.data.length === 0) {
         return {
           success: false,
           errorMessage: 'No se encontró una temporada activa',
         };
       }
 
-      // snapshot.data devuelve [{ id, data: Temporada }]
-      const data = snapshot.data[0];
-
+      // Devolvemos el primer elemento
       return {
         success: true,
-        data,
+        data: res.data[0],
       };
     } catch (error: any) {
       console.error('Error al obtener temporada activa:', error);

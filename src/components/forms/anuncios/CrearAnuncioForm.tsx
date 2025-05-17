@@ -15,10 +15,10 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { useTemporadaContext } from '../../../contexts/TemporadaContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { useUser } from '../../../contexts/UserContext';
-import { anunciosCrudService } from '../../../services/anunciosService/crudService';
 import { getRandomUID } from '../../../utils/getRandomUID';
 import { router } from 'expo-router';
 import { Anuncio } from '../../../types/Anuncio';
+import { anunciosService } from '../../../services/anunciosService';
 
 interface FormValues {
   titulo: string;
@@ -58,7 +58,7 @@ export default function NuevoAnuncioForm() {
         imagenUrl: values.imagen || '',
       };
 
-      const res = await anunciosCrudService.crearAnuncio(
+      const res = await anunciosService.crearAnuncio(
         temporada!.id,
         anuncio.id,
         anuncio

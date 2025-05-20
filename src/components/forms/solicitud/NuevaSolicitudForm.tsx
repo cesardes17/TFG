@@ -28,6 +28,7 @@ import { useUser } from '../../../contexts/UserContext';
 import { PlayerProfile, PlayerUser } from '../../../types/User';
 import { equipoService } from '../../../services/equipoService';
 import { UserService } from '../../../services/userService';
+import LoadingIndicator from '../../common/LoadingIndicator';
 
 export type SolicitudTipo = 'createTeam' | 'leaveTeam' | 'dissolveTeam';
 
@@ -248,11 +249,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
   };
 
   if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size='large' color={theme.text.primary} />
-      </View>
-    );
+    return <LoadingIndicator text='Cargando...' />;
   }
 
   const opciones = opcionesPermitidas.map((key) => ({

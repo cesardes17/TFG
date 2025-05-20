@@ -5,11 +5,13 @@ import { temporadaService } from '../../services/temporadaService';
 import { useState } from 'react';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
 
 export default function PanelControlScreen() {
   const { temporada, refetchTemporada } = useTemporadaContext();
   const [showModal, setShowModal] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
   const handleCreateTemporada = () => {
     setShowModal(true);
@@ -20,6 +22,7 @@ export default function PanelControlScreen() {
   const handleConfirm = async () => {
     setShowModal(false);
     setShowLoading(true);
+    setLoadingMessage('Creando Temporada...');
 
     const { success, data, errorMessage } =
       await temporadaService.createTemporada();
@@ -32,20 +35,11 @@ export default function PanelControlScreen() {
     }
     await refetchTemporada();
     setShowLoading(false);
+    setLoadingMessage('');
   };
 
   if (showLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <ActivityIndicator size='large' color={theme.icon.active} />
-      </View>
-    );
+    return <LoadingIndicator text={loadingMessage} />;
   }
 
   if (!temporada) {

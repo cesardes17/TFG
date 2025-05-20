@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { Modal, View, Text, Pressable } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
+import LoadingIndicator from './LoadingIndicator';
 
 export type ConfirmationType = 'create' | 'update' | 'delete';
 
@@ -98,12 +99,7 @@ export default function BaseConfirmationModal({
           )}
 
           {isProcessing ? (
-            <View style={{ alignItems: 'center', marginTop: 20 }}>
-              <ActivityIndicator size='small' color={theme.text.primary} />
-              <Text style={{ color: theme.text.secondary, marginTop: 8 }}>
-                Procesando...
-              </Text>
-            </View>
+            <LoadingIndicator text='Procesando...' />
           ) : (
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <Pressable

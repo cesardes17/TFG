@@ -4,7 +4,7 @@ export type Anuncio = {
   id: string;
   titulo: string;
   contenido: string;
-  fechaPublicacion: FirebaseFirestoreTypes.Timestamp;
+  fechaPublicacion: string;
   autor: {
     id: string;
     nombre: string;

@@ -18,7 +18,7 @@ export default function TablonAnunciosScreen() {
     return <LoadingIndicator text='Cargando anuncios' />;
   }
 
-  if (!user || !temporada) {
+  if (!temporada) {
     return (
       <View style={[styles.container, { justifyContent: 'center' }]}>
         <StyledAlert variant='error' message='No hay temporada activa' />

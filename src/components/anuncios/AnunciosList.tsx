@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Platform, StyleSheet, View } from 'react-native';
 import StyledText from '../common/StyledText';
 import StyledAlert from '../common/StyledAlert';
@@ -7,25 +7,42 @@ import { useUser } from '../../contexts/UserContext';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useFocusEffect } from 'expo-router';
 import { anunciosService } from '../../services/anunciosService';
-import AnuncioCard from './AnuncioCard';
 import AnuncioCompactoCard from './AnuncioCompactoCard';
+import StyledTextInput from '../common/StyledTextInput';
 
 export default function AnunciosList() {
   const { temporada } = useTemporadaContext();
   const { user } = useUser();
 
+  const [query, setQuery] = useState('');
   const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
+  const [filteredAnuncios, setFilteredAnuncios] = useState<Anuncio[]>([]); //anuncios filtrados por busqueda
 
   const fetchAnuncios = useCallback(async () => {
     if (!temporada) return;
     const res = await anunciosService.getAllAnuncios(temporada.id);
-    if (res.success) {
-      setAnuncios(res.data!);
+    if (res.success && res.data) {
+      setAnuncios(res.data);
+      setFilteredAnuncios(res.data);
     } else {
       console.log(res.errorMessage);
       setAnuncios([]);
     }
   }, []);
+
+  useEffect(() => {
+    const filtered = anuncios.filter((anuncio) => {
+      const titleMatch = anuncio.titulo
+        .toLowerCase()
+        .includes(query.toLowerCase());
+      const descriptionMatch = anuncio.contenido
+        .toLowerCase()
+        .includes(query.toLowerCase());
+      return titleMatch || descriptionMatch;
+    });
+
+    setFilteredAnuncios(filtered);
+  }, [query]);
 
   useFocusEffect(
     useCallback(() => {
@@ -39,8 +56,13 @@ export default function AnunciosList() {
 
   return (
     <View style={styles.listContent}>
+      <StyledTextInput
+        placeholder='Buscar Anuncios'
+        value={query}
+        onChangeText={setQuery}
+      />
       <FlatList
-        data={anuncios}
+        data={filteredAnuncios}
         renderItem={({ item }) => renderItem(item)}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={() => {

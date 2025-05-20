@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BaseSolicitudService } from '../../services/solicitudesService';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
@@ -21,6 +21,7 @@ import rechazarSolicitud from '../../utils/solicitudes/rechazarSolicitud';
 import { useToast } from '../../contexts/ToastContext';
 import aceptarSolicitud from '../../utils/solicitudes/aceptarSolicitud';
 import { inscripcionesService } from '../../services/inscripcionesService';
+import SolicitudUnirseEquipoCard from './SolicitudUnirseEquipoCard';
 
 interface SolicitudesListProps {
   screenLoading: (isLoading: boolean) => void;
@@ -35,6 +36,9 @@ export default function SolicitudesList({
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>(
+    []
+  ); //anuncios filtrados por busqued
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(
     null
   );
@@ -43,14 +47,14 @@ export default function SolicitudesList({
   const [inputError, setInputError] = useState('');
   const [mostrarInputModal, setMostrarInputModal] = useState(false);
   const [modalType, setModalType] = useState<ConfirmationType>('update');
-
+  const [query, setQuery] = useState('');
+  const [estado, setEStado] = useState('');
   const isAdmin =
     user?.role === 'organizador' || user?.role === 'coorganizador';
 
   const fetchSolicitudes = useCallback(async () => {
     if (!temporada) return;
 
-    // Construye tus filtros AND / OR
     const andFilters: [string, WhereFilterOp, any][] = [];
     const orFilters: [string, WhereFilterOp, any][] = !isAdmin
       ? [
@@ -67,10 +71,8 @@ export default function SolicitudesList({
     );
 
     if (res.success) {
-      const filteredSolicitudes =
-        res.data?.filter((sol) => sol.estado === 'pendiente') || [];
-      setSolicitudes(filteredSolicitudes);
-      // setSolicitudes(res.data!);
+      setSolicitudes(res.data!);
+      setFilteredSolicitudes(res.data!);
     }
   }, [temporada?.id, user?.uid, isAdmin]);
 
@@ -83,6 +85,50 @@ export default function SolicitudesList({
     }, [fetchSolicitudes])
   );
 
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      setFilteredSolicitudes(solicitudes);
+      return;
+    }
+
+    const filtered = solicitudes.filter((s) => {
+      // 1) Siempre filtro por solicitante
+      const solicitante = s.solicitante;
+      const matchSolicitante =
+        solicitante.nombre.toLowerCase().includes(q) ||
+        solicitante.apellidos.toLowerCase().includes(q) ||
+        solicitante.correo.toLowerCase().includes(q);
+
+      // 2) Si es "Unirse a Equipo", filtro también por jugadorObjetivo y equipoObjetivo
+      let matchUnirse = false;
+      if (s.tipo === 'Unirse a Equipo') {
+        const u = s as solicitudUnirseEquipo;
+        matchUnirse =
+          u.jugadorObjetivo.nombre.toLowerCase().includes(q) ||
+          u.jugadorObjetivo.apellidos.toLowerCase().includes(q) ||
+          u.jugadorObjetivo.correo.toLowerCase().includes(q) ||
+          u.equipoObjetivo.nombre.toLowerCase().includes(q);
+      }
+
+      // 3) Si es "Salir de Equipo", filtro por capitánObjetivo
+      let matchSalir = false;
+      if (s.tipo === 'Salir de Equipo') {
+        const sal = s as solicitudSalirEquipo;
+        matchSalir =
+          (
+            sal.capitanObjetivo.nombre.toLowerCase() +
+            ' ' +
+            sal.capitanObjetivo.apellidos.toLowerCase()
+          ).includes(q) || sal.capitanObjetivo.correo.toLowerCase().includes(q);
+      }
+
+      // 4) Para “Crear Equipo” y “Disolver Equipo” no hay otros campos que filtrar
+      return matchSolicitante || matchUnirse || matchSalir;
+    });
+
+    setFilteredSolicitudes(filtered);
+  }, [query, solicitudes]);
   const onAceptar = async (solicitud: Solicitud) => {
     console.log('aceptar Solicitud: ', solicitud);
 
@@ -207,14 +253,20 @@ export default function SolicitudesList({
       />
     );
   };
+
   return (
     <View
       style={{
         flex: 1,
       }}
     >
+      <StyledTextInput
+        placeholder='Buscar Anuncios'
+        value={query}
+        onChangeText={setQuery}
+      />
       <FlatList
-        data={solicitudes}
+        data={filteredSolicitudes}
         keyExtractor={(i) => i.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}

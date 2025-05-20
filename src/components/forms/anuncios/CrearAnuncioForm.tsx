@@ -19,6 +19,7 @@ import { getRandomUID } from '../../../utils/getRandomUID';
 import { router } from 'expo-router';
 import { Anuncio } from '../../../types/Anuncio';
 import { anunciosService } from '../../../services/anunciosService';
+import LoadingIndicator from '../../common/LoadingIndicator';
 
 interface FormValues {
   titulo: string;
@@ -77,11 +78,7 @@ export default function NuevoAnuncioForm() {
   };
 
   if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size='large' color={theme.text.primary} />
-      </View>
-    );
+    return <LoadingIndicator text='Cargando ...' />;
   }
 
   return (

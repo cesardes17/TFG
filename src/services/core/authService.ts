@@ -69,7 +69,7 @@ export const AuthService = {
       if (!user) throw new Error('No hay usuario autenticado');
       return user;
     } catch (error) {
-      console.error('Error al obtener el usuario actual:', error);
+      console.log('Error al obtener el usuario actual:', error);
       return null;
     }
   },

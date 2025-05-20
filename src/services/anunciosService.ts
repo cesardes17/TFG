@@ -93,34 +93,28 @@ export const anunciosService = {
       };
     }
   },
+
   getAllAnuncios: async (
     temporadaId: string
   ): Promise<ResultService<Anuncio[]>> => {
     try {
-      // Construimos el path como array
-      const pathSegments = ['temporadas', temporadaId, COLLECTION];
+      const path = ['temporadas', temporadaId, COLLECTION];
 
-      // Llamamos al nuevo método getCollectionByPath, pasando el array
+      // 1) Prefijo → dos filtros AND
+
+      // 2) Llamas a tu servicio. OrderBy obligatorio para rangos
       const res = await FirestoreService.getCollectionByPath<Anuncio>(
-        pathSegments
+        path,
+        [],
+        [], // no OR
+        [['createdAt', 'desc']], // ordenar
+        undefined
       );
 
-      if (!res.success) {
-        throw new Error(res.errorMessage || 'Error al obtener los anuncios');
-      }
-
-      return {
-        success: true,
-        data: res.data!,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al obtener los anuncios',
-      };
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: res.data! };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
     }
   },
 

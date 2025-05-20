@@ -4,7 +4,7 @@ import { BaseSolicitudService } from '../../services/solicitudesService';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
 import type { WhereFilterOp } from 'firebase/firestore';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import StyledAlert from '../common/StyledAlert';
 import {
   Solicitud,
@@ -21,7 +21,8 @@ import rechazarSolicitud from '../../utils/solicitudes/rechazarSolicitud';
 import { useToast } from '../../contexts/ToastContext';
 import aceptarSolicitud from '../../utils/solicitudes/aceptarSolicitud';
 import { inscripcionesService } from '../../services/inscripcionesService';
-import SolicitudUnirseEquipoCard from './SolicitudUnirseEquipoCard';
+import { AddIcon, FilterIcon } from '../Icons';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface SolicitudesListProps {
   screenLoading: (isLoading: boolean) => void;
@@ -30,6 +31,7 @@ interface SolicitudesListProps {
 export default function SolicitudesList({
   screenLoading,
 }: SolicitudesListProps) {
+  const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
   const { user } = useUser();
   const { showToast } = useToast();
@@ -260,11 +262,22 @@ export default function SolicitudesList({
         flex: 1,
       }}
     >
-      <StyledTextInput
-        placeholder='Buscar Anuncios'
-        value={query}
-        onChangeText={setQuery}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        {/* Input ocupa el 80% */}
+        <StyledTextInput
+          placeholder='Buscar por nombre, apellidos o correo'
+          value={query}
+          onChangeText={setQuery}
+          containerStyle={styles.searchInput}
+        />
+
+        {/* Botón ocupa el 20% */}
+        <TouchableOpacity
+          style={[styles.addButton, { borderColor: theme.border.primary }]}
+        >
+          <FilterIcon color={theme.text.primary} />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={filteredSolicitudes}
         keyExtractor={(i) => i.id}
@@ -296,4 +309,21 @@ export default function SolicitudesList({
 }
 const styles = StyleSheet.create({
   listContent: { paddingBottom: 16 },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+    gap: 8, // RN >=0.71, si no usa marginRight en input
+  },
+  searchInput: {
+    flex: 4, // 80% del ancho total (4 de 5)
+  },
+  addButton: {
+    flex: 1, // 20% (1 de 5)
+    height: 48,
+    borderWidth: 1,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

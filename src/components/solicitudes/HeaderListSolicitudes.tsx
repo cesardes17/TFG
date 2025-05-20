@@ -27,6 +27,7 @@ export default function () {
         paddingHorizontal: 12,
         minWidth: '100%',
         borderRadius: 5,
+        borderColor: theme.border.primary,
       }}
       onPress={() => {
         router.push('/nuevaSolicitud');

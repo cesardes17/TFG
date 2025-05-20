@@ -31,7 +31,7 @@ export const darkTheme: Theme = {
     light: colors.gray100,
   },
   border: {
-    primary: colors.primary300,
+    primary: colors.white,
     secondary: colors.gray700,
     error: colors.error.border,
     success: colors.success.border,

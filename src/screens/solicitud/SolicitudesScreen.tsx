@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUser } from '../../contexts/UserContext';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import StyledAlert from '../../components/common/StyledAlert';
 import SolicitudesList from '../../components/solicitudes/SolicitudesList';
 import { View } from 'react-native';
@@ -31,7 +31,7 @@ export default function SolicitudesScreen() {
 
   return (
     <View style={styles.container}>
-      <HeaderListSolicitudes />
+      {Platform.OS === 'web' ? <HeaderListSolicitudes /> : null}
       <SolicitudesList screenLoading={setIsLoading} />
     </View>
   );

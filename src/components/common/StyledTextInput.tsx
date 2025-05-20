@@ -1,10 +1,22 @@
-// src/components/StyledTextInput.tsx
+// src/components/common/StyledTextInput.tsx
 import React, { useState } from 'react';
-import { TextInput, TextInputProps, StyleSheet, View } from 'react-native';
+import {
+  TextInput,
+  TextInputProps,
+  StyleSheet,
+  View,
+  ViewStyle,
+  TextStyle,
+  StyleProp,
+} from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface StyledTextInputProps extends TextInputProps {
   error?: boolean;
+  /** Estilos aplicados al View wrapper */
+  containerStyle?: StyleProp<ViewStyle>;
+  /** Estilos aplicados al TextInput */
+  inputStyle?: StyleProp<TextStyle>;
 }
 
 export default function StyledTextInput({
@@ -13,6 +25,8 @@ export default function StyledTextInput({
   onBlur,
   onFocus,
   error = false,
+  containerStyle,
+  inputStyle,
   ...rest
 }: StyledTextInputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -29,16 +43,14 @@ export default function StyledTextInput({
     setIsFocused(true);
     onFocus?.(e);
   };
-
   const handleBlur = (e: any) => {
     setIsFocused(false);
     onBlur?.(e);
   };
 
-  const inputState = getInputState();
-
-  const getInputStyleByState = () => {
-    switch (inputState) {
+  const stateStyles = (() => {
+    const s = getInputState();
+    switch (s) {
       case 'focused':
         return theme.input.focused;
       case 'disabled':
@@ -48,13 +60,16 @@ export default function StyledTextInput({
       default:
         return theme.input.default;
     }
-  };
-
-  const stateStyles = getInputStyleByState();
+  })();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <TextInput
+        {...rest}
+        editable={editable}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        placeholderTextColor={stateStyles.text}
         style={[
           styles.input,
           {
@@ -62,14 +77,9 @@ export default function StyledTextInput({
             borderColor: stateStyles.border,
             color: stateStyles.text,
           },
-          style,
+          inputStyle,
+          style, // mantiene compatibilidad si aún pasas `style`
         ]}
-        // <-- aquí usamos el color dinámico del stateStyles
-        placeholderTextColor={stateStyles.text}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        editable={editable}
-        {...rest}
       />
     </View>
   );
@@ -77,7 +87,7 @@ export default function StyledTextInput({
 
 const styles = StyleSheet.create({
   container: {
-    minWidth: '100%',
+    // eliminamos minWidth:'100%' para poder controlar vía flex/width
     marginVertical: 8,
   },
   input: {
@@ -86,11 +96,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    minWidth: '100%',
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 16,
+    width: '100%',
   },
 });

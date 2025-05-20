@@ -104,3 +104,7 @@ export const MegaphoneIcon = ({ size = 24, color }: IconProps) => {
 export const PaperClipIcon = ({ size = 24, color }: IconProps) => {
   return <Feather name='paperclip' size={size} color={color} />;
 };
+
+export const FilterIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='filter' size={size} color={color} />;
+};

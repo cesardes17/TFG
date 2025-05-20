@@ -16,11 +16,13 @@ interface HeaderConfigProps {
     | 'ios_from_right'
     | 'ios_from_left'
     | 'none';
+  HeaderRight?: React.ReactNode;
 }
 
 export default function HeaderConfig({
   title,
   backLabel = 'Volver',
+  HeaderRight,
 }: HeaderConfigProps) {
   const { theme } = useTheme();
 
@@ -39,6 +41,7 @@ export default function HeaderConfig({
           color: theme.text.light,
         },
         headerBackTitle: backLabel,
+        headerRight: () => HeaderRight ?? null,
       }}
     />
   );

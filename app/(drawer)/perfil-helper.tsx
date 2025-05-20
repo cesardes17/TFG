@@ -9,7 +9,6 @@ export default function Profile() {
 
   useFocusEffect(
     useCallback(() => {
-      console.log('focus');
       refetchUser();
     }, [refetchUser])
   );

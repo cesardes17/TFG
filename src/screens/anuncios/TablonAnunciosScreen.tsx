@@ -3,7 +3,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useUser } from '../../contexts/UserContext';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import StyledAlert from '../../components/common/StyledAlert';
 import HeaderTablon from '../../components/anuncios/HeaderTablon';
 import AnunciosList from '../../components/anuncios/AnunciosList';
@@ -28,7 +28,7 @@ export default function TablonAnunciosScreen() {
 
   return (
     <View style={styles.container}>
-      <HeaderTablon />
+      {Platform.OS === 'web' && <HeaderTablon />}
       <AnunciosList />
     </View>
   );

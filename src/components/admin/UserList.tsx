@@ -12,19 +12,23 @@ import { UserAvatar } from './UserAvatar';
 import { PlayerProfile, User } from '../../types/User';
 import ProgressiveImage from '../common/ProgressiveImage';
 import StyledAlert from '../common/StyledAlert';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Props del componente
 interface UserListProps {
   usuarios: User[];
   onToggleSancion: (id: string) => void;
   onChangeRol: (id: string) => void;
+  queryActive: boolean;
 }
 
 const UserList: React.FC<UserListProps> = ({
   usuarios,
   onToggleSancion,
   onChangeRol,
+  queryActive,
 }) => {
+  const { theme } = useTheme();
   // Función para determinar si el usuario `es jugador o capitán
   const isPlayerOrCaptain = (rol: string) =>
     rol === 'jugador' || rol === 'capitán';
@@ -34,30 +38,40 @@ const UserList: React.FC<UserListProps> = ({
     const isPlayer = isPlayerOrCaptain(item.role);
 
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardDefault }]}>
         <View style={styles.userInfoContainer}>
           {isPlayer ? (
-            // Avatar para jugador o capitán
             <ProgressiveImage
               uri={(item as PlayerProfile).photoURL || ''}
               containerStyle={styles.playerPhoto}
             />
           ) : (
-            // Avatar genérico para otros roles
             <UserAvatar style={styles.genericAvatar} />
           )}
 
           <View style={styles.userDetails}>
-            <Text style={styles.userName}>
+            <Text style={[styles.userName, { color: theme.text.primary }]}>
               {item.nombre} {item.apellidos}
             </Text>
-            <Text style={styles.userRole}>{item.role}</Text>
-
-            <Text style={styles.userEmail}>{item.correo}</Text>
+            <Text style={[styles.userRole, { color: theme.text.secondary }]}>
+              {item.role}
+            </Text>
+            <Text style={[styles.userEmail, { color: theme.text.secondary }]}>
+              {item.correo}
+            </Text>
 
             {(item as PlayerProfile).sancionado && (
-              <View style={styles.sanctionBadge}>
-                <Text style={styles.sanctionText}>Sancionado</Text>
+              <View
+                style={[
+                  styles.sanctionBadge,
+                  { backgroundColor: theme.background.error },
+                ]}
+              >
+                <Text
+                  style={[styles.sanctionText, { color: theme.text.light }]}
+                >
+                  Sancionado
+                </Text>
               </View>
             )}
           </View>
@@ -68,13 +82,15 @@ const UserList: React.FC<UserListProps> = ({
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                (item as PlayerProfile).sancionado
-                  ? styles.liftSanctionButton
-                  : styles.sanctionButton,
+                {
+                  backgroundColor: (item as PlayerProfile).sancionado
+                    ? theme.button.primary.background
+                    : theme.button.error.background,
+                },
               ]}
               onPress={() => onToggleSancion(item.uid)}
             >
-              <Text style={styles.buttonText}>
+              <Text style={[styles.buttonText, { color: theme.text.light }]}>
                 {(item as PlayerProfile).sancionado
                   ? 'Levantar sanción'
                   : 'Sancionar'}
@@ -84,10 +100,15 @@ const UserList: React.FC<UserListProps> = ({
 
           {!isPlayer && (
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[
+                styles.actionButton,
+                { backgroundColor: theme.button.primary.background },
+              ]}
               onPress={() => onChangeRol(item.uid)}
             >
-              <Text style={styles.buttonText}>Cambiar rol</Text>
+              <Text style={[styles.buttonText, { color: theme.text.light }]}>
+                Cambiar rol
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -102,9 +123,15 @@ const UserList: React.FC<UserListProps> = ({
       keyExtractor={(item) => item.uid}
       contentContainerStyle={styles.listContainer}
       ListEmptyComponent={() => {
-        return (
-          <StyledAlert variant='info' message='No hay usuarios registrados' />
-        );
+        if (queryActive) {
+          return (
+            <StyledAlert
+              variant='info'
+              message='No hay usuarios que coincidan con los filtros.'
+            />
+          );
+        }
+        return <StyledAlert variant='info' message='No hay usuarios' />;
       }}
     />
   );
@@ -115,7 +142,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -141,9 +167,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 12,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   userDetails: {
     flex: 1,
@@ -155,16 +178,13 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 4,
     textTransform: 'capitalize',
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
   },
   sanctionBadge: {
-    backgroundColor: '#ff4d4f',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
@@ -172,7 +192,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sanctionText: {
-    color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -185,16 +204,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: '#1890ff',
-  },
-  sanctionButton: {
-    backgroundColor: '#ff4d4f',
-  },
-  liftSanctionButton: {
-    backgroundColor: '#52c41a',
   },
   buttonText: {
-    color: 'white',
     fontWeight: 'bold',
   },
 });

@@ -6,7 +6,6 @@ export default function AdministrarUsuariosMobile() {
   return (
     <PageContainer>
       <HeaderConfig title='Administrar Usuarios' />
-
       <AdministrarUsuariosScreen />
     </PageContainer>
   );

@@ -52,6 +52,19 @@ export default function WebLayout() {
           }}
         />
         <Drawer.Screen
+          name='administrarUsuarios'
+          options={{
+            drawerLabel: 'Administrar Usuarios',
+            title: 'Administrar Usuarios',
+            drawerItemStyle: {
+              display:
+                user?.role === 'organizador' || user?.role === 'coorganizador'
+                  ? 'flex'
+                  : 'none',
+            },
+          }}
+        />
+        <Drawer.Screen
           name='solicitudes'
           options={{
             drawerLabel: 'Solicitudes',

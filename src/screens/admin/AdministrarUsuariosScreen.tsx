@@ -255,6 +255,7 @@ export default function AdministrarUsuariosScreen() {
         usuarios={usuariosFiltered}
         onToggleSancion={handleSancionModal}
         onChangeRol={handleRolModal}
+        queryActive={query !== '' || selectedRolFilter !== ''}
       />
 
       {/* Modal de Sanción */}

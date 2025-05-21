@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
-import StyledText from '../../src/components/common/StyledText';
-import HeaderConfig from '../../src/components/layout/HeaderConfig';
-import PageContainer from '../../src/components/layout/PageContainer';
-import { useUser } from '../../src/contexts/UserContext';
-import PanelControlScreen from '../../src/screens/admin/PanelControlScreen';
 import { router } from 'expo-router';
+import { useUser } from '../../../src/contexts/UserContext';
+import PageContainer from '../../../src/components/layout/PageContainer';
+import HeaderConfig from '../../../src/components/layout/HeaderConfig';
+import PanelControlScreen from '../../../src/screens/admin/PanelControlScreen';
 
 export default function PanelControlPage() {
   const { user, loadingUser } = useUser();

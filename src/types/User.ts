@@ -40,6 +40,7 @@ export interface PlayerProfile {
     nombre: string;
     escudoUrl: string;
   };
+  sancionado: boolean;
 }
 
 /**

@@ -48,4 +48,11 @@ export const navigationItems: NavigationItem[] = [
     path: '/ajustesMobile',
     allowedRoles: ['*'], // cualquier usuario, incluso invitado
   },
+  {
+    id: 'administrarUsuarios',
+    title: 'Administrar Usuarios',
+    description: 'Administra usuarios de la aplicación.',
+    path: '/administrarUsuariosMobile',
+    allowedRoles: ['organizador', 'coorganizador'], // cualquier usuario, incluso invitado
+  },
 ];

@@ -27,7 +27,7 @@ export const UserService = {
       const payload = {
         uid,
         ...registrationData,
-        createdAt: Timestamp.now(),
+        fechaCreacion: new Date(),
       };
 
       // Inserta en Firestore en 'users/{uid}'
@@ -127,14 +127,15 @@ export const UserService = {
   updateUserProfile: async (
     uid: string,
     updatedData: Partial<User>
-  ): Promise<ResultService<User>> => {
+  ): Promise<ResultService<null>> => {
     try {
       const path = ['users', uid];
       const resUpdate = await FirestoreService.updateDocumentByPath(
         path,
         updatedData
       );
-      if (!resUpdate.success || !resUpdate.data) {
+      console.log('userService resUpdate - ', resUpdate.data);
+      if (!resUpdate.success) {
         throw new Error(
           resUpdate.errorMessage || 'Error al actualizar usuario'
         );
@@ -171,12 +172,24 @@ export const UserService = {
    */
   obtenerVisitaTablon: async (
     uid: string
-  ): Promise<ResultService<Timestamp | null>> => {
+  ): Promise<ResultService<Date | null>> => {
     try {
       const res = await FirestoreService.getDocumentByPath<User>('users', uid);
       if (!res.success) throw new Error(res.errorMessage);
       const ts = res.data?.ultimaVisitaTablon ?? null;
       return { success: true, data: ts };
+    } catch (err: any) {
+      return { success: false, errorMessage: err.message };
+    }
+  },
+
+  // Obtiene la lista de usuarios
+  getUsers: async (): Promise<ResultService<User[]>> => {
+    try {
+      const path = ['users'];
+      const res = await FirestoreService.getCollectionByPath<User>(path);
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: res.data };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };
     }

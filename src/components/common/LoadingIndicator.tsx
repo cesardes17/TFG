@@ -1,38 +1,36 @@
-import React, { ReactNode } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 
-interface LoadingIndicatorProps {
-  children?: ReactNode;
+type LoadingIndicatorProps = {
   text?: string;
-}
+};
 
 export default function LoadingIndicator({
-  children,
-  text,
+  text = 'Procesando...',
 }: LoadingIndicatorProps) {
   const { theme } = useTheme();
 
   return (
     <View style={styles.container}>
       <ActivityIndicator size='large' color={theme.text.primary} />
-      {(children || text) && (
-        <StyledText variant='secondary' style={styles.text}>
-          {children || text}
-        </StyledText>
-      )}
+      <StyledText style={[styles.text, { color: theme.text.primary }]}>
+        {text}
+      </StyledText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
   text: {
-    marginTop: 16,
+    marginLeft: 12,
+    fontSize: 16,
   },
 });

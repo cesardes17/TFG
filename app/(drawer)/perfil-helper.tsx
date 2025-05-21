@@ -1,7 +1,6 @@
 // app/profile.tsx
 import { useUser } from '../../src/contexts/UserContext';
-import { useCallback, useEffect } from 'react';
-import { Redirect, router, useFocusEffect } from 'expo-router';
+import { Redirect } from 'expo-router';
 import PageContainer from '../../src/components/layout/PageContainer';
 import PerfilScreen from '../../src/screens/user/PerfilScreen';
 import LoadingIndicator from '../../src/components/common/LoadingIndicator';

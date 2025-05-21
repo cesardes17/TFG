@@ -185,6 +185,7 @@ export default function RegisterForm({ setIsLoading }: Props) {
           dorsal: Number(values.dorsal),
           posicion: values.posicion!,
           photoURL: values.photoURL || '',
+          sancionado: false,
         };
         await registrationHelper(payload, values.password);
       } else {

@@ -1,6 +1,6 @@
+// src/components/forms/InputFormik.tsx
 import React, { useState } from 'react';
-
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { TextInputProps, View, StyleSheet } from 'react-native';
 import StyledText from '../common/StyledText';
 import StyledTextInput from '../common/StyledTextInput';
@@ -15,11 +15,12 @@ export default function InputFormik({
   placeholder,
   ...props
 }: FormikTextInputProps) {
+  const { validateField } = useFormikContext();
   const [field, meta, helpers] = useField(name);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Solo mostrar error cuando el campo ha perdido el foco y tiene un error
-  const showError = meta.touched && !isFocused && meta.error;
+  // Mostramos error solo si ya estaba tocado, perdió el foco y tiene error
+  const showError = meta.touched && !isFocused && !!meta.error;
 
   return (
     <View style={styles.container}>
@@ -28,18 +29,23 @@ export default function InputFormik({
         placeholder={placeholder}
         onChangeText={(value) => {
           helpers.setValue(value);
-          // Limpiar el estado de error mientras el usuario escribe
-          if (showError) {
+          // Opcional: limpiar error mientras escribe
+          if (meta.error) {
             helpers.setError('');
           }
         }}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => {
-          setIsFocused(false);
+        onFocus={() => {
+          setIsFocused(true);
+        }}
+        onBlur={(e) => {
+          // 1) Marcamos como "touched"
           helpers.setTouched(true);
+          setIsFocused(false);
+          // 2) Validamos solo este campo
+          validateField(name);
         }}
         {...props}
-        error={!!showError}
+        error={showError}
       />
       {showError && (
         <StyledText variant='error' style={styles.errorText}>
@@ -59,6 +65,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,
-    marginBottom: 4,
   },
 });

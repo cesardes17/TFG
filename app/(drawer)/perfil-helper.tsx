@@ -1,30 +1,24 @@
 // app/profile.tsx
 import { useUser } from '../../src/contexts/UserContext';
 import { useCallback, useEffect } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { Redirect, router, useFocusEffect } from 'expo-router';
 import PageContainer from '../../src/components/layout/PageContainer';
 import PerfilScreen from '../../src/screens/user/PerfilScreen';
+import LoadingIndicator from '../../src/components/common/LoadingIndicator';
 export default function Profile() {
-  const { user, loadingUser, refetchUser } = useUser();
-
-  useFocusEffect(
-    useCallback(() => {
-      refetchUser();
-    }, [refetchUser])
-  );
-
-  useEffect(() => {
-    if (loadingUser) {
-      return;
-    }
-    if (!user) {
-      console.log('no user');
-      return router.replace('/login');
-    }
-  }, [loadingUser, user]);
+  const { user, loadingUser } = useUser();
 
   if (loadingUser) {
-    return null;
+    return (
+      <PageContainer>
+        <LoadingIndicator text='Cargando datos…' />
+      </PageContainer>
+    );
+  }
+
+  // ¡Ojo! Aquí no usamos router.push, sino <Navigate>
+  if (!user) {
+    return <Redirect href='/login' />;
   }
 
   return (

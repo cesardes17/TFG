@@ -1,7 +1,13 @@
+// src/components/forms/auth/RegisterForm.tsx
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Formik } from 'formik';
-import { Role, UserRegistration } from '../../../types/User';
+import { useRouter } from 'expo-router';
+import {
+  Role,
+  PlayerRegistration,
+  OtherRegistration,
+} from '../../../types/User';
 import { useTheme } from '../../../contexts/ThemeContext';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
@@ -10,40 +16,30 @@ import { registerValidationSchemas } from '../../../validations/auth';
 import registrationHelper from '../../../utils/registrationHelper';
 import StyledAlert from '../../common/StyledAlert';
 import ImagePicker from '../../common/ImagePicker';
-import { router } from 'expo-router';
 
-const roles: { label: string; description: string; value: Role }[] = [
-  {
-    label: 'Espectador',
-    description: 'Solo ver contenido',
-    value: 'espectador',
-  },
-  { label: 'Jugador', description: 'Participar en partidos', value: 'jugador' },
-];
-
-interface FormValues {
+type FormValues = {
   correo: string;
   password: string;
   confirmPassword: string;
   nombre: string;
   apellidos: string;
   role: Role;
-  // Campos adicionales para jugador
   altura?: number;
   peso?: number;
   dorsal?: number;
   posicion?: string;
   photoURL?: string;
+};
+
+interface Props {
+  setIsLoading: (b: boolean) => void;
 }
 
-interface RegisterFormProps {
-  setIsLoading: (isLoading: boolean) => void;
-}
-
-export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
+export default function RegisterForm({ setIsLoading }: Props) {
   const { theme } = useTheme();
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [error, setError] = useState<string | null>(null); // Agrega el estado de error
+  const [error, setError] = useState<string | null>(null);
 
   const initialValues: FormValues = {
     correo: '',
@@ -52,7 +48,6 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
     nombre: '',
     apellidos: '',
     role: 'espectador',
-    // Valores iniciales para campos de jugador
     altura: undefined,
     peso: undefined,
     dorsal: undefined,
@@ -60,164 +55,154 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
     photoURL: '',
   };
 
-  const renderStep3 = () => (
-    <>
-      <InputFormik
-        name='altura'
-        placeholder='Altura (cm)'
-        keyboardType='numeric'
-      />
-      <InputFormik name='peso' placeholder='Peso (kg)' keyboardType='numeric' />
-      <InputFormik
-        name='dorsal'
-        placeholder='Dorsal preferido'
-        keyboardType='numeric'
-      />
-    </>
-  );
-
-  const posiciones = [
-    { label: 'Base', description: 'Point Guard', value: 'base' },
-    { label: 'Escolta', description: 'Shooting Guard', value: 'escolta' },
-    { label: 'Alero', description: 'Small Forward', value: 'alero' },
-    { label: 'Ala-Pivot', description: 'Power Forward', value: 'ala-pivot' },
-    { label: 'Pivot', description: 'Center', value: 'pivot' },
+  const roles = [
+    {
+      label: 'Espectador',
+      description: 'Solo ver contenido',
+      value: 'espectador' as Role,
+    },
+    {
+      label: 'Jugador',
+      description: 'Participar en partidos',
+      value: 'jugador' as Role,
+    },
   ];
 
-  const renderStep4 = (
-    values: FormValues,
-    setFieldValue: (field: string, value: any) => void
-  ) => (
-    <SelectableCardGroup
-      options={posiciones}
-      value={values.posicion || ''}
-      onChange={(value) => setFieldValue('posicion', value)}
-    />
-  );
+  const getTotalSteps = (values: FormValues) =>
+    values.role === 'jugador' ? 5 : 2;
 
-  const renderStep5 = (
+  const renderStep = (
     values: FormValues,
-    setFieldValue: (field: string, value: any) => void
-  ) => (
-    <>
-      <ImagePicker
-        onImageSelected={(uri) => setFieldValue('photoURL', uri)}
-        placeholder='Selecciona una foto de perfil'
-      />
-    </>
-  );
-
-  const getTotalSteps = (values: FormValues) => {
-    return values.role === 'jugador' ? 5 : 2;
-  };
-
-  const renderCurrentStep = (
-    values: FormValues,
-    setFieldValue: (field: string, value: any) => void
+    setFieldValue: (f: string, v: any) => void
   ) => {
     switch (step) {
       case 1:
-        return renderStep1();
+        return (
+          <>
+            <InputFormik
+              name='correo'
+              placeholder='Correo'
+              keyboardType='email-address'
+              autoCapitalize='none'
+            />
+            <InputFormik
+              name='password'
+              placeholder='Contraseña'
+              secureTextEntry
+            />
+            <InputFormik
+              name='confirmPassword'
+              placeholder='Confirmar'
+              secureTextEntry
+            />
+            <InputFormik name='nombre' placeholder='Nombre' />
+            <InputFormik name='apellidos' placeholder='Apellidos' />
+          </>
+        );
       case 2:
-        return renderStep2(values, setFieldValue);
+        return (
+          <SelectableCardGroup
+            options={roles}
+            value={values.role}
+            onChange={(v) => setFieldValue('role', v)}
+          />
+        );
       case 3:
-        return renderStep3();
+        return (
+          <>
+            <InputFormik
+              name='altura'
+              placeholder='Altura (cm)'
+              keyboardType='numeric'
+            />
+            <InputFormik
+              name='peso'
+              placeholder='Peso (kg)'
+              keyboardType='numeric'
+            />
+            <InputFormik
+              name='dorsal'
+              placeholder='Dorsal preferido'
+              keyboardType='numeric'
+            />
+          </>
+        );
       case 4:
-        return renderStep4(values, setFieldValue);
+        return (
+          <SelectableCardGroup
+            options={[
+              { label: 'Base', description: 'Point Guard', value: 'base' },
+              {
+                label: 'Escolta',
+                description: 'Shooting Guard',
+                value: 'escolta',
+              },
+              { label: 'Alero', description: 'Small Forward', value: 'alero' },
+              {
+                label: 'Ala-Pivot',
+                description: 'Power Forward',
+                value: 'ala-pivot',
+              },
+              { label: 'Pivot', description: 'Center', value: 'pivot' },
+            ]}
+            value={values.posicion!}
+            onChange={(v) => setFieldValue('posicion', v)}
+          />
+        );
       case 5:
-        return renderStep5(values, setFieldValue);
+        return (
+          <ImagePicker
+            onImageSelected={(uri) => setFieldValue('photoURL', uri)}
+            placeholder='Selecciona una foto de perfil'
+          />
+        );
       default:
         return null;
     }
   };
 
-  const renderStep1 = () => (
-    <>
-      <InputFormik
-        name='correo'
-        placeholder='Correo'
-        keyboardType='email-address'
-        autoCapitalize='none'
-      />
-      <InputFormik name='password' placeholder='Contraseña' secureTextEntry />
-      <InputFormik
-        name='confirmPassword'
-        placeholder='Confirmar contraseña'
-        secureTextEntry
-      />
-      <InputFormik name='nombre' placeholder='Nombre' />
-      <InputFormik name='apellidos' placeholder='Apellidos' />
-    </>
-  );
-
-  const renderStep2 = (
-    values: FormValues,
-    setFieldValue: (field: string, value: any) => void
-  ) => (
-    <SelectableCardGroup
-      options={roles}
-      value={values.role}
-      onChange={(value) => setFieldValue('role', value)}
-    />
-  );
-
   const handleSubmit = async (values: FormValues) => {
+    setError(null);
     setIsLoading(true);
-    console.log('Registro con:', values);
 
-    // Check if role is valid and handle jugador role separately
-    if (values.role !== 'espectador' && values.role !== 'jugador') {
-      console.error('Role not allowed for registration');
-      return;
-    }
-
-    if (values.role === 'jugador') {
-      // Validate that all required player fields are present
-      if (
-        !values.altura ||
-        !values.peso ||
-        !values.dorsal ||
-        !values.posicion
-      ) {
-        setError('Todos los campos son requeridos para jugadores');
-        return;
+    try {
+      if (values.role === 'jugador') {
+        if (
+          !values.altura ||
+          !values.peso ||
+          !values.dorsal ||
+          !values.posicion
+        ) {
+          throw new Error('Todos los campos de jugador son obligatorios');
+        }
+        const payload: PlayerRegistration = {
+          correo: values.correo,
+          nombre: values.nombre,
+          apellidos: values.apellidos,
+          role: 'jugador',
+          altura: Number(values.altura),
+          peso: Number(values.peso),
+          dorsal: Number(values.dorsal),
+          posicion: values.posicion!,
+          photoURL: values.photoURL || '',
+        };
+        await registrationHelper(payload, values.password);
+      } else {
+        const payload: OtherRegistration = {
+          correo: values.correo,
+          nombre: values.nombre,
+          apellidos: values.apellidos,
+          role: 'espectador',
+        };
+        await registrationHelper(payload, values.password);
       }
 
-      const user: UserRegistration = {
-        correo: values.correo,
-        nombre: values.nombre,
-        role: values.role,
-        apellidos: values.apellidos,
-        altura: Number(values.altura),
-        peso: Number(values.peso),
-        dorsal: Number(values.dorsal),
-        posicion: values.posicion,
-        photoURL: values.photoURL || '',
-      };
-      try {
-        await registrationHelper(user, values.password);
-      } catch (error) {
-        setError((error as Error).message);
-      } finally {
-        setIsLoading(false);
-        router.replace('/');
-      }
-    } else {
-      // Handle spectator registration
-      const user: UserRegistration = {
-        correo: values.correo,
-        nombre: values.nombre,
-        role: values.role,
-        apellidos: values.apellidos,
-      };
-      try {
-        await registrationHelper(user, values.password);
-      } catch (error) {
-        setError((error as Error).message);
-      } finally {
-        setIsLoading(false);
-        router.replace('/');
-      }
+      // sólo aquí, una vez todo OK, desactivo loading y navego
+      setIsLoading(false);
+      router.replace('/');
+    } catch (e: any) {
+      setError(e.message);
+      setIsLoading(false);
     }
   };
 
@@ -226,6 +211,8 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
       {error && <StyledAlert message={error} variant='error' />}
       <Formik
         initialValues={initialValues}
+        validateOnBlur={false}
+        validateOnChange={false}
         validationSchema={
           step === 1
             ? registerValidationSchemas.step1
@@ -238,28 +225,24 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
             : registerValidationSchemas.step5
         }
         onSubmit={(values) => {
-          const totalSteps = getTotalSteps(values);
-          if (step < totalSteps) {
+          const total = getTotalSteps(values);
+          if (step < total) {
             setStep(step + 1);
           } else {
             handleSubmit(values);
           }
         }}
       >
-        {({ handleSubmit: formikSubmit, values, setFieldValue }) => (
+        {({ handleSubmit, values, setFieldValue }) => (
           <View style={styles.container}>
-            <View style={styles.headerSection}>
-              <StyledText
-                style={[styles.progress, { color: theme.text.primary }]}
-              >
-                Paso {step} de {getTotalSteps(values)}
-              </StyledText>
-            </View>
-
+            <StyledText
+              style={[styles.progress, { color: theme.text.primary }]}
+            >
+              Paso {step} de {getTotalSteps(values)}
+            </StyledText>
             <View style={styles.formSection}>
-              {renderCurrentStep(values, setFieldValue)}
+              {renderStep(values, setFieldValue)}
             </View>
-
             <View style={styles.footerSection}>
               <View style={styles.buttonContainer}>
                 {step > 1 && (
@@ -284,7 +267,7 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
                     step > 1 && styles.nextButton,
                     { backgroundColor: theme.icon.active },
                   ]}
-                  onPress={() => formikSubmit()}
+                  onPress={() => handleSubmit()}
                 >
                   <StyledText
                     style={[styles.buttonText, { color: theme.text.dark }]}
@@ -302,54 +285,13 @@ export default function RegisterForm({ setIsLoading }: RegisterFormProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-  headerSection: {
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    alignItems: 'center',
-  },
-  formSection: {
-    flex: 1,
-    width: '100%',
-    paddingHorizontal: 16,
-    marginVertical: 24,
-  },
-  footerSection: {
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  progress: {
-    fontSize: 16,
-    textAlign: 'center',
-    width: '100%',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 12,
-  },
-  button: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    flex: 1,
-  },
-  backButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-  },
-  nextButton: {
-    flex: 2,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, padding: 16, justifyContent: 'space-between' },
+  progress: { fontSize: 16, textAlign: 'center', marginBottom: 12 },
+  formSection: { flex: 1 },
+  footerSection: {},
+  buttonContainer: { flexDirection: 'row', gap: 12 },
+  button: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center' },
+  backButton: { borderWidth: 2, backgroundColor: 'transparent' },
+  nextButton: { flex: 2 },
+  buttonText: { fontSize: 16, fontWeight: 'bold' },
 });

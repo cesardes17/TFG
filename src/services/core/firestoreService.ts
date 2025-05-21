@@ -1,6 +1,6 @@
 // src/services/firestoreService.ts
 
-import { WhereFilterOp } from 'firebase/firestore';
+import { WhereFilterOp, Timestamp } from 'firebase/firestore';
 import {
   deleteDocumentByPathFS,
   deleteField,
@@ -15,42 +15,66 @@ export type WhereClause = [string, WhereFilterOp, any];
 export type OrderClause = [string, 'asc' | 'desc'];
 
 /**
- * Servicio unificado para Firestore con rutas dinámicas
+ * Recorre recursivamente y convierte JS Date → Firestore Timestamp
  */
+function serializeDates(obj: any): any {
+  if (obj instanceof Date) {
+    return Timestamp.fromDate(obj);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(serializeDates);
+  }
+  if (obj && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, serializeDates(v)])
+    );
+  }
+  return obj;
+}
+
+/**
+ * Recorre recursivamente y convierte Firestore Timestamp → JS Date
+ */
+function parseTimestamps(obj: any): any {
+  if (obj instanceof Timestamp) {
+    return obj.toDate();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(parseTimestamps);
+  }
+  if (obj && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, parseTimestamps(v)])
+    );
+  }
+  return obj;
+}
+
 export const FirestoreService = {
-  /**
-   * Devuelve el valor especial para eliminar un campo en Firestore
-   */
   getDeleteField: () => deleteField(),
 
-  /**
-   * Obtiene un documento en la ruta dada: ...'colección','docId'
-   */
-  getDocumentByPath: async <T>(
+  async getDocumentByPath<T>(
     ...pathSegments: string[]
-  ): Promise<ResultService<T | null>> => {
+  ): Promise<ResultService<T | null>> {
     try {
-      const data = await getDocumentByPathFS<T>(...pathSegments);
+      const raw = await getDocumentByPathFS<T>(...pathSegments);
+      const data = raw != null ? parseTimestamps(raw) : null;
       return { success: true, data };
     } catch (error: any) {
       return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Obtiene todos los documentos de una colección anidada:
-   * ...'colección','docId','subcolección', etc
-   */
-  getCollectionByPath: async <T>(
+  async getCollectionByPath<T>(
     pathSegments: string[],
     andFilters: WhereClause[] = [],
     orFilters: WhereClause[] = [],
     orderBy: OrderClause[] = [],
     limit?: number,
     startAfter?: any
-  ): Promise<ResultService<T[]>> => {
+  ): Promise<ResultService<T[]>> {
     try {
-      const data = await getCollectionWithOptionsFS<T>(
+      const raw = await getCollectionWithOptionsFS<T>(
         pathSegments,
         andFilters,
         orFilters,
@@ -58,49 +82,43 @@ export const FirestoreService = {
         limit,
         startAfter
       );
+      const data = raw.map(parseTimestamps);
       return { success: true, data };
     } catch (error: any) {
       return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Crea o reemplaza un documento en la ruta dada.
-   * El payload debe ser el último argumento.
-   */
-  setDocumentByPath: async <T extends Record<string, any>>(
+  async setDocumentByPath<T extends Record<string, any>>(
     ...pathSegmentsAndData: [...string[], T]
-  ): Promise<ResultService<string>> => {
+  ): Promise<ResultService<string>> {
     try {
-      const id = await setDocumentByPathFS<T>(...pathSegmentsAndData);
+      const segments = pathSegmentsAndData.slice(0, -1) as string[];
+      let payload = pathSegmentsAndData[pathSegmentsAndData.length - 1] as T;
+      payload = serializeDates(payload);
+      const id = await setDocumentByPathFS<T>(...segments, payload);
       return { success: true, data: id };
     } catch (error: any) {
       return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Actualiza campos específicos de un documento sin sobrescribirlo por completo
-   */
-  updateDocumentByPath: async (
+  async updateDocumentByPath(
     pathSegments: string[],
     data: Record<string, any>
-  ): Promise<ResultService<null>> => {
+  ): Promise<ResultService<null>> {
     try {
-      await updateDocumentByPathFS(pathSegments, data);
+      const payload = serializeDates(data);
+      await updateDocumentByPathFS(pathSegments, payload);
       return { success: true, data: null };
     } catch (error: any) {
       return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Elimina un documento en la ruta dada:
-   * ...'colección','docId', etc
-   */
-  deleteDocumentByPath: async (
+  async deleteDocumentByPath(
     ...pathSegments: string[]
-  ): Promise<ResultService<null>> => {
+  ): Promise<ResultService<null>> {
     try {
       await deleteDocumentByPathFS(...pathSegments);
       return { success: true, data: null };

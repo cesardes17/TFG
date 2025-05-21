@@ -3,9 +3,23 @@ import { Platform, Text, TouchableOpacity } from 'react-native';
 import { ArrowBackIcon, ArrowBackIosIcon } from '../../src/components/Icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import StyledText from '../../src/components/common/StyledText';
+import { useUser } from '../../src/contexts/UserContext';
+import LoadingIndicator from '../../src/components/common/LoadingIndicator';
+import { useEffect } from 'react';
 
 export default function AuthLayout() {
   const { theme } = useTheme();
+  const { user, loadingUser } = useUser();
+
+  useEffect(() => {
+    if (loadingUser) return;
+    if (user) router.replace('/');
+    console.log(user, loadingUser);
+  });
+
+  if (loadingUser) {
+    return <LoadingIndicator text='Cargando...' />;
+  }
 
   return (
     <Stack

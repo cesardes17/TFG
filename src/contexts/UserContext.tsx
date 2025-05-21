@@ -9,7 +9,6 @@ import { AuthService } from '../services/core/authService';
 import { UserService } from '../services/userService';
 import type { User } from '../types/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Timestamp } from '@react-native-firebase/firestore';
 
 interface UserContextValue {
   user: User | null;
@@ -53,7 +52,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             if (localVisita) {
               const parsedDate = new Date(localVisita);
               await UserService.updateUserProfile(result.data.uid, {
-                ultimaVisitaTablon: Timestamp.fromDate(parsedDate),
+                ultimaVisitaTablon: parsedDate,
               });
               await AsyncStorage.removeItem('ultimaVisitaTablon');
             }

@@ -10,6 +10,7 @@ import {
   Solicitud,
   solicitudSalirEquipo,
   solicitudUnirseEquipo,
+  tipoSolicitud,
 } from '../../types/Solicitud';
 import SolicitudCard from './SolicitudCard';
 import BaseConfirmationModal, {
@@ -26,10 +27,14 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 interface SolicitudesListProps {
   screenLoading: (isLoading: boolean) => void;
+  searchQuery: string;
+  tipoSolicitud: tipoSolicitud | null;
 }
 
 export default function SolicitudesList({
   screenLoading,
+  searchQuery,
+  tipoSolicitud,
 }: SolicitudesListProps) {
   const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
@@ -40,7 +45,7 @@ export default function SolicitudesList({
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>(
     []
-  ); //anuncios filtrados por busqued
+  );
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(
     null
   );
@@ -49,7 +54,6 @@ export default function SolicitudesList({
   const [inputError, setInputError] = useState('');
   const [mostrarInputModal, setMostrarInputModal] = useState(false);
   const [modalType, setModalType] = useState<ConfirmationType>('update');
-  const [query, setQuery] = useState('');
   const [estado, setEStado] = useState('');
   const isAdmin =
     user?.role === 'organizador' || user?.role === 'coorganizador';
@@ -88,49 +92,52 @@ export default function SolicitudesList({
   );
 
   useEffect(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      setFilteredSolicitudes(solicitudes);
-      return;
+    let result = solicitudes;
+
+    // 0) filtro por tipo, solo si me han pasado uno
+    if (tipoSolicitud) {
+      result = result.filter((s) => s.tipo === tipoSolicitud);
     }
 
-    const filtered = solicitudes.filter((s) => {
-      // 1) Siempre filtro por solicitante
-      const solicitante = s.solicitante;
-      const matchSolicitante =
-        solicitante.nombre.toLowerCase().includes(q) ||
-        solicitante.apellidos.toLowerCase().includes(q) ||
-        solicitante.correo.toLowerCase().includes(q);
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      result = result.filter((s) => {
+        // tu lógica de búsqueda por solicitante/jugador/capitán...
+        const solicitante = s.solicitante;
+        const matchSolicitante =
+          solicitante.nombre.toLowerCase().includes(q) ||
+          solicitante.apellidos.toLowerCase().includes(q) ||
+          solicitante.correo.toLowerCase().includes(q);
 
-      // 2) Si es "Unirse a Equipo", filtro también por jugadorObjetivo y equipoObjetivo
-      let matchUnirse = false;
-      if (s.tipo === 'Unirse a Equipo') {
-        const u = s as solicitudUnirseEquipo;
-        matchUnirse =
-          u.jugadorObjetivo.nombre.toLowerCase().includes(q) ||
-          u.jugadorObjetivo.apellidos.toLowerCase().includes(q) ||
-          u.jugadorObjetivo.correo.toLowerCase().includes(q) ||
-          u.equipoObjetivo.nombre.toLowerCase().includes(q);
-      }
+        let matchUnirse = false;
+        if (s.tipo === 'Unirse a Equipo') {
+          const u = s as solicitudUnirseEquipo;
+          matchUnirse =
+            u.jugadorObjetivo.nombre.toLowerCase().includes(q) ||
+            u.jugadorObjetivo.apellidos.toLowerCase().includes(q) ||
+            u.jugadorObjetivo.correo.toLowerCase().includes(q) ||
+            u.equipoObjetivo.nombre.toLowerCase().includes(q);
+        }
 
-      // 3) Si es "Salir de Equipo", filtro por capitánObjetivo
-      let matchSalir = false;
-      if (s.tipo === 'Salir de Equipo') {
-        const sal = s as solicitudSalirEquipo;
-        matchSalir =
-          (
-            sal.capitanObjetivo.nombre.toLowerCase() +
-            ' ' +
-            sal.capitanObjetivo.apellidos.toLowerCase()
-          ).includes(q) || sal.capitanObjetivo.correo.toLowerCase().includes(q);
-      }
+        let matchSalir = false;
+        if (s.tipo === 'Salir de Equipo') {
+          const sal = s as solicitudSalirEquipo;
+          matchSalir =
+            (
+              sal.capitanObjetivo.nombre.toLowerCase() +
+              ' ' +
+              sal.capitanObjetivo.apellidos.toLowerCase()
+            ).includes(q) ||
+            sal.capitanObjetivo.correo.toLowerCase().includes(q);
+        }
 
-      // 4) Para “Crear Equipo” y “Disolver Equipo” no hay otros campos que filtrar
-      return matchSolicitante || matchUnirse || matchSalir;
-    });
+        return matchSolicitante || matchUnirse || matchSalir;
+      });
+    }
 
-    setFilteredSolicitudes(filtered);
-  }, [query, solicitudes]);
+    setFilteredSolicitudes(result);
+  }, [searchQuery, tipoSolicitud, solicitudes]);
+
   const onAceptar = async (solicitud: Solicitud) => {
     console.log('aceptar Solicitud: ', solicitud);
 
@@ -257,27 +264,7 @@ export default function SolicitudesList({
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        {/* Input ocupa el 80% */}
-        <StyledTextInput
-          placeholder='Buscar por nombre, apellidos o correo'
-          value={query}
-          onChangeText={setQuery}
-          containerStyle={styles.searchInput}
-        />
-
-        {/* Botón ocupa el 20% */}
-        <TouchableOpacity
-          style={[styles.addButton, { borderColor: theme.border.primary }]}
-        >
-          <FilterIcon color={theme.text.primary} />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1 }}>
       <FlatList
         data={filteredSolicitudes}
         keyExtractor={(i) => i.id}

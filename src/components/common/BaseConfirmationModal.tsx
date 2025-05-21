@@ -10,7 +10,7 @@ type Props = {
   visible: boolean;
   title: string;
   description?: string;
-  onConfirm: () => Promise<void>; // O async callback
+  onConfirm: () => Promise<void> | void; // O async callback
   onCancel: () => void;
   type?: ConfirmationType;
   confirmLabel?: string;

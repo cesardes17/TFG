@@ -1,5 +1,12 @@
+// src/components/common/SelectableCard.tsx
 import React from 'react';
-import { TouchableOpacity, StyleSheet, View, Dimensions } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 import { CircleCheckIcon } from '../Icons';
@@ -9,6 +16,7 @@ interface SelectableCardProps {
   description: string;
   selected: boolean;
   onPress: () => void;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export default function SelectableCard({
@@ -16,6 +24,7 @@ export default function SelectableCard({
   description,
   selected,
   onPress,
+  containerStyle,
 }: SelectableCardProps) {
   const { theme } = useTheme();
 
@@ -27,10 +36,12 @@ export default function SelectableCard({
           borderColor: selected ? theme.border.primary : theme.border.secondary,
           backgroundColor: selected
             ? theme.icon.active + '20'
-            : theme.backgroundPrimary,
+            : theme.background.primary,
         },
+        containerStyle,
       ]}
       onPress={onPress}
+      activeOpacity={0.8}
     >
       <View style={styles.contentContainer}>
         <View style={styles.textContainer}>
@@ -49,7 +60,7 @@ export default function SelectableCard({
         </View>
         {selected && (
           <View style={styles.iconContainer}>
-            <CircleCheckIcon size={24} color={theme.icon.active} />
+            <CircleCheckIcon size={24} color={theme.icon.primary} />
           </View>
         )}
       </View>
@@ -63,20 +74,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 12,
     marginVertical: 6,
-    width: Dimensions.get('window').width - 32,
-    alignSelf: 'center',
+    width: '100%', // full width of parent
     minHeight: 90,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   contentContainer: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

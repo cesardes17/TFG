@@ -1,6 +1,6 @@
 export type BolsaJugador = {
   id: string;
-  createdAt: string;
+  fechaInscripcion: Date;
 
   jugador: {
     id: string;

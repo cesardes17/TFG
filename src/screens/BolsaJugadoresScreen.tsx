@@ -109,7 +109,7 @@ const BolsaJugadoresScreen = () => {
           id: getRandomUID(),
           tipo: 'Unirse a Equipo',
           estado: 'pendiente',
-          fechaCreacion: new Date().toString(),
+          fechaCreacion: new Date(),
           solicitante: {
             id: user!.uid,
             nombre: user!.nombre!,

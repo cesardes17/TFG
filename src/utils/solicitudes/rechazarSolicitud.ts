@@ -28,7 +28,7 @@ export default async function (
         id: solicitud.id,
         estado: 'rechazada',
         respuestaAdmin: inputModal,
-        fechaRespuestaAdmin: new Date().toISOString(),
+        fechaRespuestaAdmin: new Date(),
         admin: {
           id: usuarioActor!.uid,
           nombre: usuarioActor!.nombre,

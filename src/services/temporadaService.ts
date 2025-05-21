@@ -48,7 +48,7 @@ export const temporadaService = {
   createTemporada: async (): Promise<ResultService<Temporada>> => {
     try {
       const temporadaID = getRandomUID();
-      const fechaAhora = new Date().toISOString();
+      const fechaAhora = new Date();
 
       const temporadaData: Temporada = {
         id: temporadaID,

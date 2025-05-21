@@ -161,7 +161,7 @@ export const BaseSolicitudService = {
         const actualizada = {
           ...solicitud,
           estado: 'rechazada' as const,
-          fechaRespuestaAdmin: new Date().toISOString(),
+          fechaRespuestaAdmin: new Date(),
           respuestaAdmin: 'Solicitud rechazada automáticamente',
         };
         await BaseSolicitudService.setSolicitud(

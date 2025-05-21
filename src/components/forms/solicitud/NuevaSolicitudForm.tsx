@@ -87,7 +87,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
               photoURL: (user as PlayerProfile).photoURL,
               dorsal: (user as PlayerProfile).dorsal,
             },
-            fechaCreacion: new Date().toISOString(),
+            fechaCreacion: new Date(),
             nombreEquipo: values.teamName || '',
             escudoUrl: values.teamLogo || '',
           };
@@ -139,7 +139,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
               correo: user!.correo,
               photoURL: (user as PlayerProfile).photoURL,
             },
-            fechaCreacion: new Date().toISOString(),
+            fechaCreacion: new Date(),
             motivoSalida: values.leaveReason,
             equipoActual: (user as PlayerProfile)!.equipo!,
             capitanObjetivo: {
@@ -177,7 +177,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
               correo: user!.correo,
               photoURL: (user as PlayerProfile).photoURL,
             },
-            fechaCreacion: new Date().toISOString(),
+            fechaCreacion: new Date(),
             motivoDisolucion: values.dissolveReason,
             equipo: (user as PlayerProfile)!.equipo!,
           };
@@ -290,10 +290,11 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
                     Selecciona tipo de solicitud
                   </StyledText>
                   <SelectableCardGroup
+                    style={{ width: '100%' }}
                     options={opciones}
                     value={tipo}
                     onChange={(v) => setTipo(v as SolicitudTipo)}
-                  />
+                  />{' '}
                 </>
               ) : (
                 <>{renderForm(values, setFieldValue)}</>
@@ -358,7 +359,11 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     alignItems: 'center',
   },
-  formSection: { padding: 16 },
+  formSection: {
+    padding: 16,
+    flexGrow: 1,
+    justifyContent: 'flex-start', // opcional para evitar centrado vertical si hay poco contenido
+  },
   footerSection: { padding: 16 },
   buttonContainer: { flexDirection: 'row', justifyContent: 'center', gap: 12 },
   button: {

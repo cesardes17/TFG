@@ -47,7 +47,7 @@ export const aceptarDisolverEquipoSolicitud = async (
     solicitud = {
       ...solicitud,
       estado: 'aceptada',
-      fechaRespuestaAdmin: new Date().toString(),
+      fechaRespuestaAdmin: new Date(),
       admin: {
         id: usuario.uid,
         nombre: usuario.nombre,

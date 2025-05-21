@@ -25,7 +25,7 @@ export default async function (
         ...(solicitud as solicitudCrearEquipo),
         id: solicitud.id,
         estado: 'aceptada',
-        fechaRespuestaAdmin: new Date().toISOString(),
+        fechaRespuestaAdmin: new Date(),
         admin: {
           id: usuarioActor!.uid,
           nombre: usuarioActor!.nombre,

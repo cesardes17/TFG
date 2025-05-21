@@ -19,7 +19,7 @@ export const rechazarDisolverEquipoSolicitud = async (
         correo: usuario.correo,
       },
       estado: 'rechazada',
-      fechaRespuestaAdmin: new Date().toISOString(),
+      fechaRespuestaAdmin: new Date(),
       respuestaAdmin: motivo,
     };
     const res = await BaseSolicitudService.setSolicitud(

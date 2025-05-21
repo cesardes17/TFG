@@ -16,7 +16,7 @@ export const rechazarSalirEquipoSolicitud = async (
       solicitud = {
         ...solicitud,
         estado: 'rechazada',
-        fechaRespuestaAdmin: new Date().toISOString(),
+        fechaRespuestaAdmin: new Date(),
         respuestaAdmin: motivo,
         admin: {
           id: usuario.uid,
@@ -29,7 +29,7 @@ export const rechazarSalirEquipoSolicitud = async (
       solicitud = {
         ...solicitud,
         estado: 'rechazada',
-        fechaRespuestaCapitan: new Date().toISOString(),
+        fechaRespuestaCapitan: new Date(),
         motivoRespuestaCapitan: motivo,
         aprobadoCapitan: false,
       };

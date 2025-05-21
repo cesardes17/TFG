@@ -9,4 +9,5 @@ export type Inscripcion = {
     photoURL: string;
     dorsal: number;
   };
+  fechaInscripcion: Date;
 };

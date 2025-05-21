@@ -8,5 +8,5 @@ export type Equipo = {
     apellidos: string;
     correo: string;
   };
-  fechaCreacion: string; // ISO string (buena práctica)
+  fechaCreacion: Date; // ISO string (buena práctica)
 };

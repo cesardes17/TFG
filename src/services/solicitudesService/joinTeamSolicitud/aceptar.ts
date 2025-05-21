@@ -29,7 +29,7 @@ export const aceptarUnirseEquipoSolicitud = async (
       }
       solicitud = {
         ...solicitud,
-        fechaRespuestaAdmin: new Date().toISOString(),
+        fechaRespuestaAdmin: new Date(),
         admin: {
           id: usuario.uid,
           nombre: usuario.nombre,
@@ -46,7 +46,7 @@ export const aceptarUnirseEquipoSolicitud = async (
       }
       solicitud = {
         ...solicitud,
-        fechaRespuestaJugador: new Date().toISOString(),
+        fechaRespuestaJugador: new Date(),
         aprobadoJugadorObjetivo: true,
       };
     }
@@ -73,6 +73,7 @@ export const aceptarUnirseEquipoSolicitud = async (
           photoURL: solicitud.jugadorObjetivo.photoURL,
           dorsal: solicitud.jugadorObjetivo.dorsal,
         },
+        fechaInscripcion: new Date(),
       };
       const resInscripcion = await inscripcionesService.crearInscripcion(
         temporadaId,

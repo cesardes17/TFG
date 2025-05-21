@@ -28,7 +28,7 @@ export const aceptarCrearEquipoSolicitud = async (
       capitan: data.solicitante,
       nombre: data.nombreEquipo,
       escudoUrl: data.escudoUrl,
-      fechaCreacion: new Date().toString(),
+      fechaCreacion: new Date(),
     };
 
     const resEquipo = await equipoService.crearEquipo(
@@ -45,6 +45,7 @@ export const aceptarCrearEquipoSolicitud = async (
       id: getRandomUID(),
       equipoId: resEquipo.data!,
       jugador: data.solicitante,
+      fechaInscripcion: new Date(),
     };
 
     const resInscripcion = await inscripcionesService.crearInscripcion(

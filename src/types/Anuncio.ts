@@ -4,7 +4,7 @@ export type Anuncio = {
   id: string;
   titulo: string;
   contenido: string;
-  fechaPublicacion: string;
+  fechaPublicacion: Date;
   autor: {
     id: string;
     nombre: string;

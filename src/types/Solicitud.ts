@@ -11,14 +11,14 @@ type baseSolicitud = {
   estado: estadoSolicitud;
   tipo: tipoSolicitud;
 
-  fechaCreacion: string;
+  fechaCreacion: Date;
   admin?: {
     id: string;
     nombre: string;
     apellidos: string;
     correo: string;
   };
-  fechaRespuestaAdmin?: string;
+  fechaRespuestaAdmin?: Date;
   respuestaAdmin?: string;
 };
 
@@ -50,7 +50,7 @@ export type solicitudUnirseEquipo = baseSolicitud & {
     photoURL: string;
     dorsal: number;
   };
-  fechaRespuestaJugador?: string;
+  fechaRespuestaJugador?: Date;
   motivoRespuestaJugador?: string;
   aprobadoJugadorObjetivo?: boolean;
   equipoObjetivo: {
@@ -81,7 +81,7 @@ export type solicitudSalirEquipo = baseSolicitud & {
     photoURL: string;
   };
   aprobadoCapitan?: boolean;
-  fechaRespuestaCapitan?: string;
+  fechaRespuestaCapitan?: Date;
   motivoRespuestaCapitan?: string;
   motivoSalida: string;
 };

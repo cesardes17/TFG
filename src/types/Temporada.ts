@@ -2,7 +2,7 @@
 export type Temporada = {
   id: string;
   nombre: string;
-  fechaInicio: string;
-  fechaFin: string | null;
+  fechaInicio: Date;
+  fechaFin: Date | null;
   activa: boolean;
 };

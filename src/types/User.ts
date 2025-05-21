@@ -21,8 +21,8 @@ export interface UserBase {
   nombre: string;
   apellidos: string;
   role: Role;
-  createdAt: FirebaseFirestoreTypes.Timestamp;
-  ultimaVisitaTablon?: FirebaseFirestoreTypes.Timestamp;
+  fechaCreacion: Date;
+  ultimaVisitaTablon?: Date;
 }
 
 /**

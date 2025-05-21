@@ -44,7 +44,7 @@ export default function InscripcionBolsa({
     screenLoading(true);
     const payload: BolsaJugador = {
       id: getRandomUID(),
-      createdAt: new Date().toDateString(),
+      fechaInscripcion: new Date(),
       jugador: {
         id: jugador.uid,
         nombre: jugador.nombre,

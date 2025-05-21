@@ -25,7 +25,7 @@ export const aceptarSalirEquipoSolicitud = async (
       if (aprobadoCapitan) {
         solicitud.estado = 'aceptada';
       }
-      solicitud.fechaRespuestaAdmin = new Date().toISOString();
+      solicitud.fechaRespuestaAdmin = new Date();
       solicitud.admin = {
         id: usuario.uid,
         nombre: usuario.nombre,
@@ -36,7 +36,7 @@ export const aceptarSalirEquipoSolicitud = async (
       if (aprobadaAdmin) {
         solicitud.estado = 'aceptada';
       }
-      solicitud.fechaRespuestaCapitan = new Date().toISOString();
+      solicitud.fechaRespuestaCapitan = new Date();
       solicitud.aprobadoCapitan = true;
     }
 

@@ -49,7 +49,7 @@ export default function NuevoAnuncioForm() {
         id: getRandomUID(),
         titulo: values.titulo,
         contenido: values.contenido,
-        fechaPublicacion: new Date().toISOString(),
+        fechaPublicacion: new Date(),
         autor: {
           id: user!.uid,
           nombre: user!.nombre,

@@ -12,8 +12,9 @@ export default function Register() {
 
   useEffect(() => {
     if (loadingUser) return;
-    if (user) return router.push('/');
-  }, []);
+    if (user) router.replace('/');
+    console.log(user, loadingUser);
+  }, [loadingUser, user]);
 
   if (loadingUser) return null;
 

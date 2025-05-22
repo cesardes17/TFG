@@ -1,6 +1,6 @@
 // /src/validations/auth.ts
 import * as Yup from 'yup';
-import { Role } from '../types/User';
+import { Rol } from '../types/User';
 
 export const registerValidationSchemas = {
   step1: Yup.object().shape({
@@ -12,9 +12,9 @@ export const registerValidationSchemas = {
     nombre: Yup.string().required('Requerido'),
     apellidos: Yup.string().required('Requerido'),
   }),
-  step2: (roles: { value: Role }[]) =>
+  step2: (roles: { value: Rol }[]) =>
     Yup.object().shape({
-      role: Yup.string()
+      rol: Yup.string()
         .oneOf(
           roles.map((r) => r.value),
           'Rol inválido'

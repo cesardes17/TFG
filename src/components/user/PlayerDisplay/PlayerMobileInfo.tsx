@@ -50,7 +50,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
         <View style={styles.row}>
           <BadgeAccountIcon color={theme.icon.primary} size={20} />
           <StyledText size='large' style={styles.text}>
-            {capitalizeFirst(player.role)}
+            {capitalizeFirst(player.rol)}
           </StyledText>
         </View>
         <View style={styles.row}>

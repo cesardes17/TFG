@@ -19,8 +19,7 @@ export function useVerificarAnunciosNuevos(): boolean {
       (async () => {
         // 1) Leer último acceso
         const visRes = await UserService.obtenerVisitaTablon(user.uid);
-        const desde =
-          visRes.success && visRes.data ? visRes.data.toDate() : new Date(0);
+        const desde = visRes.success && visRes.data ? visRes.data : new Date(0);
 
         // 2) Preguntar si hay anuncios más recientes
 

@@ -25,7 +25,7 @@ export default function PlayerMobileInfo({ player }: PlayerMobileInfoProps) {
         <StyledText style={styles.nombreWeb}>
           {player.nombre + ' ' + player.apellidos}
         </StyledText>
-        <StyledText style={styles.roleWeb}>{player.role}</StyledText>
+        <StyledText style={styles.rolWeb}>{player.rol}</StyledText>
         <View style={styles.row}>
           <BasketballOutlineIcon color={theme.icon.active} size={20} />
           <StyledText style={styles.textWeb}>{player.posicion}</StyledText>
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  roleWeb: {
+  rolWeb: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 12,

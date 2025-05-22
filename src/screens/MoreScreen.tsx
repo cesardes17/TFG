@@ -1,6 +1,6 @@
 // src/screens/MoreScreen.tsx
 import React from 'react';
-import { TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { navigationItems } from '../constants/navigationsItems';
@@ -12,7 +12,7 @@ export default function MoreScreen() {
   const { theme } = useTheme();
   const { user } = useUser();
 
-  const userRol = user ? user.role : null;
+  const userRol = user ? user.rol : null;
 
   const filteredItems = navigationItems.filter(
     (item) =>
@@ -36,25 +36,3 @@ export default function MoreScreen() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderRadius: 6,
-    marginBottom: 12,
-  },
-  buttonText: {
-    fontSize: 18,
-  },
-});

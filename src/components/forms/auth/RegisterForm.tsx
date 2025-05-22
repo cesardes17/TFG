@@ -4,7 +4,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Formik } from 'formik';
 import { useRouter } from 'expo-router';
 import {
-  Role,
+  Rol,
   PlayerRegistration,
   OtherRegistration,
 } from '../../../types/User';
@@ -23,7 +23,7 @@ type FormValues = {
   confirmPassword: string;
   nombre: string;
   apellidos: string;
-  role: Role;
+  rol: Rol;
   altura?: number;
   peso?: number;
   dorsal?: number;
@@ -47,7 +47,7 @@ export default function RegisterForm({ setIsLoading }: Props) {
     confirmPassword: '',
     nombre: '',
     apellidos: '',
-    role: 'espectador',
+    rol: 'espectador',
     altura: undefined,
     peso: undefined,
     dorsal: undefined,
@@ -59,17 +59,17 @@ export default function RegisterForm({ setIsLoading }: Props) {
     {
       label: 'Espectador',
       description: 'Solo ver contenido',
-      value: 'espectador' as Role,
+      value: 'espectador' as Rol,
     },
     {
       label: 'Jugador',
       description: 'Participar en partidos',
-      value: 'jugador' as Role,
+      value: 'jugador' as Rol,
     },
   ];
 
   const getTotalSteps = (values: FormValues) =>
-    values.role === 'jugador' ? 5 : 2;
+    values.rol === 'jugador' ? 5 : 2;
 
   const renderStep = (
     values: FormValues,
@@ -103,8 +103,8 @@ export default function RegisterForm({ setIsLoading }: Props) {
         return (
           <SelectableCardGroup
             options={roles}
-            value={values.role}
-            onChange={(v) => setFieldValue('role', v)}
+            value={values.rol}
+            onChange={(v) => setFieldValue('rol', v)}
           />
         );
       case 3:
@@ -166,7 +166,7 @@ export default function RegisterForm({ setIsLoading }: Props) {
     setIsLoading(true);
 
     try {
-      if (values.role === 'jugador') {
+      if (values.rol === 'jugador') {
         if (
           !values.altura ||
           !values.peso ||
@@ -179,7 +179,7 @@ export default function RegisterForm({ setIsLoading }: Props) {
           correo: values.correo,
           nombre: values.nombre,
           apellidos: values.apellidos,
-          role: 'jugador',
+          rol: 'jugador',
           altura: Number(values.altura),
           peso: Number(values.peso),
           dorsal: Number(values.dorsal),
@@ -193,7 +193,7 @@ export default function RegisterForm({ setIsLoading }: Props) {
           correo: values.correo,
           nombre: values.nombre,
           apellidos: values.apellidos,
-          role: 'espectador',
+          rol: 'espectador',
         };
         await registrationHelper(payload, values.password);
       }

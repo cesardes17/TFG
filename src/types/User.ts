@@ -2,9 +2,9 @@
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 /**
- * Roles disponibles en la aplicación
+ * rols disponibles en la aplicación
  */
-export type Role =
+export type Rol =
   | 'espectador'
   | 'jugador'
   | 'capitan'
@@ -20,7 +20,7 @@ export interface UserBase {
   correo: string;
   nombre: string;
   apellidos: string;
-  role: Role;
+  rol: Rol;
   fechaCreacion: Date;
   ultimaVisitaTablon?: Date;
 }
@@ -47,14 +47,14 @@ export interface PlayerProfile {
  * Usuario con rol Jugador o Capitán
  */
 export interface PlayerUser extends UserBase, PlayerProfile {
-  role: 'jugador' | 'capitan';
+  rol: 'jugador' | 'capitan';
 }
 
 /**
  * Usuario con cualquier otro rol distinto de Jugador o Capitán
  */
 export interface OtherUser extends UserBase {
-  role: Exclude<Role, 'jugador' | 'capitan'>;
+  rol: Exclude<Rol, 'jugador' | 'capitan'>;
 }
 
 /**
@@ -69,7 +69,7 @@ export interface UserRegistrationBase {
   correo: string;
   nombre: string;
   apellidos: string;
-  role: Role;
+  rol: Rol;
 }
 
 /**
@@ -77,15 +77,15 @@ export interface UserRegistrationBase {
  */
 export type PlayerRegistration = UserRegistrationBase &
   PlayerProfile & {
-    role: 'jugador' | 'capitan';
+    rol: 'jugador' | 'capitan';
   };
 
 /**
  * Datos para registrar cualquier otro tipo de usuario
  */
 export type OtherRegistration = UserRegistrationBase & {
-  role: Exclude<Role, 'jugador' | 'capitan'>;
-  /** Foto opcional para otros roles */
+  rol: Exclude<Rol, 'jugador' | 'capitan'>;
+  /** Foto opcional para otros rols */
   photoURL?: string;
 };
 
@@ -98,5 +98,5 @@ export type UserRegistration = PlayerRegistration | OtherRegistration;
  * Type guard para identificar un PlayerUser
  */
 export function isPlayer(user: User): user is PlayerUser {
-  return user.role === 'jugador' || user.role === 'capitan';
+  return user.rol === 'jugador' || user.rol === 'capitan';
 }

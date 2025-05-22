@@ -15,14 +15,14 @@ export default function SolicitudesPage() {
     if (loadingUser) return;
     if (!user) return router.replace('/');
     //no tienen acceso a esta pagina
-    if (user.role === 'arbitro' || user.role === 'espectador')
+    if (user.rol === 'arbitro' || user.rol === 'espectador')
       return router.replace('/');
   }, []);
 
   if (loadingUser) return null;
 
   const headerRight = () => {
-    if (user?.role === 'organizador' || user?.role === 'coorganizador')
+    if (user?.rol === 'organizador' || user?.rol === 'coorganizador')
       return null;
     return (
       <TouchableOpacity onPress={() => router.push('/nuevaSolicitud')}>

@@ -28,8 +28,7 @@ const AnuncioCard: React.FC<AnuncioCardProps> = ({ anuncio }) => {
   const shadowColor = isDarkMode ? '#000000' : '#000000';
 
   // Formatear fecha para mostrarla de manera amigable
-  const formatearFecha = (fechaString: string) => {
-    const fecha = new Date(fechaString);
+  const formatearFecha = (fecha: Date) => {
     return fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: 'short',

@@ -35,7 +35,7 @@ const UserList: React.FC<UserListProps> = ({
 
   // Renderizar cada elemento de la lista
   const renderItem = ({ item }: { item: User }) => {
-    const isPlayer = isPlayerOrCaptain(item.role);
+    const isPlayer = isPlayerOrCaptain(item.rol);
 
     return (
       <View style={[styles.card, { backgroundColor: theme.cardDefault }]}>
@@ -53,8 +53,8 @@ const UserList: React.FC<UserListProps> = ({
             <Text style={[styles.userName, { color: theme.text.primary }]}>
               {item.nombre} {item.apellidos}
             </Text>
-            <Text style={[styles.userRole, { color: theme.text.secondary }]}>
-              {item.role}
+            <Text style={[styles.userrol, { color: theme.text.secondary }]}>
+              {item.rol}
             </Text>
             <Text style={[styles.userEmail, { color: theme.text.secondary }]}>
               {item.correo}
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  userRole: {
+  userrol: {
     fontSize: 14,
     marginBottom: 4,
     textTransform: 'capitalize',

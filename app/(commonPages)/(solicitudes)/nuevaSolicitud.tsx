@@ -13,7 +13,7 @@ export default function NuevaSolicitudPage() {
     if (loadingUser) return;
     if (!user) return router.replace('/');
     //solo tienen acceso a esta pagina
-    if (user.role !== 'jugador' && user.role !== 'capitan')
+    if (user.rol !== 'jugador' && user.rol !== 'capitan')
       return router.replace('/');
   }, []);
 

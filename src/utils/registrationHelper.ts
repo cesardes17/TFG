@@ -25,7 +25,7 @@ export default async function registrationHelper(
     authCreado = uid;
 
     // 2) Si es jugador o capitán, sube la foto
-    const isJugador = user.role === 'jugador' || user.role === 'capitan';
+    const isJugador = user.rol === 'jugador' || user.rol === 'capitan';
     if (isJugador && user.photoURL) {
       // sube y recoge la URL
       const storageRes = await StorageService.uploadFile(

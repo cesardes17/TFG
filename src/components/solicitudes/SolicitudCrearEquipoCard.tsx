@@ -36,8 +36,8 @@ export default function ({
   } = solicitud;
   const { theme } = useTheme();
 
-  const formatearFecha = (fecha: string) => {
-    return format(new Date(fecha), 'dd/MM/yy');
+  const formatearFecha = (fecha: Date) => {
+    return format(fecha, 'dd/MM/yy');
   };
 
   const esAdmin = usuarioActual.esAdmin === true;

@@ -33,7 +33,7 @@ export default function UserCardInfo({ user }: UserCardInfoProps) {
       <View style={{ flexDirection: 'row', gap: 5 }}>
         <BadgeAccountIcon size={20} color={theme.text.primary} />
         <StyledText style={{ color: theme.text.primary }}>
-          {user.role}
+          {user.rol}
         </StyledText>
       </View>
     </View>

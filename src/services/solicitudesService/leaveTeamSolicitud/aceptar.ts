@@ -12,7 +12,7 @@ export const aceptarSalirEquipoSolicitud = async (
   usuario: User
 ): Promise<ResultService<solicitudSalirEquipo>> => {
   const esAdmin =
-    usuario.role === 'organizador' || usuario.role === 'coorganizador';
+    usuario.rol === 'organizador' || usuario.rol === 'coorganizador';
   const aprobadaAdmin = !!solicitud.admin;
   const aprobadoCapitan = solicitud.aprobadoCapitan === true;
   console.log('esAdmin: ', esAdmin);

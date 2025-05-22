@@ -22,8 +22,7 @@ export default function SolicitudCard({
   onRechazar,
 }: SolicitudCardProps) {
   const { user } = useUser();
-  const isAdmin =
-    user?.role === 'organizador' || user?.role === 'coorganizador';
+  const isAdmin = user?.rol === 'organizador' || user?.rol === 'coorganizador';
   const userActual = { id: user!.uid, esAdmin: isAdmin };
   switch (solicitud.tipo) {
     case 'Crear Equipo':

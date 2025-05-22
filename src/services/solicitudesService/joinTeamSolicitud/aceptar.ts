@@ -17,7 +17,7 @@ export const aceptarUnirseEquipoSolicitud = async (
   const solicitudInicial = solicitud;
   try {
     const isAdmin =
-      usuario.role === 'organizador' || usuario.role === 'coorganizador';
+      usuario.rol === 'organizador' || usuario.rol === 'coorganizador';
     const aprobadaAdmin = solicitud.admin ? true : false;
     const aprobadaJugador = solicitud.aprobadoJugadorObjetivo === true;
     if (isAdmin) {

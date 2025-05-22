@@ -1,8 +1,8 @@
 // src/constants/navigationItems.ts
 
-import { Role } from '../types/User';
+import { Rol } from '../types/User';
 
-export type NavigationAllowedRole = '*' | 'auth' | Role;
+export type NavigationAllowedRole = '*' | 'auth' | Rol;
 
 export interface NavigationItem {
   id: string;

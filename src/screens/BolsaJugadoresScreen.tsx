@@ -20,8 +20,7 @@ const BolsaJugadoresScreen = () => {
   const { showToast } = useToast();
   const { theme } = useTheme();
   const usuarioActualId = user?.uid;
-  const isAdmin =
-    user!.role === 'organizador' || user!.role === 'coorganizador';
+  const isAdmin = user!.rol === 'organizador' || user!.rol === 'coorganizador';
   const [isLoading, setIsLodaing] = useState(true);
 
   const [estadosSolicitudes, setEstadosSolicitudes] = useState<

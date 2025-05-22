@@ -9,8 +9,7 @@ export default function () {
   const { theme } = useTheme();
   const { user } = useUser();
 
-  const isAdmin =
-    user!.role === 'coorganizador' || user!.role === 'organizador';
+  const isAdmin = user!.rol === 'coorganizador' || user!.rol === 'organizador';
   if (isAdmin) {
     return null;
   }

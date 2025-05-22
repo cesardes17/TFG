@@ -36,8 +36,7 @@ const AnuncioCompactoCard: React.FC<AnuncioCompactoProps> = ({ anuncio }) => {
   const modalBgColor = isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.8)';
 
   // Formatear fecha para mostrarla de manera amigable
-  const formatearFecha = (fechaString: string) => {
-    const fecha = new Date(fechaString);
+  const formatearFecha = (fecha: Date) => {
     return fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: 'short',

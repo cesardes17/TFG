@@ -9,8 +9,7 @@ export default function HeaderTablon() {
   const { theme } = useTheme();
   const { user } = useUser();
 
-  const isAdmin =
-    user?.role === 'organizador' || user?.role === 'coorganizador';
+  const isAdmin = user?.rol === 'organizador' || user?.rol === 'coorganizador';
 
   if (!isAdmin) {
     return null;

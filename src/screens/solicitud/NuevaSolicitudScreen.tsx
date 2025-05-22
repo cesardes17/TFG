@@ -12,8 +12,8 @@ export default function NuevaSolicitudScreen() {
     [];
 
   const tieneEquipo = (user as PlayerProfile)?.equipo;
-  const esCapitan = user.role === 'capitan';
-  const esJugador = user.role === 'jugador';
+  const esCapitan = user.rol === 'capitan';
+  const esJugador = user.rol === 'jugador';
   if (!tieneEquipo && esJugador) opcionesPermitidas.push('createTeam');
   else if (esCapitan) opcionesPermitidas.push('dissolveTeam');
   else opcionesPermitidas.push('leaveTeam');

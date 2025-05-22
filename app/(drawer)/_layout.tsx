@@ -45,7 +45,7 @@ export default function WebLayout() {
             title: 'Panel de Control',
             drawerItemStyle: {
               display:
-                user?.role === 'organizador' || user?.role === 'coorganizador'
+                user?.rol === 'organizador' || user?.rol === 'coorganizador'
                   ? 'flex'
                   : 'none',
             },
@@ -58,7 +58,7 @@ export default function WebLayout() {
             title: 'Administrar Usuarios',
             drawerItemStyle: {
               display:
-                user?.role === 'organizador' || user?.role === 'coorganizador'
+                user?.rol === 'organizador' || user?.rol === 'coorganizador'
                   ? 'flex'
                   : 'none',
             },
@@ -71,7 +71,7 @@ export default function WebLayout() {
             title: 'Solicitudes',
             drawerItemStyle: {
               display:
-                user?.role !== 'espectador' && user?.role !== 'arbitro'
+                user?.rol !== 'espectador' && user?.rol !== 'arbitro'
                   ? 'flex'
                   : 'none',
             },
@@ -84,9 +84,9 @@ export default function WebLayout() {
             title: 'Bolsa de Jugadores',
             drawerItemStyle: {
               display:
-                user?.role !== 'espectador' &&
-                user?.role !== 'arbitro' &&
-                user?.role !== 'jugador'
+                user?.rol !== 'espectador' &&
+                user?.rol !== 'arbitro' &&
+                user?.rol !== 'jugador'
                   ? 'flex'
                   : 'none',
             },

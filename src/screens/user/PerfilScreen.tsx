@@ -29,9 +29,15 @@ export default function PerfilScreen() {
   return (
     <View style={styles.container}>
       <ShowUserInfo screenLoading={setIsLoading} />
-      {user.role === 'jugador' && !user.equipo && (
+      {user.rol === 'jugador' && !user.equipo && (
         <InscripcionBolsa screenLoading={setIsLoading} />
       )}
+      <StyledButton
+        title='Editar Perfil'
+        onPress={() => {
+          router.push('/editarPerfil');
+        }}
+      />
       <StyledButton
         variant='error'
         onPress={async () => {

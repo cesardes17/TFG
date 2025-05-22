@@ -64,15 +64,15 @@ export const aceptarDisolverEquipoSolicitud = async (
       throw new Error(resSol.errorMessage);
     }
 
-    //PASO 4: ACTUALIZAMOS EL ROLE DEL SOLICITANTE
-    const roleRes = await UserService.UpdatePlayerProfile(
+    //PASO 4: ACTUALIZAMOS EL rol DEL SOLICITANTE
+    const rolRes = await UserService.UpdatePlayerProfile(
       solicitud.solicitante.id,
       {
-        role: 'jugador',
+        rol: 'jugador',
       }
     );
-    if (!roleRes.success) {
-      throw new Error(roleRes.errorMessage);
+    if (!rolRes.success) {
+      throw new Error(rolRes.errorMessage);
     }
 
     //PASO 5: Eliminamos el equipo

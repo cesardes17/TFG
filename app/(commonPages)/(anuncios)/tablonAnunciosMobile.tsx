@@ -14,7 +14,7 @@ export default function TablonAnunciosPage() {
   const { user } = useUser();
 
   const headerRight = () => {
-    if (user?.role !== 'organizador' && user?.role !== 'coorganizador')
+    if (user?.rol !== 'organizador' && user?.rol !== 'coorganizador')
       return null;
     return (
       <TouchableOpacity onPress={() => router.push('/nuevaSolicitud')}>

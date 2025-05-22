@@ -35,7 +35,7 @@ export default function SolicitudDisolverEquipoCard({
   } = solicitud;
   const { theme } = useTheme();
 
-  const formatearFecha = (fecha: string) => format(new Date(fecha), 'dd/MM/yy');
+  const formatearFecha = (fecha: Date) => format(fecha, 'dd/MM/yy');
   const puedeResponder =
     estado === 'pendiente' && usuarioActual.esAdmin && !fechaRespuestaAdmin;
 

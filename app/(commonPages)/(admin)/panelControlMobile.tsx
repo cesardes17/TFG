@@ -12,7 +12,7 @@ export default function PanelControlPage() {
     if (loadingUser) return;
     if (!user) return router.replace('/');
     //no tienen acceso a esta pagina
-    if (user.role !== 'coorganizador' && user.role !== 'organizador')
+    if (user.rol !== 'coorganizador' && user.rol !== 'organizador')
       return router.replace('/');
   }, []);
 

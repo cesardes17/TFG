@@ -47,7 +47,7 @@ export default async function (
     case 'Unirse a Equipo': {
       console.log('Unirse a Equipo - ');
       let solicitudUE = solicitud as solicitudUnirseEquipo;
-      if (usuarioActor.role === 'jugador') {
+      if (usuarioActor.rol === 'jugador') {
         solicitudUE.jugadorObjetivo.dorsal = parseInt(inputModal);
       }
 

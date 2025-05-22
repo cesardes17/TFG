@@ -55,8 +55,7 @@ export default function SolicitudesList({
   const [mostrarInputModal, setMostrarInputModal] = useState(false);
   const [modalType, setModalType] = useState<ConfirmationType>('update');
   const [estado, setEStado] = useState('');
-  const isAdmin =
-    user?.role === 'organizador' || user?.role === 'coorganizador';
+  const isAdmin = user?.rol === 'organizador' || user?.rol === 'coorganizador';
 
   const fetchSolicitudes = useCallback(async () => {
     if (!temporada) return;
@@ -142,7 +141,7 @@ export default function SolicitudesList({
     console.log('aceptar Solicitud: ', solicitud);
 
     // Si es “Unirse a Equipo” y el usuario es jugador...
-    if (solicitud.tipo === 'Unirse a Equipo' && user?.role === 'jugador') {
+    if (solicitud.tipo === 'Unirse a Equipo' && user?.rol === 'jugador') {
       console.log('OBTENIENDO DORSALES');
 
       // Usa directamente `solicitud.equipoObjetivo.id`, no selectedSolicitud
@@ -165,7 +164,7 @@ export default function SolicitudesList({
     // Ahora sí setea la solicitud seleccionada
     setSelectedSolicitud(solicitud);
     setModalTitle(
-      solicitud.tipo === 'Unirse a Equipo' && user?.role === 'jugador'
+      solicitud.tipo === 'Unirse a Equipo' && user?.rol === 'jugador'
         ? 'Introduzca su Dorsal para confirmar inscripción'
         : '¿Está seguro de confirmar la solicitud?'
     );
@@ -195,7 +194,7 @@ export default function SolicitudesList({
       //validacion previa de input si es dorsal
       if (
         selectedSolicitud.tipo === 'Unirse a Equipo' &&
-        user.role === 'jugador'
+        user.rol === 'jugador'
       ) {
         const dorsal = parseInt(inputModal);
         const isValidDorsal =

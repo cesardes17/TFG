@@ -6,7 +6,7 @@ import {
   OtherUser,
   PlayerProfile,
   PlayerUser,
-  Role,
+  Rol,
   User,
 } from '../../types/User';
 import { useToast } from '../../contexts/ToastContext';
@@ -20,7 +20,7 @@ import { FilterIcon } from '../../components/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 
-const roleOptions: Option<Role | ''>[] = [
+const rolOptions: Option<Rol | ''>[] = [
   {
     label: 'Espectador',
     description: 'Puede ver partidos',
@@ -34,7 +34,7 @@ const roleOptions: Option<Role | ''>[] = [
   },
 ] as const;
 
-const roleFilters: Option<Role | ''>[] = [
+const rolFilters: Option<Rol | ''>[] = [
   {
     label: 'Espectador',
     description: 'Puede ver partidos',
@@ -62,7 +62,7 @@ export default function AdministrarUsuariosScreen() {
   const { theme } = useTheme();
   const [query, setQuery] = useState('');
   const [modalFiltros, setModalFiltros] = useState(false);
-  const [selectedRolFilter, setSelectedRolFilter] = useState<Role | ''>('');
+  const [selectedRolFilter, setSelectedRolFilter] = useState<Rol | ''>('');
   const { user, loadingUser } = useUser();
   const { showToast } = useToast();
   const [usuarios, setUsuarios] = useState<User[]>([]);
@@ -70,7 +70,7 @@ export default function AdministrarUsuariosScreen() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isRolModalVisible, setRolModalVisible] = useState(false);
   const [isSancionModalVisible, setSancionModalVisible] = useState(false);
-  const [selectedRol, setSelectedRol] = useState<Role | ''>('');
+  const [selectedRol, setSelectedRol] = useState<Rol | ''>('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch inicial
@@ -79,14 +79,14 @@ export default function AdministrarUsuariosScreen() {
       setIsLoading(true);
       const res = await UserService.getUsers();
       if (res.success && res.data) {
-        if (user?.role === 'coorganizador') {
+        if (user?.rol === 'coorganizador') {
           const usersFilered = res.data.filter(
-            (u) => u.role !== 'coorganizador' && u.role !== 'organizador'
+            (u) => u.rol !== 'coorganizador' && u.rol !== 'organizador'
           );
           setUsuarios(usersFilered);
           setUsuariosFiltered(usersFilered);
         } else {
-          const usersFilered = res.data.filter((u) => u.role !== 'organizador');
+          const usersFilered = res.data.filter((u) => u.rol !== 'organizador');
           setUsuarios(usersFilered);
           setUsuariosFiltered(usersFilered);
         }
@@ -110,7 +110,7 @@ export default function AdministrarUsuariosScreen() {
         });
       }
       if (selectedRolFilter) {
-        result = result.filter((u) => u.role === selectedRolFilter);
+        result = result.filter((u) => u.rol === selectedRolFilter);
       }
       setUsuariosFiltered(result);
     };
@@ -137,7 +137,7 @@ export default function AdministrarUsuariosScreen() {
     }
 
     setSelectedUser(usuario);
-    setSelectedRol(usuario.role as Role);
+    setSelectedRol(usuario.rol as Rol);
     setRolModalVisible(true);
   };
 
@@ -178,7 +178,7 @@ export default function AdministrarUsuariosScreen() {
     }
     try {
       const res = await UserService.updateUserProfile(selectedUser.uid, {
-        role: selectedRol,
+        rol: selectedRol,
       });
       if (!res.success) throw new Error(res.errorMessage);
 
@@ -192,7 +192,7 @@ export default function AdministrarUsuariosScreen() {
             // Asumimos que 'u' ya tenía fotoURL, dorsal, etc. (o les ponemos defaults)
             const jugador: PlayerUser = {
               ...(u as PlayerUser),
-              role: selectedRol,
+              rol: selectedRol,
             };
             return jugador;
           }
@@ -209,7 +209,7 @@ export default function AdministrarUsuariosScreen() {
           } = u as PlayerUser;
           const normal: OtherUser = {
             ...rest,
-            role: selectedRol, // ahora es uno de los 4 válidos
+            rol: selectedRol, // ahora es uno de los 4 válidos
           };
           return normal;
         })
@@ -221,7 +221,7 @@ export default function AdministrarUsuariosScreen() {
   };
 
   if (loadingUser) return null;
-  if (!user || (user.role !== 'coorganizador' && user.role !== 'organizador'))
+  if (!user || (user.rol !== 'coorganizador' && user.rol !== 'organizador'))
     return;
 
   if (isLoading) return <LoadingIndicator text='Cargando usuarios' />;
@@ -280,7 +280,7 @@ export default function AdministrarUsuariosScreen() {
         }}
       >
         <SelectableCardGroup
-          options={roleOptions}
+          options={rolOptions}
           value={selectedRol}
           onChange={setSelectedRol}
           style={{ marginTop: 16 }}
@@ -295,7 +295,7 @@ export default function AdministrarUsuariosScreen() {
         onConfirm={() => setModalFiltros(false)}
       >
         <SelectableCardGroup
-          options={roleFilters}
+          options={rolFilters}
           value={selectedRolFilter}
           onChange={setSelectedRolFilter}
           style={{ marginTop: 16 }}

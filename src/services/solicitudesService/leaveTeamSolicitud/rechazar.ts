@@ -10,7 +10,7 @@ export const rechazarSalirEquipoSolicitud = async (
   motivo: string
 ): Promise<ResultService<solicitudSalirEquipo>> => {
   const isAdmin =
-    usuario.role === 'organizador' || usuario.role === 'coorganizador';
+    usuario.rol === 'organizador' || usuario.rol === 'coorganizador';
   try {
     if (isAdmin) {
       solicitud = {

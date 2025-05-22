@@ -91,7 +91,7 @@ export const UserService = {
       if (!res.success || !res.data) {
         return { success: false, errorMessage: 'Usuario no encontrado' };
       }
-      if (res.data.role !== 'jugador' && res.data.role !== 'capitan') {
+      if (res.data.rol !== 'jugador' && res.data.rol !== 'capitan') {
         return { success: false, errorMessage: 'El usuario no es un jugador' };
       }
 

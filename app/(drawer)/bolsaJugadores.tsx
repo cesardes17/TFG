@@ -12,9 +12,9 @@ export default function BolsaJugadorPage() {
     if (!user) return router.replace('/');
     //no tienen acceso a esta pagina
     if (
-      user.role !== 'capitan' &&
-      user.role !== 'coorganizador' &&
-      user.role !== 'organizador'
+      user.rol !== 'capitan' &&
+      user.rol !== 'coorganizador' &&
+      user.rol !== 'organizador'
     )
       return router.replace('/');
   }, []);

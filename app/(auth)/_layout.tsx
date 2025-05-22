@@ -11,12 +11,6 @@ export default function AuthLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
 
-  useEffect(() => {
-    if (loadingUser) return;
-    if (user) router.replace('/');
-    console.log(user, loadingUser);
-  });
-
   if (loadingUser) {
     return <LoadingIndicator text='Cargando...' />;
   }
@@ -59,6 +53,7 @@ export default function AuthLayout() {
     >
       <Stack.Screen name='login' options={{ title: 'Iniciar Sesión' }} />
       <Stack.Screen name='register' options={{ title: 'Crea una Cuenta' }} />
+      <Stack.Screen name='editarPerfil' options={{ title: 'Editar Perfil' }} />
     </Stack>
   );
 }

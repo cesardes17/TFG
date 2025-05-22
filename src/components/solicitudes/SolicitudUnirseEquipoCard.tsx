@@ -38,7 +38,7 @@ export default function SolicitudUnirseEquipoCard({
   } = solicitud;
   const { theme } = useTheme();
 
-  const formatearFecha = (fecha: string) => format(new Date(fecha), 'dd/MM/yy');
+  const formatearFecha = (fecha: Date) => format(fecha, 'dd/MM/yy');
 
   const esJugadorObjetivo = usuarioActual.id === jugadorObjetivo.id;
   const esAdmin = usuarioActual.esAdmin === true;

@@ -69,7 +69,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [tipo, setTipo] = useState<SolicitudTipo | ''>('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [loadingText, setLoadingText] = useState('');
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
@@ -90,12 +90,14 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
             fechaCreacion: new Date(),
             nombreEquipo: values.teamName || '',
             escudoUrl: values.teamLogo || '',
+            escurdoPath: '',
           };
 
           const res = await BaseSolicitudService.setSolicitud(
             temporada!.id,
             createTeamSolicitud.id,
-            createTeamSolicitud
+            createTeamSolicitud,
+            setLoadingText
           );
 
           if (!res.success || !res.data) {
@@ -153,7 +155,8 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
           const res = await BaseSolicitudService.setSolicitud(
             temporada!.id,
             leaveTeamSolicitud.id,
-            leaveTeamSolicitud
+            leaveTeamSolicitud,
+            setLoadingText
           );
           if (!res.success || !res.data) {
             throw new Error(res.errorMessage || 'Error creando solicitud');
@@ -184,7 +187,8 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
           const res = await BaseSolicitudService.setSolicitud(
             temporada!.id,
             solicitud.id,
-            solicitud
+            solicitud,
+            setLoadingText
           );
           if (!res.success || !res.data) {
             throw new Error(res.errorMessage || 'Error creando solicitud');
@@ -249,7 +253,11 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
   };
 
   if (isLoading) {
-    return <LoadingIndicator text='Cargando...' />;
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingIndicator text={loadingText} />
+      </View>
+    );
   }
 
   const opciones = opcionesPermitidas.map((key) => ({
@@ -294,7 +302,7 @@ export default function NuevaSolicitudForm({ opcionesPermitidas }: Props) {
                     options={opciones}
                     value={tipo}
                     onChange={(v) => setTipo(v as SolicitudTipo)}
-                  />{' '}
+                  />
                 </>
               ) : (
                 <>{renderForm(values, setFieldValue)}</>

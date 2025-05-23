@@ -25,6 +25,7 @@ type baseSolicitud = {
 export type solicitudCrearEquipo = baseSolicitud & {
   nombreEquipo: string;
   escudoUrl: string;
+  escurdoPath: string;
   solicitante: {
     id: string;
     nombre: string;

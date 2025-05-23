@@ -43,9 +43,6 @@ export default function PerfilScreen() {
       }
     >
       <ShowUserInfo screenLoading={setIsLoading} />
-      {user.rol === 'jugador' && !user.equipo && (
-        <InscripcionBolsa screenLoading={setIsLoading} />
-      )}
       <View
         style={
           layoutType === 'mobile' || layoutType === 'tablet'
@@ -53,6 +50,11 @@ export default function PerfilScreen() {
             : styles.botonesDesktop
         }
       >
+        {user.rol === 'jugador' && !user.equipo && (
+          <View style={styles.buttonContainer}>
+            <InscripcionBolsa screenLoading={setIsLoading} />
+          </View>
+        )}
         {editarPerfil && (
           <View style={styles.buttonContainer}>
             <StyledButton

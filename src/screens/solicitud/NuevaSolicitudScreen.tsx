@@ -2,6 +2,7 @@
 import { useUser } from '../../contexts/UserContext';
 import { PlayerProfile } from '../../types/User';
 import NuevaSolicitudForm from '../../components/forms/solicitud/NuevaSolicitudForm';
+import { useState } from 'react';
 
 export default function NuevaSolicitudScreen() {
   const { user } = useUser();

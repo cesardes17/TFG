@@ -39,20 +39,26 @@ export const BaseSolicitudService = {
   setSolicitud: async (
     temporadaId: string,
     solicitudId: string,
-    payload: Partial<Solicitud>
+    payload: Partial<Solicitud>,
+    onProgress: (text: string) => void
   ): Promise<ResultService<string>> => {
+    let imagenInfo = null;
     try {
       // Si es tipo "Crear Equipo", subimos primero el escudo y actualizamos la URL
       if (payload.tipo === 'Crear Equipo') {
+        onProgress('Subiendo escudo del equipo...');
         const equipoPayload = payload as solicitudCrearEquipo;
         const imageRes = await StorageService.uploadFile(
           'escudos_equipos',
           equipoPayload.escudoUrl!
         );
         if (!imageRes.success || !imageRes.data) {
-          throw new Error(imageRes.errorMessage || 'Error al subir la imagen');
+          console.error('Error al subir la imagen', imageRes.errorMessage);
+          throw new Error('Error al subir la imagen');
         }
-        equipoPayload.escudoUrl = imageRes.data;
+        equipoPayload.escudoUrl = imageRes.data.url;
+        equipoPayload.escurdoPath = imageRes.data.fileName;
+        imagenInfo = imageRes.data;
       }
 
       // Ahora guardamos la solicitud en Firestore usando el servicio unificado
@@ -62,19 +68,30 @@ export const BaseSolicitudService = {
         'solicitudes',
         solicitudId,
       ];
+      onProgress('Creando Solicitud...');
+
       const res = await FirestoreService.setDocumentByPath<Partial<Solicitud>>(
         ...pathSegments,
         payload
       );
       if (!res.success) {
-        throw new Error(res.errorMessage || 'Error al guardar la solicitud');
+        console.error('Error al guardar la solicitud', res.errorMessage);
+        throw new Error('Error al guardar la solicitud');
       }
 
       return { success: true, data: res.data };
     } catch (err: any) {
+      const error = err instanceof Error ? err.message : String(err);
+
+      if (error.includes('solicitud') && imagenInfo) {
+        // Si es un error relacionado con la solicitud, intentamos eliminar la imagen
+        onProgress('Error al crear la solicitud. Eliminando imagen...');
+        await StorageService.deleteFile('escudos_equipos', imagenInfo.fileName);
+      }
+
       return {
         success: false,
-        errorMessage: err instanceof Error ? err.message : String(err),
+        errorMessage: error,
       };
     }
   },
@@ -135,7 +152,8 @@ export const BaseSolicitudService = {
 
   rechazarSolicitudesPendientes: async (
     temporadaId: string,
-    jugadorId: string
+    jugadorId: string,
+    onProgress: (text: string) => void
   ): Promise<ResultService<null>> => {
     try {
       const filtros: [string, WhereFilterOp, any][] = [
@@ -167,7 +185,8 @@ export const BaseSolicitudService = {
         await BaseSolicitudService.setSolicitud(
           temporadaId,
           solicitud.id,
-          actualizada
+          actualizada,
+          onProgress
         );
       }
 

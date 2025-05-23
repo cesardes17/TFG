@@ -7,8 +7,6 @@ import {
  * Serializa recursivamente las fechas: Date → Firestore.Timestamp
  */
 export async function serializeDates(obj: any): Promise<any> {
-  console.log('OBJETO A SERIALIZAR');
-  console.log(obj);
   const Timestamp = await getPlatformTimestampClass();
 
   if (obj instanceof Date) {

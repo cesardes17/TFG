@@ -70,7 +70,7 @@ export const aceptarUnirseEquipoSolicitud = async (
           nombre: solicitud.jugadorObjetivo.nombre,
           apellidos: solicitud.jugadorObjetivo.apellidos,
           correo: solicitud.jugadorObjetivo.correo,
-          photoURL: solicitud.jugadorObjetivo.photoURL,
+          fotoUrl: solicitud.jugadorObjetivo.fotoUrl,
           dorsal: solicitud.jugadorObjetivo.dorsal,
         },
         fechaInscripcion: new Date(),

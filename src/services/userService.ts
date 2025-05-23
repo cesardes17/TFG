@@ -134,7 +134,7 @@ export const UserService = {
         path,
         updatedData
       );
-      console.log('userService resUpdate - ', resUpdate.data);
+
       if (!resUpdate.success) {
         throw new Error(
           resUpdate.errorMessage || 'Error al actualizar usuario'

@@ -1,146 +1,210 @@
+'use client';
+
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { Formik } from 'formik';
-import { useTheme } from '../../../contexts/ThemeContext';
+import * as Yup from 'yup';
+import { AuthService } from '../../../services/core/authService';
+import { router } from 'expo-router';
+import StyledAlert from '../../common/StyledAlert';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
-import { AuthService } from '../../../services/core/authService';
-import StyledAlert from '../../common/StyledAlert';
-import { router } from 'expo-router';
-import { Platform } from 'react-native';
-import { loginValidationSchema } from '../../../validations/auth';
+import StyledButton from '../../common/StyledButton';
+import LoadingIndicator from '../../common/LoadingIndicator';
 
-interface FormValues {
-  correo: string;
-  password: string;
-}
+const esquemaInicioSesion = Yup.object().shape({
+  correo: Yup.string()
+    .email('Ingresa un correo electrónico válido')
+    .required('El correo electrónico es obligatorio'),
+  contrasena: Yup.string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .required('La contraseña es obligatoria'),
+});
 
-interface LoginFormProps {
-  setIsLoading: (isLoading: boolean) => void;
-}
-
-export default function LoginForm({ setIsLoading }: LoginFormProps) {
-  const { theme } = useTheme();
+export default function FormularioInicioSesion() {
   const [error, setError] = useState<string | null>(null);
-
-  const initialValues: FormValues = {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingText, setIsLoadingText] = useState('');
+  const valoresIniciales = {
     correo: '',
-    password: '',
+    contrasena: '',
   };
 
-  const handleSubmit = async (values: FormValues) => {
+  const manejarEnvio = async (valores: typeof valoresIniciales) => {
     setIsLoading(true);
+    setIsLoadingText('Iniciando Sesión');
     setError(null);
-
     try {
-      await AuthService.login(values.correo, values.password);
+      await AuthService.login(valores.correo, valores.contrasena);
       router.replace('/');
-    } catch (error) {
-      setError((error as Error).message);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
+      setIsLoadingText('');
     }
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.contenedor}>
+        <LoadingIndicator text={isLoadingText} />
+      </View>
+    );
+  }
+
   return (
-    <>
-      {error && <StyledAlert message={error} variant='error' />}
+    <View style={styles.contenedor}>
+      {error && <StyledAlert variant='error' message={error} />}
+
       <Formik
-        initialValues={initialValues}
-        validationSchema={loginValidationSchema}
-        onSubmit={handleSubmit}
+        initialValues={valoresIniciales}
+        validationSchema={esquemaInicioSesion}
+        onSubmit={manejarEnvio}
       >
-        {({ handleSubmit: formikSubmit }) => (
-          <View style={styles.container}>
-            <View style={styles.formContainer}>
-              <View style={styles.inputsContainer}>
-                <InputFormik
-                  name='correo'
-                  placeholder='Correo'
-                  keyboardType='email-address'
-                  autoCapitalize='none'
-                />
-                <InputFormik
-                  name='password'
-                  placeholder='Contraseña'
-                  secureTextEntry
-                />
-              </View>
+        {({
+          values,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          errors,
+          touched,
+        }) => (
+          <View style={styles.formulario}>
+            <StyledText style={styles.titulo}>Iniciar Sesión</StyledText>
 
-              <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.button,
-                    { backgroundColor: theme.icon.active },
-                  ]}
-                  onPress={() => formikSubmit()}
-                >
-                  <StyledText
-                    style={[styles.buttonText, { color: theme.text.dark }]}
-                  >
-                    Iniciar Sesión
-                  </StyledText>
-                </TouchableOpacity>
+            <View style={styles.campoFormulario}>
+              <StyledText style={styles.etiqueta}>
+                Correo Electrónico
+              </StyledText>
+              <InputFormik
+                name='correo'
+                style={styles.entrada}
+                placeholder='Ingresa tu correo'
+              />
+              {touched.correo && errors.correo && (
+                <StyledText style={styles.mensajeError}>
+                  {errors.correo}
+                </StyledText>
+              )}
+            </View>
 
-                <TouchableOpacity
-                  style={[
-                    styles.registerButton,
-                    { borderColor: theme.border.primary },
-                  ]}
-                  onPress={() => router.replace('/register')}
-                >
-                  <StyledText
-                    style={[styles.buttonText, { color: theme.text.primary }]}
-                  >
-                    Crear una cuenta
-                  </StyledText>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.campoFormulario}>
+              <StyledText style={styles.etiqueta}>Contraseña</StyledText>
+              <InputFormik
+                name='contrasena'
+                style={styles.entrada}
+                placeholder='Ingresa tu contraseña'
+                secureTextEntry
+              />
+              {touched.contrasena && errors.contrasena && (
+                <StyledText variant='error' style={styles.mensajeError}>
+                  {errors.contrasena}
+                </StyledText>
+              )}
+            </View>
+
+            <View style={styles.contenedorBoton}>
+              <StyledButton
+                title={isLoading ? 'Cargando...' : 'Iniciar Sesión'}
+                onPress={handleSubmit as any}
+                disabled={isLoading}
+              />
+            </View>
+            <View
+              style={{
+                height: 0,
+                borderWidth: 1,
+                marginVertical: 20,
+                borderColor: 'gray',
+              }}
+            />
+            <View style={styles.contenedorBoton}>
+              <StyledButton
+                variant='outline'
+                title={'Crea una cuenta'}
+                onPress={() => router.push('/register')}
+                disabled={isLoading}
+              />
             </View>
           </View>
         )}
       </Formik>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  contenedor: {
     flex: 1,
-    width: '100%',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  formContainer: {
-    width: '100%',
-    paddingHorizontal: 16,
-    gap: 24,
-  },
-  inputsContainer: {
-    width: Platform.OS === 'web' ? '75%' : '100%',
-    alignSelf: 'center',
-    gap: 16,
-  },
-  buttonsContainer: {
-    width: Platform.OS === 'web' ? '50%' : '100%',
-    alignSelf: 'center',
-    gap: 16,
-  },
-  button: {
-    width: '100%',
+  formulario: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
     padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  buttonText: {
-    fontSize: 16,
+  titulo: {
+    fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 24,
+    color: '#333',
+    textAlign: 'center',
   },
-  registerButton: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
+  campoFormulario: {
+    marginBottom: 16,
+  },
+  etiqueta: {
+    fontSize: 14,
+    marginBottom: 8,
+    color: '#555',
+  },
+  entrada: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 10,
+    fontSize: 16,
+  },
+  mensajeError: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  enlaceOlvido: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
+  textoEnlace: {
+    color: '#4CAF50',
+    fontSize: 14,
+  },
+  contenedorBoton: {},
+  contenedorRegistro: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  textoRegistro: {
+    color: '#666',
+    marginRight: 4,
+  },
+  enlaceRegistro: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
   },
 });

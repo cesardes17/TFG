@@ -11,6 +11,6 @@ export type BolsaJugador = {
     posicion: string;
     altura: number;
     peso: number;
-    photoURL: string;
+    fotoUrl: string;
   };
 };

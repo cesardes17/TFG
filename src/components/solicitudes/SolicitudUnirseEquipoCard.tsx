@@ -111,7 +111,7 @@ export default function SolicitudUnirseEquipoCard({
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
-            uri={jugadorObjetivo.photoURL || 'https://via.placeholder.com/50'}
+            uri={jugadorObjetivo.fotoUrl || 'https://via.placeholder.com/50'}
             containerStyle={styles.fotoJugador}
           />
           <View style={styles.datosJugador}>

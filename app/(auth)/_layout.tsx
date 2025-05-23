@@ -11,10 +11,6 @@ export default function AuthLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
 
-  if (loadingUser) {
-    return <LoadingIndicator text='Cargando...' />;
-  }
-
   return (
     <Stack
       screenOptions={{
@@ -29,7 +25,11 @@ export default function AuthLayout() {
           return (
             <TouchableOpacity
               onPress={() => {
-                router.replace('/');
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace('/');
+                }
               }}
               style={{
                 flexDirection: 'row',
@@ -44,7 +44,7 @@ export default function AuthLayout() {
                 <ArrowBackIcon color={theme.text.light} />
               )}
               <StyledText style={{ color: theme.text.light }}>
-                Inicio
+                Volver
               </StyledText>
             </TouchableOpacity>
           );

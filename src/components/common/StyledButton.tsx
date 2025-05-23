@@ -41,6 +41,7 @@ export default function StyledButton({
         {
           backgroundColor: buttonStyle.background,
           borderColor: buttonStyle.border,
+          paddingVertical: variant.includes('outline') ? 10 : 12,
           borderWidth: variant.includes('outline') ? 2 : 0,
           width: fullWidth ? '100%' : 'auto',
           opacity: disabled ? 0.6 : 1,
@@ -58,11 +59,11 @@ export default function StyledButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    marginTop: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    // Elimina cualquier `marginTop` que distorsione layout
   },
   buttonText: {
     fontSize: 16,

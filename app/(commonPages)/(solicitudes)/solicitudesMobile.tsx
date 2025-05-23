@@ -7,10 +7,13 @@ import { router } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
 import { AddIcon } from '../../../src/components/Icons';
 import { useTheme } from '../../../src/contexts/ThemeContext';
+import { useTemporadaContext } from '../../../src/contexts/TemporadaContext';
 
 export default function SolicitudesPage() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
+  const { temporada } = useTemporadaContext();
+
   useEffect(() => {
     if (loadingUser) return;
     if (!user) return router.replace('/');
@@ -22,7 +25,11 @@ export default function SolicitudesPage() {
   if (loadingUser) return null;
 
   const headerRight = () => {
-    if (user?.rol === 'organizador' || user?.rol === 'coorganizador')
+    if (
+      user?.rol === 'organizador' ||
+      user?.rol === 'coorganizador' ||
+      !temporada
+    )
       return null;
     return (
       <TouchableOpacity onPress={() => router.push('/nuevaSolicitud')}>

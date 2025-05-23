@@ -1,12 +1,19 @@
 // app/profile.tsx
 import { useUser } from '../../src/contexts/UserContext';
-import { Redirect } from 'expo-router';
+import { Redirect, useFocusEffect } from 'expo-router';
 import PageContainer from '../../src/components/layout/PageContainer';
 import PerfilScreen from '../../src/screens/user/PerfilScreen';
 import LoadingIndicator from '../../src/components/common/LoadingIndicator';
-export default function Profile() {
-  const { user, loadingUser } = useUser();
+import { useCallback } from 'react';
 
+export default function Profile() {
+  const { user, loadingUser, refetchUser } = useUser();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchUser(); // <- Refresca los datos del usuario al entrar
+    }, [])
+  );
   if (loadingUser) {
     return (
       <PageContainer>

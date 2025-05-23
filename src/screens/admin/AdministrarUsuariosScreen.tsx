@@ -199,7 +199,7 @@ export default function AdministrarUsuariosScreen() {
 
           // Si el nuevo rol es uno “normal”, devolvemos un OtherUser
           const {
-            photoURL,
+            fotoUrl,
             dorsal,
             posicion,
             peso,

@@ -1,298 +1,439 @@
-// src/components/forms/auth/RegisterForm.tsx
-import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Formik } from 'formik';
-import { useRouter } from 'expo-router';
-import {
-  Rol,
-  PlayerRegistration,
-  OtherRegistration,
-} from '../../../types/User';
-import { useTheme } from '../../../contexts/ThemeContext';
+'use client';
+
+import { useState } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Formik, FormikProps } from 'formik';
+import * as Yup from 'yup';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
-import SelectableCardGroup from '../../common/SelectableCardGroup';
-import { registerValidationSchemas } from '../../../validations/auth';
-import registrationHelper from '../../../utils/registrationHelper';
-import StyledAlert from '../../common/StyledAlert';
+import SelectableCardGroup, { Option } from '../../common/SelectableCardGroup';
+import { posiciones } from '../../../constants/posiciones';
+import StyledButton from '../../common/StyledButton';
 import ImagePicker from '../../common/ImagePicker';
+import { Rol } from '../../../types/User';
+import { useTheme } from '../../../contexts/ThemeContext';
 
-type FormValues = {
-  correo: string;
-  password: string;
-  confirmPassword: string;
+export interface ValoresFormularioRegistro {
   nombre: string;
   apellidos: string;
-  rol: Rol;
-  altura?: number;
-  peso?: number;
-  dorsal?: number;
-  posicion?: string;
-  photoURL?: string;
-};
-
-interface Props {
-  setIsLoading: (b: boolean) => void;
+  correo: string;
+  contraseña: string;
+  confirmarContraseña: string;
+  rol: 'jugador' | 'espectador';
+  altura: string;
+  peso: string;
+  dorsalPreferido: string;
+  posicionPreferida: string;
+  imagenPerfil: string;
 }
 
-export default function RegisterForm({ setIsLoading }: Props) {
-  const { theme } = useTheme();
-  const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+const esquemaInformacionBasica = Yup.object().shape({
+  nombre: Yup.string().required('El nombre es obligatorio'),
+  apellidos: Yup.string().required('Los apellidos son obligatorios'),
+  correo: Yup.string()
+    .email('Correo electrónico inválido')
+    .required('El correo es obligatorio'),
+  contraseña: Yup.string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .required('La contraseña es obligatoria'),
+  confirmarContraseña: Yup.string()
+    .oneOf([Yup.ref('contraseña')], 'Las contraseñas no coinciden')
+    .required('Debes confirmar la contraseña'),
+});
+const esquemaSeleccionRol = Yup.object().shape({
+  rol: Yup.string()
+    .oneOf(['jugador', 'espectador'], 'Debes seleccionar un rol')
+    .required('El rol es obligatorio'),
+});
 
-  const initialValues: FormValues = {
-    correo: '',
-    password: '',
-    confirmPassword: '',
-    nombre: '',
-    apellidos: '',
-    rol: 'espectador',
-    altura: undefined,
-    peso: undefined,
-    dorsal: undefined,
-    posicion: '',
-    photoURL: '',
+const esquemaInformacionJugador = Yup.object().shape({
+  altura: Yup.number()
+    .required('La altura es obligatoria')
+    .positive('La altura debe ser positiva'),
+  peso: Yup.number()
+    .required('El peso es obligatorio')
+    .positive('El peso debe ser positivo'),
+  dorsalPreferido: Yup.number()
+    .required('El dorsal preferido es obligatorio')
+    .positive('El dorsal debe ser positivo')
+    .integer('El dorsal debe ser un número entero'),
+});
+
+const esquemaPosicionFavorita = Yup.object().shape({
+  posicionPreferida: Yup.string().required(
+    'La posición preferida es obligatoria'
+  ),
+});
+
+const esquemaImagenPerfil = Yup.object().shape({
+  imagenPerfil: Yup.string().when('rol', {
+    is: 'jugador',
+    then: (schema) =>
+      schema.required('La imagen es obligatoria para los jugadores'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
+
+function getValidationSchema(paso: number) {
+  switch (paso) {
+    case 1:
+      return esquemaInformacionBasica;
+    case 2:
+      return esquemaSeleccionRol;
+    case 3:
+      return esquemaInformacionJugador;
+    case 4:
+      return esquemaPosicionFavorita;
+    case 5:
+      return esquemaImagenPerfil; // 👈
+    default:
+      return null;
+  }
+}
+
+const opcionesRol: Option<'jugador' | 'espectador'>[] = [
+  {
+    label: 'Espectador',
+    description: 'Solo visualiza la información',
+    value: 'espectador',
+  },
+  {
+    label: 'Jugador',
+    description: 'Participa en la competición',
+    value: 'jugador',
+  },
+];
+
+interface RegisterFormProps {
+  setIsLoading: (isLoading: boolean) => void;
+  setLoadingText: (text: string) => void;
+  valoresIniciales: ValoresFormularioRegistro;
+  onSubmit: (valores: ValoresFormularioRegistro) => void;
+}
+
+export default function RegisterForm({
+  setIsLoading,
+  setLoadingText,
+  valoresIniciales,
+  onSubmit,
+}: RegisterFormProps) {
+  const { theme } = useTheme();
+  const [pasoActual, setPasoActual] = useState(1);
+
+  const obtenerTotalPasos = (valores: ValoresFormularioRegistro) => {
+    return valores.rol === 'jugador' ? 5 : 2;
   };
 
-  const roles = [
-    {
-      label: 'Espectador',
-      description: 'Solo ver contenido',
-      value: 'espectador' as Rol,
-    },
-    {
-      label: 'Jugador',
-      description: 'Participar en partidos',
-      value: 'jugador' as Rol,
-    },
-  ];
-
-  const getTotalSteps = (values: FormValues) =>
-    values.rol === 'jugador' ? 5 : 2;
-
-  const renderStep = (
-    values: FormValues,
-    setFieldValue: (f: string, v: any) => void
+  const manejarSiguiente = async (
+    formikProps: FormikProps<ValoresFormularioRegistro>
   ) => {
-    switch (step) {
+    const errors = await formikProps.validateForm();
+    if (Object.keys(errors).length === 0) {
+      const { values } = formikProps;
+      if (pasoActual === 2 && values.rol === 'espectador') {
+        setPasoActual(obtenerTotalPasos(values));
+      } else {
+        setPasoActual(pasoActual + 1);
+      }
+    } else {
+      Object.keys(errors).forEach((campo) =>
+        formikProps.setFieldTouched(campo, true)
+      );
+    }
+  };
+
+  const manejarEnvio = (valores: ValoresFormularioRegistro) => {
+    console.log('🚨 Guardando cambios...'); // Asegúrate de tener esta línea
+    onSubmit(valores);
+  };
+
+  const manejarAtras = () => {
+    setPasoActual(pasoActual - 1);
+  };
+
+  const renderizarPaso = (
+    formikProps: FormikProps<ValoresFormularioRegistro>
+  ) => {
+    const { values, setFieldValue, errors, touched } = formikProps;
+
+    switch (pasoActual) {
       case 1:
         return (
-          <>
+          <View style={styles.paso}>
+            <StyledText style={styles.tituloPaso}>
+              Información Básica
+            </StyledText>
+            <InputFormik name='nombre' placeholder='Ingresa tu nombre' />
+            <InputFormik name='apellidos' placeholder='Ingresa tus apellidos' />
             <InputFormik
               name='correo'
-              placeholder='Correo'
+              placeholder='Correo electrónico'
               keyboardType='email-address'
-              autoCapitalize='none'
             />
             <InputFormik
-              name='password'
+              name='contraseña'
               placeholder='Contraseña'
               secureTextEntry
             />
             <InputFormik
-              name='confirmPassword'
-              placeholder='Confirmar'
+              name='confirmarContraseña'
+              placeholder='Confirmar contraseña'
               secureTextEntry
             />
-            <InputFormik name='nombre' placeholder='Nombre' />
-            <InputFormik name='apellidos' placeholder='Apellidos' />
-          </>
+          </View>
         );
+
       case 2:
         return (
-          <SelectableCardGroup
-            options={roles}
-            value={values.rol}
-            onChange={(v) => setFieldValue('rol', v)}
-          />
+          <View style={styles.paso}>
+            <StyledText style={styles.tituloPaso}>Selección de Rol</StyledText>
+            <SelectableCardGroup
+              options={opcionesRol}
+              value={values.rol}
+              onChange={(valor) => setFieldValue('rol', valor)}
+            />
+            {touched.rol && errors.rol && (
+              <StyledText style={styles.mensajeError}>{errors.rol}</StyledText>
+            )}
+          </View>
         );
+
       case 3:
         return (
-          <>
+          <View style={styles.paso}>
+            <StyledText style={styles.tituloPaso}>
+              Información del Jugador
+            </StyledText>
             <InputFormik
               name='altura'
-              placeholder='Altura (cm)'
+              placeholder='Ingresa tu altura en cm'
               keyboardType='numeric'
             />
             <InputFormik
               name='peso'
-              placeholder='Peso (kg)'
+              placeholder='Ingresa tu peso en kg'
               keyboardType='numeric'
             />
             <InputFormik
-              name='dorsal'
-              placeholder='Dorsal preferido'
+              name='dorsalPreferido'
+              placeholder='Ingresa tu dorsal preferido'
               keyboardType='numeric'
             />
-          </>
+          </View>
         );
+
       case 4:
         return (
-          <SelectableCardGroup
-            options={[
-              { label: 'Base', description: 'Point Guard', value: 'base' },
-              {
-                label: 'Escolta',
-                description: 'Shooting Guard',
-                value: 'escolta',
-              },
-              { label: 'Alero', description: 'Small Forward', value: 'alero' },
-              {
-                label: 'Ala-Pivot',
-                description: 'Power Forward',
-                value: 'ala-pivot',
-              },
-              { label: 'Pivot', description: 'Center', value: 'pivot' },
-            ]}
-            value={values.posicion!}
-            onChange={(v) => setFieldValue('posicion', v)}
-          />
+          <View style={styles.paso}>
+            <StyledText style={styles.tituloPaso}>Posición Favorita</StyledText>
+            <SelectableCardGroup
+              options={posiciones}
+              value={values.posicionPreferida}
+              onChange={(valor) => setFieldValue('posicionPreferida', valor)}
+            />
+            {touched.posicionPreferida && errors.posicionPreferida && (
+              <StyledText style={styles.mensajeError}>
+                {errors.posicionPreferida}
+              </StyledText>
+            )}
+          </View>
         );
+
       case 5:
         return (
-          <ImagePicker
-            onImageSelected={(uri) => setFieldValue('photoURL', uri)}
-            placeholder='Selecciona una foto de perfil'
-          />
+          <View style={styles.paso}>
+            <StyledText style={styles.tituloPaso}>
+              Imagen de Perfil (Obligatorio)
+            </StyledText>
+            <ImagePicker
+              onImageSelected={(uri) => {
+                setFieldValue('imagenPerfil', uri); // ✅ Guardar en Formik
+              }}
+              placeholder='Seleccionar Imagen'
+            />
+          </View>
         );
+
       default:
         return null;
     }
   };
 
-  const handleSubmit = async (values: FormValues) => {
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      if (values.rol === 'jugador') {
-        if (
-          !values.altura ||
-          !values.peso ||
-          !values.dorsal ||
-          !values.posicion
-        ) {
-          throw new Error('Todos los campos de jugador son obligatorios');
-        }
-        const payload: PlayerRegistration = {
-          correo: values.correo,
-          nombre: values.nombre,
-          apellidos: values.apellidos,
-          rol: 'jugador',
-          altura: Number(values.altura),
-          peso: Number(values.peso),
-          dorsal: Number(values.dorsal),
-          posicion: values.posicion!,
-          photoURL: values.photoURL || '',
-          sancionado: false,
-        };
-        await registrationHelper(payload, values.password);
-      } else {
-        const payload: OtherRegistration = {
-          correo: values.correo,
-          nombre: values.nombre,
-          apellidos: values.apellidos,
-          rol: 'espectador',
-        };
-        await registrationHelper(payload, values.password);
-      }
-
-      // sólo aquí, una vez todo OK, desactivo loading y navego
-      setIsLoading(false);
-      router.replace('/');
-    } catch (e: any) {
-      setError(e.message);
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <>
-      {error && <StyledAlert message={error} variant='error' />}
+    <ScrollView
+      style={[styles.contenedor, { backgroundColor: theme.background.primary }]}
+    >
       <Formik
-        initialValues={initialValues}
-        validateOnBlur={false}
-        validateOnChange={false}
-        validationSchema={
-          step === 1
-            ? registerValidationSchemas.step1
-            : step === 2
-            ? registerValidationSchemas.step2(roles)
-            : step === 3
-            ? registerValidationSchemas.step3
-            : step === 4
-            ? registerValidationSchemas.step4
-            : registerValidationSchemas.step5
-        }
-        onSubmit={(values) => {
-          const total = getTotalSteps(values);
-          if (step < total) {
-            setStep(step + 1);
-          } else {
-            handleSubmit(values);
-          }
-        }}
+        initialValues={valoresIniciales}
+        validationSchema={getValidationSchema(pasoActual)}
+        onSubmit={manejarEnvio}
       >
-        {({ handleSubmit, values, setFieldValue }) => (
-          <View style={styles.container}>
-            <StyledText
-              style={[styles.progress, { color: theme.text.primary }]}
+        {(formikProps: FormikProps<ValoresFormularioRegistro>) => {
+          const totalPasos = obtenerTotalPasos(formikProps.values);
+          const esPasoFinal = pasoActual === totalPasos;
+
+          return (
+            <View
+              style={[
+                styles.formulario,
+                { backgroundColor: theme.cardDefault },
+              ]}
             >
-              Paso {step} de {getTotalSteps(values)}
-            </StyledText>
-            <View style={styles.formSection}>
-              {renderStep(values, setFieldValue)}
-            </View>
-            <View style={styles.footerSection}>
-              <View style={styles.buttonContainer}>
-                {step > 1 && (
-                  <TouchableOpacity
-                    style={[
-                      styles.button,
-                      styles.backButton,
-                      { borderColor: theme.border.primary },
-                    ]}
-                    onPress={() => setStep(step - 1)}
-                  >
-                    <StyledText
-                      style={[styles.buttonText, { color: theme.text.primary }]}
-                    >
-                      Atrás
-                    </StyledText>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={[
-                    styles.button,
-                    step > 1 && styles.nextButton,
-                    { backgroundColor: theme.icon.active },
-                  ]}
-                  onPress={() => handleSubmit()}
+              <View
+                style={[
+                  styles.indicadorPasos,
+                  { borderBottomColor: theme.border.primary },
+                ]}
+              >
+                <StyledText
+                  style={[styles.textoPasos, { color: theme.text.primary }]}
                 >
-                  <StyledText
-                    style={[styles.buttonText, { color: theme.text.dark }]}
-                  >
-                    {step < getTotalSteps(values) ? 'Siguiente' : 'Registrarse'}
-                  </StyledText>
-                </TouchableOpacity>
+                  Paso {pasoActual} de {totalPasos}
+                </StyledText>
+              </View>
+
+              {renderizarPaso(formikProps)}
+
+              <View style={styles.contenedorBotones}>
+                {pasoActual > 1 && (
+                  <View style={styles.botonMitad}>
+                    <StyledButton
+                      variant='outline'
+                      title='Atrás'
+                      onPress={manejarAtras}
+                      fullWidth
+                    />
+                  </View>
+                )}
+                <View style={styles.botonMitad}>
+                  <StyledButton
+                    variant='primary'
+                    title={esPasoFinal ? 'Crear Cuenta' : 'Siguiente'}
+                    onPress={
+                      esPasoFinal
+                        ? () => formikProps.submitForm()
+                        : () => manejarSiguiente(formikProps)
+                    }
+                    fullWidth
+                  />
+                </View>
               </View>
             </View>
-          </View>
-        )}
+          );
+        }}
       </Formik>
-    </>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, justifyContent: 'space-between' },
-  progress: { fontSize: 16, textAlign: 'center', marginBottom: 12 },
-  formSection: { flex: 1 },
-  footerSection: {},
-  buttonContainer: { flexDirection: 'row', gap: 12 },
-  button: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center' },
-  backButton: { borderWidth: 2, backgroundColor: 'transparent' },
-  nextButton: { flex: 2 },
-  buttonText: { fontSize: 16, fontWeight: 'bold' },
+  contenedor: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  formulario: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  indicadorPasos: {
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  textoPasos: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  paso: {
+    marginBottom: 20,
+  },
+  tituloPaso: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  campoFormulario: {
+    marginBottom: 16,
+  },
+  etiqueta: {
+    fontSize: 14,
+    marginBottom: 8,
+    color: '#555',
+  },
+  mensajeError: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  contenedorBotones: {
+    flexDirection: 'row',
+
+    marginTop: 20,
+    gap: 10,
+    alignItems: 'center',
+    flex: 1,
+  },
+  botonMitad: {
+    flex: 1,
+  },
+  contenedorTarjetas: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  tarjetaSeleccion: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    width: '48%',
+    alignItems: 'center',
+  },
+  tarjetaSeleccionada: {
+    borderColor: '#4CAF50',
+    backgroundColor: '#E8F5E9',
+  },
+  textoTarjeta: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  botonSeleccionarImagen: {
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 4,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  textoBoton: {
+    color: '#333',
+    fontWeight: '500',
+  },
+  contenedorVistaPrevia: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  vistaPrevia: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 8,
+  },
+  botonEliminar: {
+    backgroundColor: '#ffebee',
+    padding: 8,
+    borderRadius: 4,
+  },
+  textoBotonEliminar: {
+    color: '#f44336',
+  },
 });

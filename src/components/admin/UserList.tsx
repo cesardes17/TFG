@@ -42,7 +42,7 @@ const UserList: React.FC<UserListProps> = ({
         <View style={styles.userInfoContainer}>
           {isPlayer ? (
             <ProgressiveImage
-              uri={(item as PlayerProfile).photoURL || ''}
+              uri={(item as PlayerProfile).fotoUrl || ''}
               containerStyle={styles.playerPhoto}
             />
           ) : (

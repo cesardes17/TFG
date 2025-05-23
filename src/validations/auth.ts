@@ -44,7 +44,7 @@ export const registerValidationSchemas = {
       .required('Requerido'),
   }),
   step5: Yup.object().shape({
-    photoURL: Yup.string().optional(),
+    fotoUrl: Yup.string().optional(),
   }),
 };
 

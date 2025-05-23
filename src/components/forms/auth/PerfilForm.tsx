@@ -1,29 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  View,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import StyledText from '../../common/StyledText';
 import InputFormik from '../InputFormik';
 import SelectableCardGroup, { Option } from '../../common/SelectableCardGroup';
+import { posiciones } from '../../../constants/posiciones';
+import StyledButton from '../../common/StyledButton';
+import ImagePicker from '../../common/ImagePicker';
+import { Rol } from '../../../types/User';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export interface ValoresFormulario {
   nombre: string;
   apellidos: string;
-  rol: 'jugador' | 'espectador' | '';
+  rol: 'jugador' | 'espectador';
   altura: string;
   peso: string;
   dorsalPreferido: string;
   posicionPreferida: string;
   imagenPerfil: string;
+  imagenExistente: boolean; // 👈 Agregado para saber si hay una imagen existente
 }
 
 const esquemaInformacionBasica = Yup.object().shape({
@@ -56,6 +55,16 @@ const esquemaPosicionFavorita = Yup.object().shape({
   ),
 });
 
+const esquemaImagenPerfil = Yup.object().shape({
+  imagenPerfil: Yup.string().when(['rol', 'imagenExistente'], {
+    is: (rol: Rol, imagenExistente: boolean) =>
+      rol === 'jugador' && !imagenExistente,
+    then: (schema) =>
+      schema.required('La imagen es obligatoria para los jugadores'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+});
+
 function getValidationSchema(paso: number) {
   switch (paso) {
     case 1:
@@ -66,6 +75,8 @@ function getValidationSchema(paso: number) {
       return esquemaInformacionJugador;
     case 4:
       return esquemaPosicionFavorita;
+    case 5:
+      return esquemaImagenPerfil; // 👈
     default:
       return null;
   }
@@ -84,28 +95,20 @@ const opcionesRol: Option<'jugador' | 'espectador'>[] = [
   },
 ];
 
-const opcionesPosicion: Option<string>[] = [
-  { label: 'Portero', description: 'Defiende la portería', value: 'Portero' },
-  { label: 'Defensa', description: 'Protege el área', value: 'Defensa' },
-  {
-    label: 'Centrocampista',
-    description: 'Conecta defensa y ataque',
-    value: 'Centrocampista',
-  },
-  { label: 'Delantero', description: 'Busca marcar goles', value: 'Delantero' },
-];
-
 interface EditarPerfilFormProps {
   setIsLoading: (isLoading: boolean) => void;
   setLoadingText: (text: string) => void;
   valoresIniciales: ValoresFormulario;
+  onSubmit: (valores: ValoresFormulario) => void;
 }
 
-export default function EditarPerfilForm({
+export default function PerfilForm({
   setIsLoading,
   setLoadingText,
   valoresIniciales,
+  onSubmit,
 }: EditarPerfilFormProps) {
+  const { theme } = useTheme();
   const [pasoActual, setPasoActual] = useState(1);
 
   const obtenerTotalPasos = (valores: ValoresFormulario) => {
@@ -130,12 +133,13 @@ export default function EditarPerfilForm({
     }
   };
 
-  const manejarAtras = () => {
-    setPasoActual(pasoActual - 1);
+  const manejarEnvio = (valores: ValoresFormulario) => {
+    console.log('🚨 Guardando cambios...'); // Asegúrate de tener esta línea
+    onSubmit(valores);
   };
 
-  const manejarEnvio = (valores: ValoresFormulario) => {
-    console.log('Formulario enviado:', valores);
+  const manejarAtras = () => {
+    setPasoActual(pasoActual - 1);
   };
 
   const renderizarPaso = (formikProps: FormikProps<ValoresFormulario>) => {
@@ -163,7 +167,11 @@ export default function EditarPerfilForm({
               onChange={(valor) => setFieldValue('rol', valor)}
             />
             {touched.rol && errors.rol && (
-              <StyledText style={styles.mensajeError}>{errors.rol}</StyledText>
+              <StyledText
+                style={[styles.mensajeError, { color: theme.text.error }]}
+              >
+                {errors.rol}
+              </StyledText>
             )}
           </View>
         );
@@ -179,11 +187,13 @@ export default function EditarPerfilForm({
               placeholder='Ingresa tu altura en cm'
               keyboardType='numeric'
             />
+
             <InputFormik
               name='peso'
               placeholder='Ingresa tu peso en kg'
               keyboardType='numeric'
             />
+
             <InputFormik
               name='dorsalPreferido'
               placeholder='Ingresa tu dorsal preferido'
@@ -197,12 +207,14 @@ export default function EditarPerfilForm({
           <View style={styles.paso}>
             <StyledText style={styles.tituloPaso}>Posición Favorita</StyledText>
             <SelectableCardGroup
-              options={opcionesPosicion}
+              options={posiciones}
               value={values.posicionPreferida}
               onChange={(valor) => setFieldValue('posicionPreferida', valor)}
             />
             {touched.posicionPreferida && errors.posicionPreferida && (
-              <StyledText style={styles.mensajeError}>
+              <StyledText
+                style={[styles.mensajeError, { color: theme.text.error }]}
+              >
                 {errors.posicionPreferida}
               </StyledText>
             )}
@@ -212,41 +224,15 @@ export default function EditarPerfilForm({
       case 5:
         return (
           <View style={styles.paso}>
-            <StyledText style={styles.tituloPaso}>Imagen de Perfil</StyledText>
-            <View style={styles.campoFormulario}>
-              <StyledText style={styles.etiqueta}>
-                Selecciona una imagen (opcional)
-              </StyledText>
-              <TouchableOpacity
-                style={styles.botonSeleccionarImagen}
-                onPress={() =>
-                  setFieldValue(
-                    'imagenPerfil',
-                    'https://via.placeholder.com/150'
-                  )
-                }
-              >
-                <StyledText style={styles.textoBoton}>
-                  Seleccionar Imagen
-                </StyledText>
-              </TouchableOpacity>
-              {values.imagenPerfil ? (
-                <View style={styles.contenedorVistaPrevia}>
-                  <Image
-                    source={{ uri: values.imagenPerfil }}
-                    style={styles.vistaPrevia}
-                  />
-                  <TouchableOpacity
-                    style={styles.botonEliminar}
-                    onPress={() => setFieldValue('imagenPerfil', '')}
-                  >
-                    <StyledText style={styles.textoBotonEliminar}>
-                      Eliminar
-                    </StyledText>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            </View>
+            <StyledText style={styles.tituloPaso}>
+              Imagen de Perfil {!values.imagenExistente && '(Obligatorio)'}
+            </StyledText>
+            <ImagePicker
+              onImageSelected={(uri) => {
+                setFieldValue('imagenPerfil', uri); // ✅ Guardar en Formik
+              }}
+              placeholder='Seleccionar Imagen'
+            />
           </View>
         );
 
@@ -256,7 +242,9 @@ export default function EditarPerfilForm({
   };
 
   return (
-    <ScrollView style={styles.contenedor}>
+    <ScrollView
+      style={[styles.contenedor, { backgroundColor: theme.background.primary }]}
+    >
       <Formik
         initialValues={valoresIniciales}
         validationSchema={getValidationSchema(pasoActual)}
@@ -267,9 +255,21 @@ export default function EditarPerfilForm({
           const esPasoFinal = pasoActual === totalPasos;
 
           return (
-            <View style={styles.formulario}>
-              <View style={styles.indicadorPasos}>
-                <StyledText style={styles.textoPasos}>
+            <View
+              style={[
+                styles.formulario,
+                { backgroundColor: theme.cardDefault },
+              ]}
+            >
+              <View
+                style={[
+                  styles.indicadorPasos,
+                  { borderBottomColor: theme.border.primary },
+                ]}
+              >
+                <StyledText
+                  style={[styles.textoPasos, { color: theme.text.secondary }]}
+                >
                   Paso {pasoActual} de {totalPasos}
                 </StyledText>
               </View>
@@ -278,20 +278,27 @@ export default function EditarPerfilForm({
 
               <View style={styles.contenedorBotones}>
                 {pasoActual > 1 && (
-                  <Button title='Atrás' onPress={manejarAtras} />
+                  <View style={styles.botonMitad}>
+                    <StyledButton
+                      variant='outline'
+                      title='Atrás'
+                      onPress={manejarAtras}
+                      fullWidth
+                    />
+                  </View>
                 )}
-
-                {esPasoFinal ? (
-                  <Button
-                    title='Guardar'
-                    onPress={() => formikProps.submitForm()}
+                <View style={styles.botonMitad}>
+                  <StyledButton
+                    variant='primary'
+                    title={esPasoFinal ? 'Guardar' : 'Siguiente'}
+                    onPress={
+                      esPasoFinal
+                        ? () => formikProps.submitForm()
+                        : () => manejarSiguiente(formikProps)
+                    }
+                    fullWidth
                   />
-                ) : (
-                  <Button
-                    title='Siguiente'
-                    onPress={() => manejarSiguiente(formikProps)}
-                  />
-                )}
+                </View>
               </View>
             </View>
           );
@@ -305,10 +312,8 @@ const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   formulario: {
-    backgroundColor: '#ffffff',
     borderRadius: 8,
     padding: 16,
     shadowColor: '#000',
@@ -321,11 +326,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   textoPasos: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
   },
   paso: {
@@ -335,7 +338,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#333',
+  },
+  mensajeError: {
+    fontSize: 12,
+    marginTop: 4,
   },
   campoFormulario: {
     marginBottom: 16,
@@ -345,15 +351,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#555',
   },
-  mensajeError: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 4,
-  },
+
   contenedorBotones: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+    maxWidth: 400, // o un valor que te acomode
+    alignSelf: 'center',
+    gap: 10,
+  },
+  botonMitad: {
+    flex: 1,
   },
   contenedorTarjetas: {
     flexDirection: 'row',

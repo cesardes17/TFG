@@ -16,8 +16,6 @@ export default function Register() {
     console.log(user, loadingUser);
   }, [loadingUser, user]);
 
-  if (loadingUser) return null;
-
   return (
     <PageContainer>
       <RegisterScreen />

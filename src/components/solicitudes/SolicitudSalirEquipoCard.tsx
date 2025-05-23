@@ -118,7 +118,7 @@ export default function SolicitudSalirEquipoCard({
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
-            uri={capitanObjetivo.photoURL || 'https://via.placeholder.com/50'}
+            uri={capitanObjetivo.fotoUrl || 'https://via.placeholder.com/50'}
             containerStyle={styles.fotoJugador}
           />
           <View style={styles.datosJugador}>
@@ -150,7 +150,7 @@ export default function SolicitudSalirEquipoCard({
             <StyledText variant='secondary'>Solicitante</StyledText>
             <View style={styles.infoJugador}>
               <ProgressiveImage
-                uri={solicitante.photoURL || 'https://via.placeholder.com/40'}
+                uri={solicitante.fotoUrl || 'https://via.placeholder.com/40'}
                 containerStyle={styles.fotoJugador}
               />
               <View style={styles.datosJugador}>

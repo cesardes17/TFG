@@ -15,7 +15,7 @@ interface Jugador {
   posicion: string;
   altura: number;
   peso: number;
-  photoURL: string;
+  fotoUrl: string;
 }
 
 interface PlayerListProps {

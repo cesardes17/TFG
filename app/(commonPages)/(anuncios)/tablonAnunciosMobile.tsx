@@ -7,14 +7,19 @@ import { useMarcarVisitaTablon } from '../../../src/hooks/useMarcarVisitaTablon'
 import TablonAnunciosScreen from '../../../src/screens/anuncios/TablonAnunciosScreen';
 import { AddIcon } from '../../../src/components/Icons';
 import { router } from 'expo-router';
+import { useTemporadaContext } from '../../../src/contexts/TemporadaContext';
 
 export default function TablonAnunciosPage() {
   useMarcarVisitaTablon();
   const { theme } = useTheme();
   const { user } = useUser();
+  const { temporada } = useTemporadaContext();
 
   const headerRight = () => {
-    if (user?.rol !== 'organizador' && user?.rol !== 'coorganizador')
+    if (
+      (user?.rol !== 'organizador' && user?.rol !== 'coorganizador') ||
+      !temporada
+    )
       return null;
     return (
       <TouchableOpacity onPress={() => router.push('/nuevaSolicitud')}>

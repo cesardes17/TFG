@@ -16,7 +16,7 @@ interface Player {
   nombre: string;
   apellidos: string;
   correo: string;
-  photoURL: string;
+  fotoUrl: string;
   dorsal: number;
 }
 
@@ -71,7 +71,7 @@ const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
     >
       <View style={styles.photoContainer}>
         <Image
-          source={{ uri: player.photoURL }}
+          source={{ uri: player.fotoUrl }}
           style={[styles.photo, { borderColor: theme.border.primary }]}
         />
       </View>

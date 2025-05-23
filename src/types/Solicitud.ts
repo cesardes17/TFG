@@ -30,7 +30,7 @@ export type solicitudCrearEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
     dorsal: number;
   };
 };
@@ -40,14 +40,14 @@ export type solicitudUnirseEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
   };
   jugadorObjetivo: {
     id: string;
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
     dorsal: number;
   };
   fechaRespuestaJugador?: Date;
@@ -66,7 +66,7 @@ export type solicitudSalirEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
   };
   equipoActual: {
     id: string;
@@ -78,7 +78,7 @@ export type solicitudSalirEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
   };
   aprobadoCapitan?: boolean;
   fechaRespuestaCapitan?: Date;
@@ -92,7 +92,7 @@ export type solicitudDisolverEquipo = baseSolicitud & {
     nombre: string;
     apellidos: string;
     correo: string;
-    photoURL: string;
+    fotoUrl: string;
   };
   equipo: {
     id: string;

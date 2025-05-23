@@ -18,7 +18,7 @@ export const StorageService = {
   uploadFile: async (
     folder: string,
     file: Blob | File | string
-  ): Promise<ResultService<string>> => {
+  ): Promise<ResultService<{ url: string; fileName: string }>> => {
     try {
       const preparedFile = await prepareUploadData(file);
 
@@ -32,7 +32,7 @@ export const StorageService = {
 
       const downloadUrl = await uploadFileFS(remotePath, preparedFile);
 
-      return { success: true, data: downloadUrl };
+      return { success: true, data: { url: downloadUrl, fileName: fileName } };
     } catch (error: any) {
       return {
         success: false,
@@ -40,24 +40,24 @@ export const StorageService = {
       };
     }
   },
-  /**
-   * Elimina un archivo de Firebase Storage
-   * @param url - url del archivo a eliminar
-   */
-  deleteFileByUrl: async (url: string): Promise<ResultService<null>> => {
-    try {
-      // 1) Separa en dos por '/o/'
-      const [, afterO] = url.split('/o/');
-      if (!afterO) {
-        throw new Error('URL de Storage inválida');
-      }
-      // 2) Quita los parámetros tras el '?'
-      const [encodedPath] = afterO.split('?');
-      // 3) Decodifica "%2F" a "/"
-      const objectPath = decodeURIComponent(encodedPath);
 
-      // Finalmente llama a tu función interna
-      await deleteFileFS(objectPath);
+  /**
+   * Elimina un archivo de Firebase Storage construyendo la ruta con bucket y nombre
+   * @param bucket - carpeta raíz o prefix del archivo (ej. 'fotos_jugadores')
+   * @param name - nombre o ruta interna del archivo (ej. 'abc123.jpg')
+   */
+  deleteFile: async (
+    bucket: string,
+    name: string
+  ): Promise<ResultService<null>> => {
+    try {
+      if (!bucket || !name) {
+        throw new Error('Bucket o nombre de archivo inválido');
+      }
+
+      const filePath = `${bucket}/${name}`; // 👈 Concatenamos bucket + nombre
+      await deleteFileFS(filePath); // ✅ Llamada directa
+
       return { success: true, data: null };
     } catch (error: any) {
       return {

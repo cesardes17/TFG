@@ -54,7 +54,7 @@ export default function InscripcionBolsa({
         posicion: jugador.posicion,
         altura: jugador.altura,
         peso: jugador.peso,
-        photoURL: jugador.photoURL,
+        fotoUrl: jugador.fotoUrl,
       },
     };
     const res = await bolsaJugadoresService.inscribirJugador(

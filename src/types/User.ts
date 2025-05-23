@@ -34,7 +34,8 @@ export interface PlayerProfile {
   dorsal: number;
   posicion: string;
   /** En este caso es obligatoria la foto de perfil */
-  photoURL: string;
+  fotoUrl: string;
+  fotoPath: string;
   equipo?: {
     id: string;
     nombre: string;
@@ -85,8 +86,6 @@ export type PlayerRegistration = UserRegistrationBase &
  */
 export type OtherRegistration = UserRegistrationBase & {
   rol: Exclude<Rol, 'jugador' | 'capitan'>;
-  /** Foto opcional para otros rols */
-  photoURL?: string;
 };
 
 /**

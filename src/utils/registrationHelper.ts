@@ -1,66 +1,81 @@
 // /src/utils/registrationHelper.ts
-import { storage } from '../api/config/firebase';
+import { ToastType } from '../components/common/Toast';
+import { ValoresFormularioRegistro } from '../components/forms/auth/RegisterForm';
 import { AuthService } from '../services/core/authService';
 import { StorageService } from '../services/core/storageService';
 import { UserService } from '../services/userService';
-import type { UserRegistration } from '../types/User';
+import type { OtherRegistration, PlayerRegistration } from '../types/User';
 
 export default async function registrationHelper(
-  user: UserRegistration,
-  password: string
-) {
-  let authCreado,
-    imagenJugador,
-    usuarioCreado = null;
+  datosFormulario: ValoresFormularioRegistro,
+  onUpdate: (step: string) => void
+): Promise<{ type: ToastType; message: string }> {
   try {
-    // 1) Registrar en Auth
-    const { success, data, errorMessage } = await AuthService.register(
-      user.correo,
-      password
+    //paso 1: registro en auth
+    onUpdate('Creando usuario...');
+    const res = await AuthService.register(
+      datosFormulario.correo,
+      datosFormulario.contraseña
     );
-    if (!success || !data) {
-      throw new Error(errorMessage || 'Error al registrar usuario');
+    if (!res.success) {
+      throw new Error(res.errorMessage);
     }
-    const uid = data.uid;
-    authCreado = uid;
+    const userId = res.data.uid;
 
-    // 2) Si es jugador o capitán, sube la foto
-    const isJugador = user.rol === 'jugador' || user.rol === 'capitan';
-    if (isJugador && user.photoURL) {
-      // sube y recoge la URL
-      const storageRes = await StorageService.uploadFile(
-        'fotos_jugadores',
-        user.photoURL
-      );
-      console.log('URL: ', storageRes);
-      if (!storageRes.success || !storageRes.data) {
-        throw new Error(storageRes.errorMessage || 'Error al subir la imagen');
+    //paso 2: comprobar rol elegido
+    if (datosFormulario.rol === 'espectador') {
+      const payload: OtherRegistration = {
+        correo: datosFormulario.correo,
+        nombre: datosFormulario.nombre,
+        apellidos: datosFormulario.apellidos,
+        rol: datosFormulario.rol,
+      };
+
+      onUpdate('Guardando datos del usuario...');
+
+      const res = await UserService.createUser(userId, payload);
+      if (!res.success) {
+        throw new Error('Error al guardar los datos del usuario');
       }
-      imagenJugador = storageRes.data;
-      user.photoURL = storageRes.data; // ahora es la URL remota
-    }
+    } else {
+      onUpdate('Subiendo imagen del usuario...');
+      const resImagen = await StorageService.uploadFile(
+        'fotos_jugadores',
+        datosFormulario.imagenPerfil
+      );
+      if (!resImagen.success || !resImagen.data) {
+        throw new Error('Error al subir la imagen...');
+      }
+      const payload: PlayerRegistration = {
+        correo: datosFormulario.correo,
+        nombre: datosFormulario.nombre,
+        apellidos: datosFormulario.apellidos,
+        rol: datosFormulario.rol,
+        altura: parseInt(datosFormulario.altura),
+        dorsal: parseInt(datosFormulario.dorsalPreferido),
+        peso: parseInt(datosFormulario.peso),
+        posicion: datosFormulario.posicionPreferida,
+        sancionado: false,
+        fotoPath: resImagen.data.fileName,
+        fotoUrl: resImagen.data.url,
+      };
 
-    // 3) Crear documento de usuario en Firestore
-    const {
-      success: userSuccess,
-      data: userData,
-      errorMessage: userMsg,
-    } = await UserService.createUser(uid, user);
-    if (!userSuccess || !userData) {
-      throw new Error(userMsg || 'Error al crear usuario en Firestore');
-    }
-    usuarioCreado = userData;
-    await AuthService.login(user.correo, password);
+      onUpdate('Guardando datos del usuario...');
 
-    return { success: true, data: userData, errorMessage: null };
-  } catch (error: any) {
-    if (authCreado) {
-      AuthService.deleteUser();
+      const res = await UserService.createUser(userId, payload);
+      if (!res.success) {
+        throw new Error('Error al guardar los datos del usuario...');
+      }
     }
-    if (imagenJugador) {
-      StorageService.deleteFileByUrl(imagenJugador);
-    }
-    console.error(error);
-    return { success: false, data: null, errorMessage: error.message };
+    return {
+      type: 'success',
+      message: 'Cuenta creada con éxito!',
+    };
+  } catch (error) {
+    return {
+      type: 'error',
+      message:
+        error instanceof Error ? error.message : 'Error al crear la cuenta',
+    };
   }
 }

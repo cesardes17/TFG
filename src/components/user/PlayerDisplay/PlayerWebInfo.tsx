@@ -17,7 +17,7 @@ export default function PlayerMobileInfo({ player }: PlayerMobileInfoProps) {
   return (
     <View style={styles.cardWeb}>
       <Image
-        source={{ uri: player.photoURL }}
+        source={{ uri: player.fotoUrl }}
         style={styles.imageWeb}
         resizeMode='cover'
       />

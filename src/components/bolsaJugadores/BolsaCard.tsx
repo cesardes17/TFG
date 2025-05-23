@@ -21,7 +21,7 @@ interface Jugador {
   posicion: string;
   altura: number;
   peso: number;
-  photoURL: string;
+  fotoUrl: string;
 }
 
 interface PlayerCardProps {
@@ -44,7 +44,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
   return (
     <View style={[styles.card, { backgroundColor: theme.cardDefault }]}>
-      <Image source={{ uri: jugador.photoURL }} style={styles.photo} />
+      <Image source={{ uri: jugador.fotoUrl }} style={styles.photo} />
 
       <View style={styles.infoContainer}>
         <StyledText style={[styles.name, { color: theme.text.primary }]}>

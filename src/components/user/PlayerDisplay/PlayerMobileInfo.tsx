@@ -24,7 +24,7 @@ export default function PlayerWebInfo({ player }: PlayerWebInfoProps) {
     <View style={[styles.card, { borderColor: theme.border.primary }]}>
       {/* Foto principal */}
       <ProgressiveImage
-        uri={player.photoURL}
+        uri={player.fotoUrl}
         containerStyle={styles.imageContainer}
         imageStyle={styles.image}
       />

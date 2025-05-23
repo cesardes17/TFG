@@ -121,7 +121,7 @@ export default function ({
         </StyledText>
         <View style={styles.infoSolicitante}>
           <ProgressiveImage
-            uri={solicitante.photoURL || ''}
+            uri={solicitante.fotoUrl || ''}
             containerStyle={styles.fotoSolicitante}
           />
           <View style={styles.datosSolicitante}>

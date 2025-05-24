@@ -11,7 +11,8 @@ import { BaseSolicitudService } from '../baseSolicitud';
 export const aceptarUnirseEquipoSolicitud = async (
   temporadaId: string,
   solicitud: solicitudUnirseEquipo,
-  usuario: User
+  usuario: User,
+  onProgress: (text: string) => void
 ): Promise<ResultService<Solicitud>> => {
   let solicitudModificada = false;
   const solicitudInicial = solicitud;
@@ -55,7 +56,8 @@ export const aceptarUnirseEquipoSolicitud = async (
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,
       solicitud.id,
-      solicitud
+      solicitud,
+      onProgress
     );
     if (!res.success) {
       throw new Error(res.errorMessage || 'Error al aceptar la solicitud');
@@ -75,6 +77,8 @@ export const aceptarUnirseEquipoSolicitud = async (
         },
         fechaInscripcion: new Date(),
       };
+
+      onProgress('Creando inscripcion...');
       const resInscripcion = await inscripcionesService.crearInscripcion(
         temporadaId,
         inscripcionData.id,
@@ -86,6 +90,7 @@ export const aceptarUnirseEquipoSolicitud = async (
         );
       }
       //Eliminar jugador de la bolsa de jugadores
+      onProgress('Eliminando jugador de la bolsa...');
       const resBolsa = await bolsaJugadoresService.deleteJugadorInscrito(
         temporadaId,
         solicitud.jugadorObjetivo.id
@@ -103,6 +108,7 @@ export const aceptarUnirseEquipoSolicitud = async (
           escudoUrl: solicitud.equipoObjetivo.escudoUrl,
         },
       };
+      onProgress('Actualizando jugador...');
       const resJugador = await UserService.UpdatePlayerProfile(
         solicitud.jugadorObjetivo.id,
         jugadorActualizado
@@ -117,7 +123,8 @@ export const aceptarUnirseEquipoSolicitud = async (
       const resRechazar =
         await BaseSolicitudService.rechazarSolicitudesPendientes(
           temporadaId,
-          solicitud.jugadorObjetivo.id
+          solicitud.jugadorObjetivo.id,
+          onProgress
         );
 
       if (!resRechazar.success) {
@@ -138,7 +145,8 @@ export const aceptarUnirseEquipoSolicitud = async (
       await BaseSolicitudService.setSolicitud(
         temporadaId,
         solicitudInicial.id,
-        solicitudInicial
+        solicitudInicial,
+        onProgress
       );
     }
     console.log(error);

@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import * as ExpoImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
@@ -17,34 +23,45 @@ export default function ImagePicker({
 }: ImagePickerProps) {
   const { theme } = useTheme();
   const [image, setImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const requestPermissions = async () => {
+  const pickImageNative = async () => {
     const { status } =
       await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Se necesitan permisos para acceder a la galería');
-      return false;
+      return;
     }
-    return true;
-  };
-
-  const pickImage = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
 
     const result = await ExpoImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.5, // opcional, porque también vamos a comprimir después
+      quality: 0.5,
     });
 
     if (!result.canceled && result.assets[0].uri) {
       const originalUri = result.assets[0].uri;
       const compressedUri = await compressImage(originalUri);
+      setImage(compressedUri);
+      onImageSelected(compressedUri);
+    }
+  };
 
-      setImage(compressedUri); // Mostramos imagen comprimida
-      onImageSelected(compressedUri); // Enviamos la comprimida al padre
+  const pickImageWeb = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const uri = URL.createObjectURL(file);
+      setImage(uri);
+      onImageSelected(uri);
+    }
+  };
+
+  const handlePickImage = () => {
+    if (Platform.OS === 'web') {
+      fileInputRef.current?.click();
+    } else {
+      pickImageNative();
     }
   };
 
@@ -56,7 +73,7 @@ export default function ImagePicker({
           { borderColor: theme.border.primary },
           image ? styles.imageSelected : null,
         ]}
-        onPress={pickImage}
+        onPress={handlePickImage}
       >
         {image ? (
           <Image source={{ uri: image }} style={styles.image} />
@@ -71,6 +88,16 @@ export default function ImagePicker({
           </View>
         )}
       </TouchableOpacity>
+
+      {Platform.OS === 'web' && (
+        <input
+          type='file'
+          accept='image/*'
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={pickImageWeb}
+        />
+      )}
     </View>
   );
 }

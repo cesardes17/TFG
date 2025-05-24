@@ -7,7 +7,8 @@ export const rechazarDisolverEquipoSolicitud = async (
   temporadaId: string,
   solicitud: solicitudDisolverEquipo,
   usuario: User,
-  motivo: string
+  motivo: string,
+  onProgress: (text: string) => void
 ): Promise<ResultService<solicitudDisolverEquipo>> => {
   try {
     solicitud = {
@@ -25,7 +26,8 @@ export const rechazarDisolverEquipoSolicitud = async (
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,
       solicitud.id,
-      solicitud
+      solicitud,
+      onProgress
     );
     if (!res.success) {
       throw new Error(res.errorMessage);

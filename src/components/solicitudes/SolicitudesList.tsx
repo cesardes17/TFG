@@ -24,17 +24,22 @@ import aceptarSolicitud from '../../utils/solicitudes/aceptarSolicitud';
 import { inscripcionesService } from '../../services/inscripcionesService';
 import { AddIcon, FilterIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { EstadoSolicitudConTodos } from './SelectorEstado';
 
 interface SolicitudesListProps {
   screenLoading: (isLoading: boolean) => void;
   searchQuery: string;
   tipoSolicitud: tipoSolicitud | null;
+  setLoadingText: (text: string) => void;
+  estadoSolicitud: EstadoSolicitudConTodos;
 }
 
 export default function SolicitudesList({
   screenLoading,
   searchQuery,
   tipoSolicitud,
+  setLoadingText,
+  estadoSolicitud,
 }: SolicitudesListProps) {
   const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
@@ -54,7 +59,7 @@ export default function SolicitudesList({
   const [inputError, setInputError] = useState('');
   const [mostrarInputModal, setMostrarInputModal] = useState(false);
   const [modalType, setModalType] = useState<ConfirmationType>('update');
-  const [estado, setEStado] = useState('');
+
   const isAdmin = user?.rol === 'organizador' || user?.rol === 'coorganizador';
 
   const fetchSolicitudes = useCallback(async () => {
@@ -134,8 +139,13 @@ export default function SolicitudesList({
       });
     }
 
+    //si el estado es diferente de todos, filtramos por estado
+    console.log('ESTADO SOLICITUD: ', estadoSolicitud);
+    if (estadoSolicitud !== 'todos') {
+      result = result.filter((s) => s.estado === estadoSolicitud);
+    }
     setFilteredSolicitudes(result);
-  }, [searchQuery, tipoSolicitud, solicitudes]);
+  }, [searchQuery, tipoSolicitud, solicitudes, estadoSolicitud]);
 
   const onAceptar = async (solicitud: Solicitud) => {
     console.log('aceptar Solicitud: ', solicitud);
@@ -210,7 +220,8 @@ export default function SolicitudesList({
         temporada.id,
         selectedSolicitud,
         user,
-        inputModal
+        inputModal,
+        setLoadingText
       );
       showToast(res.message, res.type);
     } else {
@@ -218,7 +229,8 @@ export default function SolicitudesList({
         temporada.id,
         selectedSolicitud,
         user,
-        inputModal
+        inputModal,
+        setLoadingText
       );
       showToast(res.message, res.type);
     }

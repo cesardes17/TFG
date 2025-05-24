@@ -16,7 +16,8 @@ export default async function (
   temporadaId: string,
   solicitud: Solicitud,
   usuarioActor: User,
-  inputModal: string
+  inputModal: string,
+  onProgress: (text: string) => void
 ): Promise<{ type: ToastType; message: string }> {
   switch (solicitud.tipo) {
     case 'Crear Equipo': {
@@ -35,8 +36,12 @@ export default async function (
       };
       const res = await aceptarCrearEquipoSolicitud(
         temporadaId,
-        aceptacionData
+        aceptacionData,
+        onProgress
       );
+      if (!res.success) {
+        console.error(res.errorMessage);
+      }
       return {
         type: res.success ? 'success' : 'error',
         message: res.success
@@ -54,7 +59,8 @@ export default async function (
       const res = await aceptarUnirseEquipoSolicitud(
         temporadaId,
         solicitud as solicitudUnirseEquipo,
-        usuarioActor
+        usuarioActor,
+        onProgress
       );
       return {
         type: res.success ? 'success' : 'error',
@@ -67,7 +73,8 @@ export default async function (
       const res = await aceptarSalirEquipoSolicitud(
         temporadaId,
         solicitud as solicitudSalirEquipo,
-        usuarioActor
+        usuarioActor,
+        onProgress
       );
       return {
         type: res.success ? 'success' : 'error',
@@ -80,7 +87,8 @@ export default async function (
       const res = await aceptarDisolverEquipoSolicitud(
         temporadaId,
         solicitud as solicitudDisolverEquipo,
-        usuarioActor
+        usuarioActor,
+        onProgress
       );
       return {
         type: res.success ? 'success' : 'error',

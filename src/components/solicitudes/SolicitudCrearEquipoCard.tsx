@@ -103,15 +103,6 @@ export default function ({
           <StyledText variant='primary' style={styles.nombreEquipo}>
             {nombreEquipo}
           </StyledText>
-          <View style={styles.contenedorIconoEstado}>
-            {estado === 'pendiente' ? (
-              <ClockCircleOIcon size={24} color={theme.background.warning} />
-            ) : estado === 'aceptada' ? (
-              <CircleCheckIcon size={24} color={theme.background.success} />
-            ) : (
-              <CloseCircleoIcon size={24} color={theme.background.error} />
-            )}
-          </View>
         </View>
       </View>
 
@@ -130,9 +121,6 @@ export default function ({
             </StyledText>
             <StyledText variant='secondary' style={styles.correo}>
               {solicitante.correo}
-            </StyledText>
-            <StyledText variant='secondary' style={styles.dorsal}>
-              Dorsal propuesto: {solicitante.dorsal}
             </StyledText>
           </View>
         </View>

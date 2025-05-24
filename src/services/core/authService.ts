@@ -19,6 +19,7 @@ export const AuthService = {
       return { data: userCredential.user, success: true };
     } catch (error: any) {
       const code = error.code || '';
+      console.log('Error al iniciar sesión:', error);
       const message = translateAuthError(code, 'No se pudo iniciar sesión.');
       return { success: false, errorMessage: message };
     }

@@ -11,5 +11,5 @@ export default function LoginScreen() {
     return <LoadingIndicator text='Iniciando Sesión...' />;
   }
 
-  return <LoginForm setIsLoading={setIsLoading} />;
+  return <LoginForm />;
 }

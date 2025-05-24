@@ -4,13 +4,15 @@ import { BaseSolicitudService } from '../baseSolicitud';
 
 export const rechazarCrearEquipoSolicitud = async (
   temporadaId: string,
-  data: solicitudCrearEquipo
+  data: solicitudCrearEquipo,
+  onProgress: (text: string) => void
 ) => {
   try {
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,
       data.id,
-      data
+      data,
+      onProgress
     );
     if (!res.success) {
       throw new Error(res.errorMessage || 'Error al crear la solicitud');

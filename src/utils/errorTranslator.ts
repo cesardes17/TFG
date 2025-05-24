@@ -10,6 +10,7 @@ const authErrorMessages: Record<string, string> = {
   'auth/email-already-in-use': 'El correo ya está en uso.',
   'auth/operation-not-allowed': 'Operación no permitida.',
   'auth/weak-password': 'La contraseña es demasiado débil.',
+  'auth/invalid-credential': 'Credenciales inválidas. Revisa tus credenciales.',
 };
 
 /**

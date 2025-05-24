@@ -7,7 +7,8 @@ export const rechazarUnirseEquipoSolicitud = async (
   temporadaId: string,
   solicitud: solicitudUnirseEquipo,
   usuario: User,
-  motivo: string
+  motivo: string,
+  onProgress: (text: string) => void
 ): Promise<ResultService<solicitudUnirseEquipo>> => {
   const isAdmin =
     usuario.rol === 'organizador' || usuario.rol === 'coorganizador';
@@ -39,7 +40,8 @@ export const rechazarUnirseEquipoSolicitud = async (
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,
       solicitud.id,
-      solicitud
+      solicitud,
+      onProgress
     );
     if (!res.success) {
       throw new Error(res.errorMessage || 'Error al rechazar la solicitud');

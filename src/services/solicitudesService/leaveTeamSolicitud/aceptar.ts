@@ -9,7 +9,8 @@ import { BaseSolicitudService } from '../baseSolicitud';
 export const aceptarSalirEquipoSolicitud = async (
   temporadaId: string,
   solicitud: solicitudSalirEquipo,
-  usuario: User
+  usuario: User,
+  onProgress: (text: string) => void
 ): Promise<ResultService<solicitudSalirEquipo>> => {
   const esAdmin =
     usuario.rol === 'organizador' || usuario.rol === 'coorganizador';
@@ -41,10 +42,12 @@ export const aceptarSalirEquipoSolicitud = async (
     }
 
     // Guardar cambios en la solicitud
+    onProgress('Actualizando la solicitud...');
     const resSolicitud = await BaseSolicitudService.setSolicitud(
       temporadaId,
       solicitud.id,
-      solicitud
+      solicitud,
+      onProgress
     );
     if (!resSolicitud.success) {
       throw new Error(
@@ -54,6 +57,7 @@ export const aceptarSalirEquipoSolicitud = async (
 
     // Si fue aceptada, ejecutar efectos secundarios
     if (solicitud.estado === 'aceptada') {
+      onProgress('Eliminando la inscripción del jugador solicitante...');
       const resInscripcion = await inscripcionesService.deleteInscripcion(
         temporadaId,
         solicitud.solicitante.id
@@ -68,7 +72,7 @@ export const aceptarSalirEquipoSolicitud = async (
       const campo = {
         equipo: FirestoreService.getDeleteField(),
       };
-
+      onProgress('Actualizando la información del jugador...');
       const jugador = await UserService.UpdatePlayerProfile(
         solicitud.solicitante.id,
         campo

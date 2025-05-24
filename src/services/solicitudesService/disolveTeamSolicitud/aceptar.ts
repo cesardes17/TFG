@@ -10,7 +10,8 @@ import { BaseSolicitudService } from '../baseSolicitud';
 export const aceptarDisolverEquipoSolicitud = async (
   temporadaId: string,
   solicitud: solicitudDisolverEquipo,
-  usuario: User
+  usuario: User,
+  onProgress: (text: string) => void
 ): Promise<ResultService<solicitudDisolverEquipo>> => {
   try {
     //PASO 1: OBTENEMOS INSCRIPCIONES DEL EQUIPO
@@ -23,6 +24,7 @@ export const aceptarDisolverEquipoSolicitud = async (
     }
     const inscripciones = res.data;
     //PASO 2: PARA CADA INSCRIPCION, LA ELIMINAMOS, Y ACTUALIZAMOS EL PERFIL DEL JUGADOR
+    onProgress('Eliminando inscripciones...');
     inscripciones.forEach(async (inscripcion) => {
       //PASO 2.1: ELIMINAMOS LA INSCRIPCION
       await inscripcionesService.deleteInscripcionById(
@@ -44,6 +46,7 @@ export const aceptarDisolverEquipoSolicitud = async (
     });
 
     //PASO 3: ACTUALIZAMOS LA SOLICITUD
+    onProgress('Actualizando solicitud...');
     solicitud = {
       ...solicitud,
       estado: 'aceptada',
@@ -58,13 +61,15 @@ export const aceptarDisolverEquipoSolicitud = async (
     const resSol = await BaseSolicitudService.setSolicitud(
       temporadaId,
       solicitud.id,
-      solicitud
+      solicitud,
+      onProgress
     );
     if (!resSol.success) {
       throw new Error(resSol.errorMessage);
     }
 
     //PASO 4: ACTUALIZAMOS EL rol DEL SOLICITANTE
+    onProgress('Actualizando información del solicitante...');
     const rolRes = await UserService.UpdatePlayerProfile(
       solicitud.solicitante.id,
       {
@@ -76,6 +81,7 @@ export const aceptarDisolverEquipoSolicitud = async (
     }
 
     //PASO 5: Eliminamos el equipo
+    onProgress('Eliminando equipo...');
     const resEquipo = await equipoService.deleteEquipo(
       temporadaId,
       solicitud.equipo.id

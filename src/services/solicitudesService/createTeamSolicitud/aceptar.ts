@@ -10,14 +10,16 @@ import { BaseSolicitudService } from '../baseSolicitud';
 
 export const aceptarCrearEquipoSolicitud = async (
   temporadaId: string,
-  data: solicitudCrearEquipo
+  data: solicitudCrearEquipo,
+  onProgress: (text: string) => void
 ) => {
   try {
     // Paso 1: Aceptar la solicitud
     const resSol = await BaseSolicitudService.setSolicitud(
       temporadaId,
       data.id,
-      data
+      data,
+      onProgress
     );
     if (!resSol.success) {
       throw new Error(resSol.errorMessage || 'Error al crear la solicitud');
@@ -31,6 +33,7 @@ export const aceptarCrearEquipoSolicitud = async (
       fechaCreacion: new Date(),
     };
 
+    onProgress('Creando equipo...');
     const resEquipo = await equipoService.crearEquipo(
       temporadaId,
       equipoData.id,
@@ -48,6 +51,7 @@ export const aceptarCrearEquipoSolicitud = async (
       fechaInscripcion: new Date(),
     };
 
+    onProgress('Inscribiendo al capitán...');
     const resInscripcion = await inscripcionesService.crearInscripcion(
       temporadaId,
       inscripcionData.id,
@@ -68,6 +72,7 @@ export const aceptarCrearEquipoSolicitud = async (
         escudoUrl: equipoData.escudoUrl,
       },
     };
+    onProgress('Actualizando información del usuairo...');
     const resUser = await UserService.UpdatePlayerProfile(
       data.solicitante.id,
       userData
@@ -79,7 +84,8 @@ export const aceptarCrearEquipoSolicitud = async (
     const resRechazar =
       await BaseSolicitudService.rechazarSolicitudesPendientes(
         temporadaId,
-        data.solicitante.id
+        data.solicitante.id,
+        onProgress
       );
     if (!resRechazar.success) {
       throw new Error(

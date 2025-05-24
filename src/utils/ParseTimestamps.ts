@@ -4,13 +4,29 @@ import {
 } from './firebaseUtils';
 
 /**
+ * Detecta si un objeto es un FieldValue especial (como deleteField, serverTimestamp, etc.)
+ */
+function isFirestoreFieldValue(obj: any): boolean {
+  return (
+    obj &&
+    typeof obj === 'object' &&
+    (typeof obj._methodName === 'string' || obj._type === 'delete')
+  );
+}
+
+/**
  * Serializa recursivamente las fechas: Date → Firestore.Timestamp
+ * Mantiene los valores especiales de Firestore como deleteField y serverTimestamp.
  */
 export async function serializeDates(obj: any): Promise<any> {
   const Timestamp = await getPlatformTimestampClass();
 
   if (obj instanceof Date) {
     return Timestamp.fromDate(obj);
+  }
+
+  if (isFirestoreFieldValue(obj)) {
+    return obj; // no lo tocamos
   }
 
   if (Array.isArray(obj)) {

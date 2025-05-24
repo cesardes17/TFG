@@ -22,7 +22,7 @@ const BolsaJugadoresScreen = () => {
   const usuarioActualId = user?.uid;
   const isAdmin = user!.rol === 'organizador' || user!.rol === 'coorganizador';
   const [isLoading, setIsLodaing] = useState(true);
-
+  const [loadingText, setLoadingText] = useState('');
   const [estadosSolicitudes, setEstadosSolicitudes] = useState<
     Record<string, 'ninguna' | 'pendiente'>
   >({});
@@ -33,6 +33,7 @@ const BolsaJugadoresScreen = () => {
 
     const fetchData = async () => {
       setIsLodaing(true);
+      setLoadingText('Cargando jugadores...');
       try {
         const res = await bolsaJugadoresService.getJugadoresInscritos(
           temporada.id
@@ -68,6 +69,7 @@ const BolsaJugadoresScreen = () => {
         console.error('Error al cargar inscripciones y solicitudes:', error);
       }
       setIsLodaing(false);
+      setLoadingText('');
     };
 
     fetchData();
@@ -75,6 +77,8 @@ const BolsaJugadoresScreen = () => {
 
   const handleEnviarSolicitud = useCallback(
     async (jugadorId: string) => {
+      setLoadingText('Enviando solicitud...');
+      setIsLodaing(true);
       try {
         if (!temporada) {
           throw new Error('No hay una temporada seleccionada');
@@ -127,7 +131,8 @@ const BolsaJugadoresScreen = () => {
         const res = await BaseSolicitudService.setSolicitud(
           temporada.id,
           solicitud.id,
-          solicitud
+          solicitud,
+          setLoadingText
         );
 
         if (!res.success) {
@@ -142,13 +147,16 @@ const BolsaJugadoresScreen = () => {
         }));
       } catch (error) {
         showToast('No se pudo enviar la solicitud', 'error');
+      } finally {
+        setIsLodaing(false);
+        setLoadingText('');
       }
     },
     [temporada, user, inscripciones]
   );
 
   if (isLoading) {
-    return <LoadingIndicator text='Cargando inscripciones...' />;
+    return <LoadingIndicator text={loadingText} />;
   }
 
   return (

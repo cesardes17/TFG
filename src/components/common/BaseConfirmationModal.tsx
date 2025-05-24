@@ -3,6 +3,7 @@ import { Modal, View, Text, Pressable } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from './StyledText';
 import LoadingIndicator from './LoadingIndicator';
+import { useResponsiveWidth } from '../../hooks/useResponsiveWidth'; // ✅ IMPORTACIÓN NUEVA
 
 export type ConfirmationType = 'create' | 'update' | 'delete';
 
@@ -10,12 +11,13 @@ type Props = {
   visible: boolean;
   title: string;
   description?: string;
-  onConfirm: () => Promise<void> | void; // O async callback
+  onConfirm: () => Promise<void> | void;
   onCancel: () => void;
   type?: ConfirmationType;
   confirmLabel?: string;
   cancelLabel?: string;
   children?: React.ReactNode;
+  loadingText?: string;
 };
 
 export default function BaseConfirmationModal({
@@ -28,8 +30,10 @@ export default function BaseConfirmationModal({
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
   children,
+  loadingText = 'Procesando...',
 }: Props) {
   const { theme } = useTheme();
+  const { containerWidth } = useResponsiveWidth(); // ✅ AÑADIDO
   const [isProcessing, setIsProcessing] = useState(false);
 
   const getConfirmColor = () => {
@@ -50,7 +54,7 @@ export default function BaseConfirmationModal({
     try {
       await onConfirm();
     } finally {
-      setIsProcessing(false); // Se podría eliminar el modal desde fuera
+      setIsProcessing(false);
     }
   };
 
@@ -62,13 +66,15 @@ export default function BaseConfirmationModal({
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          padding: 16,
         }}
         onPress={!isProcessing ? onCancel : undefined}
       >
         <Pressable
           onPress={(e) => e.stopPropagation()}
           style={{
-            width: '80%',
+            width: containerWidth, // ✅ APLICACIÓN DEL WIDTH RESPONSIVE
+            maxWidth: 500, // ✅ Límite máximo para pantallas grandes
             backgroundColor: theme.background.primary,
             borderRadius: 12,
             padding: 20,
@@ -89,9 +95,7 @@ export default function BaseConfirmationModal({
           </StyledText>
 
           {description && !isProcessing && (
-            <Text style={{ color: theme.text.secondary, marginBottom: 20 }}>
-              {description}
-            </Text>
+            <StyledText style={{ marginBottom: 20 }}>{description}</StyledText>
           )}
 
           {children && !isProcessing && (
@@ -99,7 +103,7 @@ export default function BaseConfirmationModal({
           )}
 
           {isProcessing ? (
-            <LoadingIndicator text='Procesando...' />
+            <LoadingIndicator text={loadingText} />
           ) : (
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <Pressable

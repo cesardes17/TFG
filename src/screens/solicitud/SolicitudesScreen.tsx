@@ -18,32 +18,50 @@ import LoadingIndicator from '../../components/common/LoadingIndicator';
 import StyledTextInput from '../../components/common/StyledTextInput';
 import { FilterIcon } from '../../components/Icons';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
-import { tipoSolicitud } from '../../types/Solicitud';
+import { estadoSolicitud, tipoSolicitud } from '../../types/Solicitud';
 import SelectableCardGroup from '../../components/common/SelectableCardGroup';
+import SelectorEstado, {
+  EstadoSolicitudConTodos,
+} from '../../components/solicitudes/SelectorEstado';
 
 export default function SolicitudesScreen() {
   const { theme } = useTheme();
   const { temporada, loadingTemporada } = useTemporadaContext();
   const { user, loadingUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
   const [query, setQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTipoSolicitud, setSelectedTipoSolicitud] = useState<
     tipoSolicitud | ''
   >('');
   const [selectedTipo, setSelectedTipo] = useState<tipoSolicitud | null>(null);
-  if (loadingTemporada || loadingUser || isLoading) {
+  const [selectedEstado, setSelectedEstado] =
+    useState<EstadoSolicitudConTodos>('pendiente');
+  if (loadingTemporada || loadingUser) {
     console.log('loadingtemporada: ', loadingTemporada);
     console.log('loadinguser: ', loadingUser);
     console.log('isloading: ', isLoading);
 
-    return <LoadingIndicator text='Cargando anuncios' />;
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <LoadingIndicator text='Cargando información' />
+      </View>
+    );
   }
 
   if (!user || !temporada) {
     return (
       <View style={[styles.container, { justifyContent: 'center' }]}>
         <StyledAlert variant='error' message='No hay temporada activa' />
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <LoadingIndicator text={loadingText} />
       </View>
     );
   }
@@ -75,10 +93,14 @@ export default function SolicitudesScreen() {
           <FilterIcon color={theme.text.primary} />
         </TouchableOpacity>
       </View>
+      <SelectorEstado value={selectedEstado} onSelect={setSelectedEstado} />
+
       <SolicitudesList
         screenLoading={setIsLoading}
+        setLoadingText={setLoadingText}
         searchQuery={query}
         tipoSolicitud={selectedTipo}
+        estadoSolicitud={selectedEstado}
       />
 
       <BaseConfirmationModal

@@ -1,13 +1,19 @@
 // app/_layout.web.tsx     ← Drawer (web)
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import { useUser } from '../../src/contexts/UserContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { useVerificarAnunciosNuevos } from '../../src/hooks/useVerificarAnunciosNuevos';
+import { useVerificarSolicitudes } from '../../src/hooks/useVerificarSolicitudes';
+import { DrawerLabelWithBadge } from '../../src/components/drawer/DrawerLabelWithBadge';
 
 export default function WebLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
+
+  const nAnunciosNuevos = useVerificarAnunciosNuevos();
+  const nSolicitudesNuevas = useVerificarSolicitudes();
 
   if (loadingUser) return null;
 
@@ -29,19 +35,28 @@ export default function WebLayout() {
           headerTitleAlign: 'center',
         }}
       >
-        <Drawer.Screen name='index' options={{ drawerLabel: 'Home' }} />
+        <Drawer.Screen
+          name='index'
+          options={{
+            drawerLabel: () => <DrawerLabelWithBadge label={'Inicio'} />,
+          }}
+        />
 
         <Drawer.Screen
           name='perfil-helper'
           options={{
-            drawerLabel: user ? 'Perfil' : 'Login',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge label={user ? 'Perfil' : 'Login'} />
+            ),
             title: 'Perfil',
           }}
         />
         <Drawer.Screen
           name='panelControl'
           options={{
-            drawerLabel: 'Panel de Control',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge label='Panel de Control' />
+            ),
             title: 'Panel de Control',
             drawerItemStyle: {
               display:
@@ -54,7 +69,9 @@ export default function WebLayout() {
         <Drawer.Screen
           name='administrarUsuarios'
           options={{
-            drawerLabel: 'Administrar Usuarios',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge label='Administrar Usuarios' />
+            ),
             title: 'Administrar Usuarios',
             drawerItemStyle: {
               display:
@@ -67,7 +84,12 @@ export default function WebLayout() {
         <Drawer.Screen
           name='solicitudes'
           options={{
-            drawerLabel: 'Solicitudes',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge
+                label='Solicitudes'
+                badgeCount={nSolicitudesNuevas}
+              />
+            ),
             title: 'Solicitudes',
             drawerItemStyle: {
               display:
@@ -80,7 +102,9 @@ export default function WebLayout() {
         <Drawer.Screen
           name='bolsaJugadores'
           options={{
-            drawerLabel: 'Bolsa de Jugadores',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge label='Bolsa de Jugadores' />
+            ),
             title: 'Bolsa de Jugadores',
             drawerItemStyle: {
               display:
@@ -95,7 +119,12 @@ export default function WebLayout() {
         <Drawer.Screen
           name='tablonAnuncios'
           options={{
-            drawerLabel: 'Tablon de Anuncios',
+            drawerLabel: () => (
+              <DrawerLabelWithBadge
+                label='Anuncios'
+                badgeCount={nAnunciosNuevos}
+              />
+            ),
             title: 'Tablon de Anuncios',
           }}
         />

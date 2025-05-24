@@ -1,5 +1,5 @@
 // app/_layout.native.tsx   ← Tabs (iOS/Android)
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Tabs, useFocusEffect } from 'expo-router';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useUser } from '../../src/contexts/UserContext';
@@ -10,14 +10,19 @@ import {
   UserCircleIcon,
 } from '../../src/components/Icons';
 import { useVerificarAnunciosNuevos } from '../../src/hooks/useVerificarAnunciosNuevos';
+import { useVerificarSolicitudes } from '../../src/hooks/useVerificarSolicitudes';
 
 export default function NativeLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
 
+  const [badges, setBadges] = useState(0);
   const nAnunciosNuevos = useVerificarAnunciosNuevos();
+  const nSolicitudesNuevas = useVerificarSolicitudes();
 
-  console.log('numero de anuncios nuevos: ', nAnunciosNuevos);
+  useEffect(() => {
+    setBadges(nAnunciosNuevos + nSolicitudesNuevas);
+  }, [nAnunciosNuevos, nSolicitudesNuevas]);
 
   if (loadingUser) return null;
   return (
@@ -59,7 +64,7 @@ export default function NativeLayout() {
         name='more'
         options={{
           title: 'More',
-          tabBarBadge: nAnunciosNuevos > 0 ? nAnunciosNuevos : undefined,
+          tabBarBadge: badges > 0 ? badges : undefined,
           tabBarIcon: ({ color, size }) => (
             <MenuIcon size={size} color={color} />
           ),

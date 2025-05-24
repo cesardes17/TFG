@@ -3,7 +3,12 @@
 import { WhereFilterOp } from 'firebase/firestore';
 
 import type { ResultService } from '../../types/ResultService';
-import type { Solicitud, solicitudCrearEquipo } from '../../types/Solicitud';
+import type {
+  Solicitud,
+  solicitudCrearEquipo,
+  solicitudSalirEquipo,
+  solicitudUnirseEquipo,
+} from '../../types/Solicitud';
 import { StorageService } from '../core/storageService';
 import { User } from '../../types/User';
 import { FirestoreService, WhereClause } from '../core/firestoreService';
@@ -200,5 +205,56 @@ export const BaseSolicitudService = {
             : 'Error al rechazar solicitudes pendientes',
       };
     }
+  },
+
+  contarSolicitudesPendientesAdmin: async (
+    temporadaId: string
+  ): Promise<number> => {
+    const res = await FirestoreService.getCollectionByPath<Solicitud>(
+      ['temporadas', temporadaId, 'solicitudes'],
+      [['estado', '==', 'pendiente']]
+    );
+    if (!res.success || !res.data) return 0;
+
+    return res.data.length;
+  },
+
+  contarSolicitudesObjetivo: async (
+    temporadaId: string,
+    userId: string
+  ): Promise<number> => {
+    const res = await FirestoreService.getCollectionByPath<Solicitud>(
+      ['temporadas', temporadaId, 'solicitudes'],
+      [['estado', '==', 'pendiente']]
+    );
+    if (!res.success || !res.data) return 0;
+
+    return res.data.filter((s) => {
+      if (s.tipo === 'Unirse a Equipo') {
+        return (s as solicitudUnirseEquipo).jugadorObjetivo?.id === userId;
+      }
+      if (s.tipo === 'Salir de Equipo') {
+        return (s as solicitudSalirEquipo).capitanObjetivo?.id === userId;
+      }
+      return false; // Las otras solicitudes no aplican
+    }).length;
+  },
+
+  contarSolicitudesNoVistasSolicitante: async (
+    temporadaId: string,
+    userId: string
+  ): Promise<number> => {
+    const res = await FirestoreService.getCollectionByPath<Solicitud>(
+      ['temporadas', temporadaId, 'solicitudes'],
+      [
+        ['solicitante.id', '==', userId],
+        ['vistoSolicitante', '==', false],
+      ]
+    );
+    console.log(res);
+
+    if (!res.success || !res.data) return 0;
+
+    return res.data.length;
   },
 };

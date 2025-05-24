@@ -4,6 +4,7 @@ import {
   Feather,
   FontAwesome,
   FontAwesome5,
+  FontAwesome6,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -107,4 +108,12 @@ export const PaperClipIcon = ({ size = 24, color }: IconProps) => {
 
 export const FilterIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='filter' size={size} color={color} />;
+};
+
+export const EnvelopeOpenIcon = ({ size = 24, color }: IconProps) => {
+  return <FontAwesome6 name='envelope-open' size={size} color={color} />;
+};
+
+export const EnvelopeIcon = ({ size = 24, color }: IconProps) => {
+  return <FontAwesome6 name='envelope' size={size} color={color} />;
 };

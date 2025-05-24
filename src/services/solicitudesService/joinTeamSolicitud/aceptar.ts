@@ -27,6 +27,7 @@ export const aceptarUnirseEquipoSolicitud = async (
           ...solicitud,
           estado: 'aceptada',
           vistoSolicitante: false,
+          vistoAfectado: false,
         };
       }
       solicitud = {
@@ -45,6 +46,7 @@ export const aceptarUnirseEquipoSolicitud = async (
           ...solicitud,
           estado: 'aceptada',
           vistoSolicitante: false,
+          vistoAfectado: true,
         };
       }
       solicitud = {

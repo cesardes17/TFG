@@ -14,12 +14,14 @@ interface SolicitudCardProps {
   solicitud: Solicitud;
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
+  marcarLeidoSolicitante: (solicitud: Solicitud) => void;
 }
 
 export default function SolicitudCard({
   solicitud,
   onAceptar,
   onRechazar,
+  marcarLeidoSolicitante,
 }: SolicitudCardProps) {
   const { user } = useUser();
   const isAdmin = user?.rol === 'organizador' || user?.rol === 'coorganizador';
@@ -32,6 +34,7 @@ export default function SolicitudCard({
           usuarioActual={userActual}
           onAceptar={onAceptar}
           onRechazar={onRechazar}
+          marcarLeidoSolicitante={marcarLeidoSolicitante}
         />
       );
     case 'Unirse a Equipo':
@@ -41,6 +44,7 @@ export default function SolicitudCard({
           usuarioActual={userActual}
           onAceptar={onAceptar}
           onRechazar={onRechazar}
+          marcarLeidoSolicitante={marcarLeidoSolicitante}
         />
       );
 
@@ -51,6 +55,7 @@ export default function SolicitudCard({
           usuarioActual={userActual}
           onAceptar={onAceptar}
           onRechazar={onRechazar}
+          marcarLeidoSolicitante={marcarLeidoSolicitante}
         />
       );
     case 'Disolver Equipo':
@@ -60,6 +65,7 @@ export default function SolicitudCard({
           usuarioActual={userActual}
           onAceptar={onAceptar}
           onRechazar={onRechazar}
+          marcarLeidoSolicitante={marcarLeidoSolicitante}
         />
       );
     default:

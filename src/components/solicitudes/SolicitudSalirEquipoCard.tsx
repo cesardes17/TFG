@@ -6,6 +6,7 @@ import { Solicitud, solicitudSalirEquipo } from '../../types/Solicitud';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
 import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
+import FooterSolicitudCard from './FooterSolicitudCard';
 
 interface Props {
   solicitud: solicitudSalirEquipo;
@@ -15,6 +16,7 @@ interface Props {
   };
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
+  marcarLeidoSolicitante: (solicitud: Solicitud) => void;
 }
 
 export default function SolicitudSalirEquipoCard({
@@ -22,6 +24,7 @@ export default function SolicitudSalirEquipoCard({
   usuarioActual,
   onAceptar,
   onRechazar,
+  marcarLeidoSolicitante,
 }: Props) {
   const {
     solicitante,
@@ -43,6 +46,20 @@ export default function SolicitudSalirEquipoCard({
 
   const esCapitan = usuarioActual.id === capitanObjetivo.id;
   const esAdmin = usuarioActual.esAdmin === true;
+
+  const quienResponde = fechaRespuestaAdmin
+    ? {
+        id: admin?.id || '',
+        nombre: admin?.nombre || '',
+        apellidos: admin?.apellidos || '',
+        correo: admin?.correo || '',
+      }
+    : {
+        id: capitanObjetivo.id,
+        nombre: capitanObjetivo.nombre,
+        apellidos: capitanObjetivo.apellidos,
+        correo: capitanObjetivo.correo,
+      };
 
   const puedeResponder =
     estado === 'pendiente' &&
@@ -114,7 +131,7 @@ export default function SolicitudSalirEquipoCard({
 
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Capitán
+          Capitán (Afectado)
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
@@ -186,78 +203,20 @@ export default function SolicitudSalirEquipoCard({
         <StyledText variant='primary'>{motivoSalida}</StyledText>
       </View>
 
-      <View
-        style={[
-          styles.bloqueAccionesFooter,
-          { borderTopColor: theme.border.primary },
-        ]}
-      >
-        {estado === 'pendiente' ? (
-          puedeResponder ? (
-            <View style={styles.botonesAccion}>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.primary.background },
-                ]}
-                onPress={() => onAceptar(solicitud)}
-              >
-                <StyledText variant='light'>Aceptar</StyledText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.error.background },
-                ]}
-                onPress={() => onRechazar(solicitud)}
-              >
-                <StyledText variant='light'>Rechazar</StyledText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
-              Esperando respuesta
-            </StyledText>
-          )
-        ) : (
-          <View
-            style={[
-              styles.infoResolucion,
-              { backgroundColor: theme.background.primary },
-            ]}
-          >
-            {fechaRespuestaAdmin || fechaRespuestaCapitan ? (
-              <StyledText style={styles.textoInfoResolucion}>
-                Resuelta el{' '}
-                {formatearFecha(fechaRespuestaAdmin || fechaRespuestaCapitan!)}
-              </StyledText>
-            ) : null}
-            <StyledText style={styles.textoInfoResolucion}>
-              Respondida por{' '}
-              {fechaRespuestaAdmin
-                ? `${admin?.nombre ?? 'Administrador'} ${
-                    admin?.apellidos ?? ''
-                  }`
-                : `${capitanObjetivo.nombre} ${capitanObjetivo.apellidos}`}{' '}
-              (
-              {fechaRespuestaAdmin
-                ? admin?.correo ?? ''
-                : capitanObjetivo.correo}
-              )
-            </StyledText>
-            {estado === 'rechazada' && motivoRespuestaCapitan && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {motivoRespuestaCapitan}
-              </StyledText>
-            )}
-            {estado === 'rechazada' && respuestaAdmin && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {respuestaAdmin}
-              </StyledText>
-            )}
-          </View>
-        )}
-      </View>
+      <FooterSolicitudCard
+        estado={estado}
+        afectadoId={capitanObjetivo.id}
+        solicitanteId={solicitante.id}
+        vistoPorSolicitante={solicitud.vistoSolicitante}
+        vistoPorAfectado={solicitud.vistoAfectado}
+        puedeResponder={puedeResponder}
+        onAceptar={() => onAceptar(solicitud)}
+        onRechazar={() => onRechazar(solicitud)}
+        admin={quienResponde}
+        fechaRespuestaAdmin={fechaRespuestaAdmin || fechaRespuestaCapitan}
+        respuestaAdmin={respuestaAdmin || motivoRespuestaCapitan}
+        onMarcarComoLeido={() => marcarLeidoSolicitante(solicitud)}
+      />
     </View>
   );
 }

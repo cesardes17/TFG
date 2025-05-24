@@ -21,6 +21,7 @@ type baseSolicitud = {
   fechaRespuestaAdmin?: Date;
   respuestaAdmin?: string;
   vistoSolicitante?: boolean; //variable para indicar si hay solicitudes pendientes para un solicitante
+  vistoAfectado?: boolean; //variable para indicar si hay solicitudes pendientes para un tercer participante que debe aceptar la solicitud
 };
 
 export type solicitudCrearEquipo = baseSolicitud & {

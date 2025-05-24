@@ -1,4 +1,4 @@
-import type React from 'react';
+import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { Solicitud, solicitudUnirseEquipo } from '../../types/Solicitud';
@@ -6,6 +6,7 @@ import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
+import FooterSolicitudCard from './FooterSolicitudCard';
 
 interface Props {
   solicitud: solicitudUnirseEquipo;
@@ -15,6 +16,7 @@ interface Props {
   };
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
+  marcarLeidoSolicitante: (solicitud: Solicitud) => void;
 }
 
 export default function SolicitudUnirseEquipoCard({
@@ -22,6 +24,7 @@ export default function SolicitudUnirseEquipoCard({
   usuarioActual,
   onAceptar,
   onRechazar,
+  marcarLeidoSolicitante,
 }: Props) {
   const {
     jugadorObjetivo,
@@ -35,6 +38,8 @@ export default function SolicitudUnirseEquipoCard({
     motivoRespuestaJugador,
     admin,
     respuestaAdmin,
+    vistoSolicitante,
+    vistoAfectado,
   } = solicitud;
   const { theme } = useTheme();
 
@@ -48,23 +53,19 @@ export default function SolicitudUnirseEquipoCard({
     ((esJugadorObjetivo && !fechaRespuestaJugador) ||
       (esAdmin && !fechaRespuestaAdmin));
 
-  const obtenerTextoEstado = () => {
-    switch (estado) {
-      case 'pendiente':
-        return 'Pendiente';
-      case 'aceptada':
-        return 'Aceptada';
-      case 'rechazada':
-        return 'Rechazada';
-      default:
-        return 'Desconocido';
-    }
-  };
-
-  const estiloSeccion = () => [
-    styles.seccion,
-    { borderColor: theme.border.primary },
-  ];
+  const quienResponde = fechaRespuestaAdmin
+    ? {
+        id: admin?.id || '',
+        nombre: admin?.nombre || '',
+        apellidos: admin?.apellidos || '',
+        correo: admin?.correo || '',
+      }
+    : {
+        id: jugadorObjetivo.id,
+        nombre: jugadorObjetivo.nombre,
+        apellidos: jugadorObjetivo.apellidos,
+        correo: jugadorObjetivo.correo,
+      };
 
   return (
     <View style={[styles.tarjeta, { backgroundColor: theme.cardDefault }]}>
@@ -85,7 +86,7 @@ export default function SolicitudUnirseEquipoCard({
           ]}
         >
           <StyledText variant='light' size='small' style={styles.estadoTexto}>
-            {obtenerTextoEstado()}
+            {estado.charAt(0).toUpperCase() + estado.slice(1)}
           </StyledText>
         </View>
         <StyledText
@@ -104,10 +105,10 @@ export default function SolicitudUnirseEquipoCard({
         </StyledText>
       </View>
 
-      {/* Jugador que debe aprobar */}
-      <View style={estiloSeccion()}>
+      {/* Jugador */}
+      <View style={styles.seccion}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
-          Jugador
+          Jugador (afectado)
         </StyledText>
         <View style={styles.infoJugador}>
           <ProgressiveImage
@@ -137,10 +138,9 @@ export default function SolicitudUnirseEquipoCard({
         </View>
       </View>
 
-      {/* Solicitante y equipo en la misma fila */}
-      <View style={estiloSeccion()}>
+      {/* Solicitante y equipo */}
+      <View style={styles.seccion}>
         <View style={styles.filaDual}>
-          {/* Solicitante */}
           <View style={styles.columnaMitad}>
             <StyledText variant='secondary' style={styles.tituloSeccion}>
               Solicitante
@@ -152,7 +152,6 @@ export default function SolicitudUnirseEquipoCard({
               {solicitante.correo}
             </StyledText>
           </View>
-          {/* Equipo */}
           <View style={styles.columnaMitad}>
             <StyledText variant='secondary' style={styles.tituloSeccion}>
               Equipo
@@ -172,74 +171,21 @@ export default function SolicitudUnirseEquipoCard({
         </View>
       </View>
 
-      {/* Acciones o resultado */}
-      <View>
-        {estado === 'pendiente' ? (
-          puedeResponder ? (
-            <View style={styles.botonesAccion}>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.primary.background },
-                ]}
-                onPress={() => onAceptar(solicitud)}
-              >
-                <StyledText variant='light'>Aceptar</StyledText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.error.background },
-                ]}
-                onPress={() => onRechazar(solicitud)}
-              >
-                <StyledText variant='light'>Rechazar</StyledText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
-              Esperando respuesta
-            </StyledText>
-          )
-        ) : (
-          <View
-            style={[
-              styles.infoResolucion,
-              { backgroundColor: theme.background.primary },
-            ]}
-          >
-            {fechaRespuestaAdmin || fechaRespuestaJugador ? (
-              <StyledText style={styles.textoInfoResolucion}>
-                Resuelta el{' '}
-                {formatearFecha(fechaRespuestaAdmin || fechaRespuestaJugador!)}
-              </StyledText>
-            ) : null}
-            <StyledText style={styles.textoInfoResolucion}>
-              Respondida por{' '}
-              {fechaRespuestaAdmin
-                ? `${admin?.nombre ?? 'Administrador'} ${
-                    admin?.apellidos ?? ''
-                  }`
-                : `${jugadorObjetivo.nombre} ${jugadorObjetivo.apellidos}`}{' '}
-              (
-              {fechaRespuestaAdmin
-                ? admin?.correo ?? ''
-                : jugadorObjetivo.correo}
-              )
-            </StyledText>
-            {estado === 'rechazada' && motivoRespuestaJugador && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {motivoRespuestaJugador}
-              </StyledText>
-            )}
-            {estado === 'rechazada' && respuestaAdmin && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {respuestaAdmin}
-              </StyledText>
-            )}
-          </View>
-        )}
-      </View>
+      {/* Footer común */}
+      <FooterSolicitudCard
+        estado={estado}
+        solicitanteId={solicitante.id}
+        vistoPorAfectado={vistoAfectado}
+        afectadoId={jugadorObjetivo.id}
+        vistoPorSolicitante={vistoSolicitante}
+        puedeResponder={puedeResponder}
+        onAceptar={() => onAceptar(solicitud)}
+        onRechazar={() => onRechazar(solicitud)}
+        admin={quienResponde}
+        fechaRespuestaAdmin={fechaRespuestaAdmin || fechaRespuestaJugador}
+        respuestaAdmin={respuestaAdmin || motivoRespuestaJugador}
+        onMarcarComoLeido={() => marcarLeidoSolicitante(solicitud)}
+      />
     </View>
   );
 }
@@ -326,7 +272,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
   filaDual: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -334,37 +279,5 @@ const styles = StyleSheet.create({
   },
   columnaMitad: {
     flex: 1,
-  },
-  botonesAccion: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  boton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  esperandoRespuesta: {
-    textAlign: 'center',
-    color: '#666',
-    fontStyle: 'italic',
-  },
-  infoResolucion: {
-    padding: 12,
-    borderRadius: 8,
-  },
-  textoInfoResolucion: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  textoMotivoRechazo: {
-    fontSize: 14,
-    color: '#F44336',
-    marginTop: 8,
-    fontStyle: 'italic',
   },
 });

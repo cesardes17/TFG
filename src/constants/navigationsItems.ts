@@ -10,6 +10,7 @@ export interface NavigationItem {
   description: string;
   path: string;
   allowedRoles: NavigationAllowedRole[];
+  showBadge?: boolean;
 }
 
 export const navigationItems: NavigationItem[] = [
@@ -19,6 +20,7 @@ export const navigationItems: NavigationItem[] = [
     description: 'Gestiona y consulta tus solicitudes.',
     path: '/solicitudesMobile',
     allowedRoles: ['jugador', 'capitan', 'organizador', 'coorganizador'], // solo jugadores y capitanes
+    showBadge: true, // ← puede mostrar un badge o no,
   },
   {
     id: 'panelControl',
@@ -40,6 +42,7 @@ export const navigationItems: NavigationItem[] = [
     description: 'Consulta los anuncios de la Liga.',
     path: '/tablonAnunciosMobile',
     allowedRoles: ['*'], // cualquier usuario, incluso invitado
+    showBadge: true, // ← puede mostrar un badge o no,
   },
   {
     id: 'ajustes',

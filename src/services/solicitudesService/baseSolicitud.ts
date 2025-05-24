@@ -257,4 +257,74 @@ export const BaseSolicitudService = {
 
     return res.data.length;
   },
+  contarSolicitudesNoVistasAfectado: async (
+    temporadaId: string,
+    userId: string
+  ): Promise<number> => {
+    const res = await FirestoreService.getCollectionByPath<Solicitud>(
+      ['temporadas', temporadaId, 'solicitudes'],
+      [
+        ['solicitante.id', '==', userId],
+        ['vistoAfectado', '==', false],
+      ]
+    );
+    console.log(res);
+
+    if (!res.success || !res.data) return 0;
+
+    return res.data.length;
+  },
+
+  marcarSolicitudLeidaSolicitante: async (
+    temporadaId: string,
+    solicitudId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = ['temporadas', temporadaId, 'solicitudes', solicitudId];
+      const res = await FirestoreService.updateDocumentByPath(path, {
+        vistoSolicitante: true,
+      });
+      if (!res.success) {
+        throw new Error(
+          res.errorMessage || 'Error al marcar la solicitud como leída'
+        );
+      }
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al marcar la solicitud como leída',
+      };
+    }
+  },
+
+  marcarSolicitudLeidaAfectado: async (
+    temporadaId: string,
+    solicitudId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = ['temporadas', temporadaId, 'solicitudes', solicitudId];
+      const res = await FirestoreService.updateDocumentByPath(path, {
+        vistoAfectado: true,
+      });
+      console.log('BASE SOLICITUD RES - ', res); // Añadido para depuración: imprime el resultad
+      if (!res.success) {
+        throw new Error(
+          res.errorMessage || 'Error al marcar la solicitud como leída'
+        );
+      }
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al marcar la solicitud como leída',
+      };
+    }
+  },
 };

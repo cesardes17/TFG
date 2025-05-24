@@ -2,7 +2,6 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { solicitudDisolverEquipo, Solicitud } from '../../types/Solicitud';
-import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
@@ -15,6 +14,7 @@ interface Props {
   };
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
+  marcarLeidoSolicitante: (solicitud: Solicitud) => void;
 }
 
 export default function SolicitudDisolverEquipoCard({

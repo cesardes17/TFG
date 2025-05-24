@@ -1,6 +1,6 @@
 // app/_layout.native.tsx   ← Tabs (iOS/Android)
-import React, { useCallback, useEffect, useState } from 'react';
-import { Tabs, useFocusEffect } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useUser } from '../../src/contexts/UserContext';
 import {
@@ -22,6 +22,7 @@ export default function NativeLayout() {
 
   useEffect(() => {
     setBadges(nAnunciosNuevos + nSolicitudesNuevas);
+    console.log('badges', badges);
   }, [nAnunciosNuevos, nSolicitudesNuevas]);
 
   if (loadingUser) return null;

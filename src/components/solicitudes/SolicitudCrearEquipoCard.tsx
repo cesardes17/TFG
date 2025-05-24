@@ -6,6 +6,7 @@ import { CircleCheckIcon, ClockCircleOIcon, CloseCircleoIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
+import FooterSolicitudCard from './FooterSolicitudCard';
 
 interface Props {
   solicitud: solicitudCrearEquipo;
@@ -15,6 +16,7 @@ interface Props {
   };
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
+  marcarLeidoSolicitante: (solicitud: Solicitud) => void;
 }
 
 export default function ({
@@ -22,6 +24,7 @@ export default function ({
   usuarioActual,
   onAceptar,
   onRechazar,
+  marcarLeidoSolicitante,
 }: Props) {
   const {
     nombreEquipo,
@@ -33,12 +36,15 @@ export default function ({
     fechaRespuestaAdmin,
     respuestaAdmin,
     id,
+    vistoSolicitante,
   } = solicitud;
   const { theme } = useTheme();
 
   const formatearFecha = (fecha: Date) => {
     return format(fecha, 'dd/MM/yy');
   };
+
+  const vistoPorSolicitante = vistoSolicitante || false;
 
   const esAdmin = usuarioActual.esAdmin === true;
   const puedeResponder =
@@ -90,7 +96,6 @@ export default function ({
           {formatearFecha(fechaCreacion)}
         </StyledText>
       </View>
-
       <View style={estiloSeccion()}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Equipo
@@ -105,7 +110,6 @@ export default function ({
           </StyledText>
         </View>
       </View>
-
       <View style={estiloSeccion(true)}>
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Solicitante
@@ -125,65 +129,20 @@ export default function ({
           </View>
         </View>
       </View>
-
-      <View
-        style={[
-          styles.bloqueAccionesFooter,
-          { borderTopColor: theme.border.primary },
-        ]}
-      >
-        {estado === 'pendiente' ? (
-          puedeResponder ? (
-            <View style={styles.botonesAccion}>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.primary.background },
-                ]}
-                onPress={() => onAceptar(solicitud)}
-              >
-                <StyledText variant='light'>Aceptar</StyledText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.error.background },
-                ]}
-                onPress={() => onRechazar(solicitud)}
-              >
-                <StyledText variant='light'>Rechazar</StyledText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
-              Esperando respuesta
-            </StyledText>
-          )
-        ) : (
-          <View
-            style={[
-              styles.infoResolucion,
-              { backgroundColor: theme.background.primary },
-            ]}
-          >
-            {fechaRespuestaAdmin && (
-              <StyledText style={styles.textoInfoResolucion}>
-                Resuelta el {formatearFecha(fechaRespuestaAdmin)}
-              </StyledText>
-            )}
-            {admin && (
-              <StyledText style={styles.textoInfoResolucion}>
-                Respondida por {admin.nombre} {admin.apellidos} ({admin.correo})
-              </StyledText>
-            )}
-            {estado === 'rechazada' && respuestaAdmin && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {respuestaAdmin}
-              </StyledText>
-            )}
-          </View>
-        )}
-      </View>
+      <FooterSolicitudCard
+        estado={estado}
+        solicitanteId={solicitante.id}
+        fechaRespuestaAdmin={fechaRespuestaAdmin}
+        admin={admin}
+        respuestaAdmin={respuestaAdmin}
+        puedeResponder={puedeResponder}
+        onAceptar={() => onAceptar(solicitud)}
+        onRechazar={() => onRechazar(solicitud)}
+        vistoPorSolicitante={vistoPorSolicitante}
+        onMarcarComoLeido={() => {
+          marcarLeidoSolicitante(solicitud);
+        }}
+      />
     </View>
   );
 }
@@ -243,9 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contenedorIconoEstado: {
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
   },
   infoSolicitante: {
     flexDirection: 'row',
@@ -295,6 +252,9 @@ const styles = StyleSheet.create({
   infoResolucion: {
     padding: 12,
     borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   textoInfoResolucion: {
     fontSize: 14,

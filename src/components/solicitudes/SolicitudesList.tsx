@@ -264,12 +264,64 @@ export default function SolicitudesList({
     );
   };
 
+  const marcarLeidoSolicitante = async (solicitud: Solicitud) => {
+    screenLoading(true);
+    try {
+      if (!temporada || !user) {
+        console.error('No hay temporada o usuario');
+        return;
+      }
+
+      if (user.uid === solicitud.solicitante.id) {
+        const res = await BaseSolicitudService.marcarSolicitudLeidaSolicitante(
+          temporada.id,
+          solicitud.id
+        );
+        if (res.success) {
+          showToast('Solicitud marcada como leída', 'success');
+        } else {
+          showToast('Error al marcar la solicitud como leída', 'error');
+        }
+      }
+
+      let marcarAfectado = false;
+      if (solicitud.tipo === 'Unirse a Equipo') {
+        const unirse = solicitud as solicitudUnirseEquipo;
+        marcarAfectado = user.uid === unirse.jugadorObjetivo.id;
+      }
+
+      if (solicitud.tipo === 'Salir de Equipo') {
+        const salir = solicitud as solicitudSalirEquipo;
+        marcarAfectado = user.uid === salir.capitanObjetivo.id;
+      }
+
+      if (marcarAfectado) {
+        console.log('marcando como leida afectado');
+        const res = await BaseSolicitudService.marcarSolicitudLeidaAfectado(
+          temporada.id,
+          solicitud.id
+        );
+
+        console.log('RESULTADO DE MARCAR COMO LEIDA AFFECTADO - ', res);
+        if (res.success) {
+          showToast('Solicitud marcada como leída', 'success');
+        } else {
+          showToast('Error al marcar la solicitud como leída', 'error');
+        }
+      }
+    } catch (error) {
+      console.error('Error al marcar la solicitud como leída:', error);
+    }
+    screenLoading(false);
+  };
+
   const renderItem = ({ item }: { item: Solicitud }) => {
     return (
       <SolicitudCard
         solicitud={item}
         onAceptar={onAceptar}
         onRechazar={onRechazar}
+        marcarLeidoSolicitante={marcarLeidoSolicitante}
       />
     );
   };

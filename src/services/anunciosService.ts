@@ -134,7 +134,6 @@ export const anunciosService = {
       if (!res.success || !res.data)
         throw new Error(res.errorMessage || 'Error al obtener los anuncios');
 
-      console.log(res.data);
       return { success: true, data: res.data.length };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };

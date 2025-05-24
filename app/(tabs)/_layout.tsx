@@ -64,7 +64,7 @@ export default function NativeLayout() {
       <Tabs.Screen
         name='more'
         options={{
-          title: 'More',
+          title: 'Más',
           tabBarBadge: badges > 0 ? badges : undefined,
           tabBarIcon: ({ color, size }) => (
             <MenuIcon size={size} color={color} />

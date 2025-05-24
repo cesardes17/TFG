@@ -158,7 +158,7 @@ export const UserService = {
       // usamos Timestamp de Firestore
       const ahora = new Date();
       const res = await FirestoreService.updateDocumentByPath(['users', uid], {
-        ultimaVisitaTablon: Timestamp.fromDate(ahora),
+        ultimaVisitaTablon: ahora,
       });
       if (!res.success) throw new Error(res.errorMessage);
       return { success: true, data: null };

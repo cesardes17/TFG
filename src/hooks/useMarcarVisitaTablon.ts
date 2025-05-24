@@ -11,6 +11,13 @@ export function useMarcarVisitaTablon() {
 
   useEffect(() => {
     if (!temporada || !user) return;
-    UserService.marcarVisitaTablon(user.uid);
+
+    const marcarVisita = async () => {
+      const res = await UserService.marcarVisitaTablon(user.uid);
+      if (!res.success) {
+        console.error('Error al marcar visita al tablon:', res.errorMessage);
+      }
+    };
+    marcarVisita();
   }, [temporada?.id, user?.uid]);
 }

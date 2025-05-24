@@ -1,16 +1,17 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { solicitudDisolverEquipo, Solicitud } from '../../types/Solicitud';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import ProgressiveImage from '../common/ProgressiveImage';
+import FooterSolicitudCard from './FooterSolicitudCard';
 
 interface Props {
   solicitud: solicitudDisolverEquipo;
   usuarioActual: {
     id: string;
-    esAdmin?: boolean;
+    esAdmin: boolean;
   };
   onAceptar: (solicitud: Solicitud) => void;
   onRechazar: (solicitud: Solicitud) => void;
@@ -22,6 +23,7 @@ export default function SolicitudDisolverEquipoCard({
   usuarioActual,
   onAceptar,
   onRechazar,
+  marcarLeidoSolicitante,
 }: Props) {
   const {
     equipo,
@@ -32,10 +34,12 @@ export default function SolicitudDisolverEquipoCard({
     admin,
     fechaRespuestaAdmin,
     respuestaAdmin,
+    vistoSolicitante,
   } = solicitud;
-  const { theme } = useTheme();
 
+  const { theme } = useTheme();
   const formatearFecha = (fecha: Date) => format(fecha, 'dd/MM/yy');
+
   const puedeResponder =
     estado === 'pendiente' && usuarioActual.esAdmin && !fechaRespuestaAdmin;
 
@@ -56,13 +60,14 @@ export default function SolicitudDisolverEquipoCard({
           style={[
             styles.estadoBadge,
             {
-              backgroundColor: theme.background[
-                estado === 'pendiente'
-                  ? 'warning'
-                  : estado === 'aceptada'
-                  ? 'success'
-                  : 'error'
-              ] as string,
+              backgroundColor:
+                theme.background[
+                  estado === 'pendiente'
+                    ? 'warning'
+                    : estado === 'aceptada'
+                    ? 'success'
+                    : 'error'
+                ],
             },
           ]}
         >
@@ -128,64 +133,18 @@ export default function SolicitudDisolverEquipoCard({
         </View>
       </View>
 
-      <View
-        style={[
-          styles.bloqueAccionesFooter,
-          { borderTopColor: theme.border.primary },
-        ]}
-      >
-        {estado === 'pendiente' ? (
-          puedeResponder ? (
-            <View style={styles.botonesAccion}>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.primary.background },
-                ]}
-                onPress={() => onAceptar(solicitud)}
-              >
-                <StyledText variant='light'>Aceptar</StyledText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.boton,
-                  { backgroundColor: theme.button.error.background },
-                ]}
-                onPress={() => onRechazar(solicitud)}
-              >
-                <StyledText variant='light'>Rechazar</StyledText>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <StyledText variant='secondary' style={styles.esperandoRespuesta}>
-              Esperando respuesta
-            </StyledText>
-          )
-        ) : (
-          <View
-            style={[
-              styles.infoResolucion,
-              { backgroundColor: theme.background.primary },
-            ]}
-          >
-            {fechaRespuestaAdmin && (
-              <StyledText style={styles.textoInfoResolucion}>
-                Resuelta el {formatearFecha(fechaRespuestaAdmin)}
-              </StyledText>
-            )}
-            {admin && (
-              <StyledText style={styles.textoInfoResolucion}>
-                Respondida por {admin.nombre} {admin.apellidos} ({admin.correo})
-              </StyledText>
-            )}
-            {estado === 'rechazada' && respuestaAdmin && (
-              <StyledText style={styles.textoMotivoRechazo}>
-                Motivo del rechazo: {respuestaAdmin}
-              </StyledText>
-            )}
-          </View>
-        )}
-      </View>
+      <FooterSolicitudCard
+        puedeResponder={puedeResponder}
+        estado={estado}
+        solicitanteId={solicitante.id}
+        fechaRespuestaAdmin={fechaRespuestaAdmin}
+        admin={admin}
+        respuestaAdmin={respuestaAdmin}
+        onAceptar={() => onAceptar(solicitud)}
+        onRechazar={() => onRechazar(solicitud)}
+        onMarcarComoLeido={() => marcarLeidoSolicitante(solicitud)}
+        vistoPorSolicitante={vistoSolicitante}
+      />
     </View>
   );
 }
@@ -244,11 +203,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
   },
-  contenedorIconoEstado: {
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   infoSolicitante: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -268,43 +222,5 @@ const styles = StyleSheet.create({
   },
   correo: {
     fontSize: 14,
-  },
-  dorsal: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  bloqueAccionesFooter: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-  },
-  botonesAccion: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  boton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  esperandoRespuesta: {
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  infoResolucion: {
-    padding: 12,
-    borderRadius: 8,
-  },
-  textoInfoResolucion: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  textoMotivoRechazo: {
-    fontSize: 14,
-    marginTop: 8,
-    fontStyle: 'italic',
   },
 });

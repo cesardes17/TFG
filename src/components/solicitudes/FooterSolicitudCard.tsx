@@ -156,10 +156,16 @@ export default function FooterSolicitudCard({
         {!usuarioActual.esAdmin ? (
           <>
             {usuarioActual.esAfectado && (
-              <>{vistoPorAfectado ? <IconoVisto /> : <IconoPendiente />}</>
+              <>
+                {vistoPorAfectado ? <IconoVisto /> : <IconoPendiente />}
+                <StyledText>Afectado</StyledText>
+              </>
             )}
             {usuarioActual.esSolicitante && (
-              <>{vistoPorSolicitante ? <IconoVisto /> : <IconoPendiente />}</>
+              <>
+                {vistoPorSolicitante ? <IconoVisto /> : <IconoPendiente />}
+                <StyledText>solicitante</StyledText>
+              </>
             )}
           </>
         ) : null}

@@ -10,13 +10,13 @@ import {
   Modal,
   Image,
   Dimensions,
-  useColorScheme,
   TouchableWithoutFeedback,
   StatusBar,
   Platform,
 } from 'react-native';
 import { CloseCircleoIcon, MegaphoneIcon, PaperClipIcon } from '../Icons';
 import { Anuncio } from '../../types/Anuncio';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface AnuncioCompactoProps {
   anuncio: Anuncio;
@@ -25,45 +25,50 @@ interface AnuncioCompactoProps {
 const AnuncioCompactoCard: React.FC<AnuncioCompactoProps> = ({ anuncio }) => {
   const { titulo, contenido, imagenUrl, fechaPublicacion } = anuncio;
   const [modalVisible, setModalVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  // Colores adaptados al tema
-  const backgroundColor = isDark ? '#1F2937' : '#FFFFFF';
-  const textColor = isDark ? '#F9FAFB' : '#1F2937';
-  const subtextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const iconColor = isDark ? '#9CA3AF' : '#4B5563';
-  const modalBgColor = isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+  const { theme } = useTheme();
 
   // Formatear fecha para mostrarla de manera amigable
   const formatearFecha = (fecha: Date) => {
-    return fecha.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    try {
+      if (!(fecha instanceof Date)) {
+        fecha = new Date(fecha);
+      }
+      if (isNaN(fecha.getTime())) {
+        return '';
+      }
+      return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return '';
+    }
   };
 
   return (
     <>
-      <View style={[styles.card, { backgroundColor }]}>
+      <View style={[styles.card, { backgroundColor: theme.cardDefault }]}>
         {/* Icono de megáfono */}
         <View style={styles.iconContainer}>
-          <MegaphoneIcon size={20} color={iconColor} />
+          <MegaphoneIcon size={20} color={theme.icon.primary} />
         </View>
 
         {/* Contenido principal */}
         <View style={styles.contentContainer}>
-          <Text style={[styles.titulo, { color: textColor }]} numberOfLines={1}>
+          <Text
+            style={[styles.titulo, { color: theme.text.primary }]}
+            numberOfLines={1}
+          >
             {titulo}
           </Text>
           <Text
-            style={[styles.contenido, { color: subtextColor }]}
+            style={[styles.contenido, { color: theme.text.secondary }]}
             numberOfLines={2}
           >
             {contenido}
           </Text>
-          <Text style={[styles.fecha, { color: subtextColor }]}>
+          <Text style={[styles.fecha, { color: theme.text.secondary }]}>
             {formatearFecha(fechaPublicacion)}
           </Text>
         </View>
@@ -75,7 +80,7 @@ const AnuncioCompactoCard: React.FC<AnuncioCompactoProps> = ({ anuncio }) => {
             onPress={() => setModalVisible(true)}
             activeOpacity={0.7}
           >
-            <PaperClipIcon size={20} color={iconColor} />
+            <PaperClipIcon size={20} color={theme.icon.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -87,10 +92,16 @@ const AnuncioCompactoCard: React.FC<AnuncioCompactoProps> = ({ anuncio }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <StatusBar backgroundColor='black' barStyle='light-content' />
+        <StatusBar
+          backgroundColor={theme.background.primary}
+          barStyle='light-content'
+        />
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View
-            style={[styles.modalContainer, { backgroundColor: modalBgColor }]}
+            style={[
+              styles.modalContainer,
+              { backgroundColor: theme.background.primary },
+            ]}
           >
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
@@ -102,10 +113,13 @@ const AnuncioCompactoCard: React.FC<AnuncioCompactoProps> = ({ anuncio }) => {
                   />
                 )}
                 <TouchableOpacity
-                  style={styles.closeButton}
+                  style={[
+                    styles.closeButton,
+                    { backgroundColor: theme.background.primary },
+                  ]}
                   onPress={() => setModalVisible(false)}
                 >
-                  <CloseCircleoIcon size={24} color='#FFFFFF' />
+                  <CloseCircleoIcon size={24} color={theme.text.light} />
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>

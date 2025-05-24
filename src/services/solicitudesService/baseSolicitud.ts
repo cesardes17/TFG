@@ -263,16 +263,21 @@ export const BaseSolicitudService = {
   ): Promise<number> => {
     const res = await FirestoreService.getCollectionByPath<Solicitud>(
       ['temporadas', temporadaId, 'solicitudes'],
-      [
-        ['solicitante.id', '==', userId],
-        ['vistoAfectado', '==', false],
-      ]
+      [['vistoAfectado', '==', false]]
     );
-    console.log(res);
+    console.log('res Afectado - ', res); // Añadido para depuración: imprime el resultado de la consulta a Firestore
 
     if (!res.success || !res.data) return 0;
 
-    return res.data.length;
+    return res.data.filter((s) => {
+      if (s.tipo === 'Unirse a Equipo') {
+        return (s as solicitudUnirseEquipo).jugadorObjetivo?.id === userId;
+      }
+      if (s.tipo === 'Salir de Equipo') {
+        return (s as solicitudSalirEquipo).capitanObjetivo?.id === userId;
+      }
+      return false; // Las otras solicitudes no aplican
+    }).length;
   },
 
   marcarSolicitudLeidaSolicitante: async (

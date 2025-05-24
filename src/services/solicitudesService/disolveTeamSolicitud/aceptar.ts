@@ -23,6 +23,7 @@ export const aceptarDisolverEquipoSolicitud = async (
       throw new Error(res.errorMessage);
     }
     const inscripciones = res.data;
+    console.log('Inscripciones: ', inscripciones);
     //PASO 2: PARA CADA INSCRIPCION, LA ELIMINAMOS, Y ACTUALIZAMOS EL PERFIL DEL JUGADOR
     onProgress('Eliminando inscripciones...');
     inscripciones.forEach(async (inscripcion) => {
@@ -37,7 +38,7 @@ export const aceptarDisolverEquipoSolicitud = async (
       };
 
       const jugador = await UserService.UpdatePlayerProfile(
-        solicitud.solicitante.id,
+        inscripcion.jugador.id,
         campo
       );
       if (!jugador.success || !jugador.data) {
@@ -57,6 +58,7 @@ export const aceptarDisolverEquipoSolicitud = async (
         apellidos: usuario.apellidos,
         correo: usuario.correo,
       },
+      vistoSolicitante: false,
     };
     const resSol = await BaseSolicitudService.setSolicitud(
       temporadaId,

@@ -12,4 +12,5 @@ export type Anuncio = {
     correo: string;
   };
   imagenUrl?: string;
+  imagenPath?: string;
 };

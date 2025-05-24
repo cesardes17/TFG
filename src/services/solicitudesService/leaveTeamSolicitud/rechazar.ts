@@ -25,6 +25,7 @@ export const rechazarSalirEquipoSolicitud = async (
           apellidos: usuario.apellidos,
           correo: usuario.correo,
         },
+        vistoSolicitante: false,
       };
     } else {
       solicitud = {
@@ -33,6 +34,7 @@ export const rechazarSalirEquipoSolicitud = async (
         fechaRespuestaCapitan: new Date(),
         motivoRespuestaCapitan: motivo,
         aprobadoCapitan: false,
+        vistoSolicitante: false,
       };
     }
     const res = await BaseSolicitudService.setSolicitud(

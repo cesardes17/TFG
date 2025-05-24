@@ -18,7 +18,7 @@ export const aceptarCrearEquipoSolicitud = async (
     const resSol = await BaseSolicitudService.setSolicitud(
       temporadaId,
       data.id,
-      data,
+      { ...data, vistoSolicitante: false },
       onProgress
     );
     if (!resSol.success) {

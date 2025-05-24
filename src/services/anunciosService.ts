@@ -20,10 +20,11 @@ export const anunciosService = {
       const path = ['temporadas', temporadaId, COLLECTION, id];
       if (data.imagenUrl) {
         const res = await StorageService.uploadFile('anuncios', data.imagenUrl);
-        if (!res.success) {
+        if (!res.success || !res.data) {
           throw new Error(res.errorMessage || 'Error al subir la imagen');
         }
-        data.imagenUrl = res.data as string;
+        data.imagenUrl = res.data.url;
+        data.imagenPath = res.data.fileName;
       }
       const res = await FirestoreService.setDocumentByPath(...path, data);
       if (!res.success) {
@@ -121,19 +122,20 @@ export const anunciosService = {
   hayAnunciosNuevos: async (
     temporadaId: string,
     desde: Date
-  ): Promise<ResultService<boolean>> => {
+  ): Promise<ResultService<number>> => {
     try {
       const path = ['temporadas', temporadaId, 'anuncios'];
       const res = await FirestoreService.getCollectionByPath<Anuncio>(
         path,
         [['createdAt', '>', desde]],
         [], // orFilters
-        [], // orderBy
-        1 // limit
+        [] // orderBy
       );
       if (!res.success || !res.data)
         throw new Error(res.errorMessage || 'Error al obtener los anuncios');
-      return { success: true, data: res.data.length > 0 };
+
+      console.log(res.data);
+      return { success: true, data: res.data.length };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };
     }

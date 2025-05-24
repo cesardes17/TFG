@@ -4,12 +4,7 @@ import { useState } from 'react';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useUser } from '../../contexts/UserContext';
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import StyledAlert from '../../components/common/StyledAlert';
 import SolicitudesList from '../../components/solicitudes/SolicitudesList';
 import { View } from 'react-native';
@@ -18,7 +13,7 @@ import LoadingIndicator from '../../components/common/LoadingIndicator';
 import StyledTextInput from '../../components/common/StyledTextInput';
 import { FilterIcon } from '../../components/Icons';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
-import { estadoSolicitud, tipoSolicitud } from '../../types/Solicitud';
+import { tipoSolicitud } from '../../types/Solicitud';
 import SelectableCardGroup from '../../components/common/SelectableCardGroup';
 import SelectorEstado, {
   EstadoSolicitudConTodos,

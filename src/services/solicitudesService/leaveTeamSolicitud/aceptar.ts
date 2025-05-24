@@ -25,6 +25,7 @@ export const aceptarSalirEquipoSolicitud = async (
     if (esAdmin) {
       if (aprobadoCapitan) {
         solicitud.estado = 'aceptada';
+        solicitud.vistoSolicitante = false;
       }
       solicitud.fechaRespuestaAdmin = new Date();
       solicitud.admin = {
@@ -36,6 +37,7 @@ export const aceptarSalirEquipoSolicitud = async (
     } else {
       if (aprobadaAdmin) {
         solicitud.estado = 'aceptada';
+        solicitud.vistoSolicitante = false;
       }
       solicitud.fechaRespuestaCapitan = new Date();
       solicitud.aprobadoCapitan = true;

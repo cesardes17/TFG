@@ -15,9 +15,9 @@ export default function NativeLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
 
-  const showMoreBadge = useVerificarAnunciosNuevos();
+  const nAnunciosNuevos = useVerificarAnunciosNuevos();
 
-  console.log('anunciosNuevos: ', showMoreBadge);
+  console.log('numero de anuncios nuevos: ', nAnunciosNuevos);
 
   if (loadingUser) return null;
   return (
@@ -59,7 +59,7 @@ export default function NativeLayout() {
         name='more'
         options={{
           title: 'More',
-          tabBarBadge: showMoreBadge ? '' : undefined,
+          tabBarBadge: nAnunciosNuevos > 0 ? nAnunciosNuevos : undefined,
           tabBarIcon: ({ color, size }) => (
             <MenuIcon size={size} color={color} />
           ),

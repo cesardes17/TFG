@@ -6,10 +6,10 @@ import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { UserService } from '../services/userService';
 import { anunciosService } from '../services/anunciosService';
 
-export function useVerificarAnunciosNuevos(): boolean {
+export function useVerificarAnunciosNuevos(): number {
   const { temporada } = useTemporadaContext();
   const { user } = useUser();
-  const [hayNuevos, setHayNuevos] = useState(false);
+  const [hayNuevos, setHayNuevos] = useState(0);
 
   useFocusEffect(
     useCallback(() => {

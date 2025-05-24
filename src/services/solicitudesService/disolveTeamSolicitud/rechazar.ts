@@ -22,6 +22,7 @@ export const rechazarDisolverEquipoSolicitud = async (
       estado: 'rechazada',
       fechaRespuestaAdmin: new Date(),
       respuestaAdmin: motivo,
+      vistoSolicitante: false,
     };
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,

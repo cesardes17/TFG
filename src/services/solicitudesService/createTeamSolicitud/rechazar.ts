@@ -11,7 +11,7 @@ export const rechazarCrearEquipoSolicitud = async (
     const res = await BaseSolicitudService.setSolicitud(
       temporadaId,
       data.id,
-      data,
+      { ...data, vistoSolicitante: false },
       onProgress
     );
     if (!res.success) {

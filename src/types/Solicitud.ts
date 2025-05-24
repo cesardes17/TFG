@@ -20,6 +20,7 @@ type baseSolicitud = {
   };
   fechaRespuestaAdmin?: Date;
   respuestaAdmin?: string;
+  vistoSolicitante?: boolean; //variable para indicar si hay solicitudes pendientes para un solicitante
 };
 
 export type solicitudCrearEquipo = baseSolicitud & {

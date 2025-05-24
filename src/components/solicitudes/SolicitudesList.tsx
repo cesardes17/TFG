@@ -41,9 +41,8 @@ export default function SolicitudesList({
   setLoadingText,
   estadoSolicitud,
 }: SolicitudesListProps) {
-  const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
-  const { user } = useUser();
+  const { user, refetchUser } = useUser();
   const { showToast } = useToast();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
@@ -140,7 +139,6 @@ export default function SolicitudesList({
     }
 
     //si el estado es diferente de todos, filtramos por estado
-    console.log('ESTADO SOLICITUD: ', estadoSolicitud);
     if (estadoSolicitud !== 'todos') {
       result = result.filter((s) => s.estado === estadoSolicitud);
     }
@@ -223,6 +221,7 @@ export default function SolicitudesList({
         inputModal,
         setLoadingText
       );
+      await refetchUser();
       showToast(res.message, res.type);
     } else {
       const res = await rechazarSolicitud(
@@ -232,6 +231,7 @@ export default function SolicitudesList({
         inputModal,
         setLoadingText
       );
+      await refetchUser();
       showToast(res.message, res.type);
     }
     screenLoading(false);

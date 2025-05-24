@@ -26,6 +26,7 @@ export const rechazarUnirseEquipoSolicitud = async (
           apellidos: usuario.apellidos,
           correo: usuario.correo,
         },
+        vistoSolicitante: false,
       };
     } else {
       solicitud = {
@@ -34,6 +35,7 @@ export const rechazarUnirseEquipoSolicitud = async (
         fechaRespuestaJugador: new Date(),
         motivoRespuestaJugador: motivo,
         aprobadoJugadorObjetivo: false,
+        vistoSolicitante: false,
       };
     }
 

@@ -84,6 +84,7 @@ export default async function (
       };
     }
     case 'Disolver Equipo': {
+      console.log('Disolver Equipo');
       const res = await aceptarDisolverEquipoSolicitud(
         temporadaId,
         solicitud as solicitudDisolverEquipo,

@@ -20,7 +20,6 @@ const BolsaJugadoresScreen = () => {
   const { showToast } = useToast();
   const { theme } = useTheme();
   const usuarioActualId = user?.uid;
-  const isAdmin = user!.rol === 'organizador' || user!.rol === 'coorganizador';
   const [isLoading, setIsLodaing] = useState(true);
   const [loadingText, setLoadingText] = useState('');
   const [estadosSolicitudes, setEstadosSolicitudes] = useState<
@@ -74,6 +73,11 @@ const BolsaJugadoresScreen = () => {
 
     fetchData();
   }, [temporada, user]);
+
+  if (!temporada || !user) {
+    return null;
+  }
+  const isAdmin = user.rol === 'organizador' || user.rol === 'coorganizador';
 
   const handleEnviarSolicitud = useCallback(
     async (jugadorId: string) => {

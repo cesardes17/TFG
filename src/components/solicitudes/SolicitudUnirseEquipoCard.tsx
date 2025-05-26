@@ -106,7 +106,12 @@ export default function SolicitudUnirseEquipoCard({
       </View>
 
       {/* Jugador */}
-      <View style={styles.seccion}>
+      <View
+        style={[
+          styles.seccion,
+          { borderColor: theme.border.primary, borderBottomWidth: 2 },
+        ]}
+      >
         <StyledText variant='secondary' style={styles.tituloSeccion}>
           Jugador (afectado)
         </StyledText>
@@ -223,7 +228,6 @@ const styles = StyleSheet.create({
   seccion: {
     marginBottom: 16,
     paddingBottom: 16,
-    borderBottomWidth: 1,
   },
   tituloSeccion: {
     fontSize: 14,

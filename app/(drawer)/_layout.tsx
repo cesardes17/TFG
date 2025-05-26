@@ -11,7 +11,7 @@ import { DrawerLabelWithBadge } from '../../src/components/drawer/DrawerLabelWit
 export default function WebLayout() {
   const { theme } = useTheme();
   const { user, loadingUser } = useUser();
-
+  console.log('user - ', user);
   const nAnunciosNuevos = useVerificarAnunciosNuevos();
   const nSolicitudesNuevas = useVerificarSolicitudes();
 
@@ -93,7 +93,7 @@ export default function WebLayout() {
             title: 'Solicitudes',
             drawerItemStyle: {
               display:
-                user?.rol !== 'espectador' && user?.rol !== 'arbitro'
+                user && user?.rol !== 'espectador' && user?.rol !== 'arbitro'
                   ? 'flex'
                   : 'none',
             },
@@ -108,6 +108,7 @@ export default function WebLayout() {
             title: 'Bolsa de Jugadores',
             drawerItemStyle: {
               display:
+                user &&
                 user?.rol !== 'espectador' &&
                 user?.rol !== 'arbitro' &&
                 user?.rol !== 'jugador'

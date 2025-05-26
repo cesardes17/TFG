@@ -117,3 +117,11 @@ export const EnvelopeOpenIcon = ({ size = 24, color }: IconProps) => {
 export const EnvelopeIcon = ({ size = 24, color }: IconProps) => {
   return <FontAwesome6 name='envelope' size={size} color={color} />;
 };
+
+export const RefreshIcon = ({ size = 24, color }: IconProps) => {
+  return <Feather name='refresh-ccw' size={size} color={color} />;
+};
+
+export const CrossCricleIcon = ({ size = 24, color }: IconProps) => {
+  return <Entypo name='circle-with-cross' size={size} color={color} />;
+};

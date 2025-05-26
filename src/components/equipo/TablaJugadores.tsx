@@ -10,6 +10,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledAlert from '../common/StyledAlert';
 import { Inscripcion } from '../../types/Inscripcion';
+import StyledText from '../common/StyledText';
 
 interface Player {
   id: string;
@@ -36,19 +37,25 @@ const TableHeader = () => {
       ]}
     >
       <View style={styles.photoContainer}>
-        <Text style={[styles.headerText, { color: theme.table.headerText }]}>
+        <StyledText
+          style={[styles.headerText, { color: theme.table.headerText }]}
+        >
           Foto
-        </Text>
+        </StyledText>
       </View>
       <View style={styles.dorsalContainer}>
-        <Text style={[styles.headerText, { color: theme.table.headerText }]}>
+        <StyledText
+          style={[styles.headerText, { color: theme.table.headerText }]}
+        >
           Dorsal
-        </Text>
+        </StyledText>
       </View>
       <View style={styles.infoContainer}>
-        <Text style={[styles.headerText, { color: theme.table.headerText }]}>
+        <StyledText
+          style={[styles.headerText, { color: theme.table.headerText }]}
+        >
           Jugador
-        </Text>
+        </StyledText>
       </View>
     </View>
   );
@@ -76,17 +83,17 @@ const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
         />
       </View>
       <View style={styles.dorsalContainer}>
-        <Text style={[styles.dorsalText, { color: theme.text.primary }]}>
+        <StyledText style={[styles.dorsalText, { color: theme.text.primary }]}>
           {player.dorsal}
-        </Text>
+        </StyledText>
       </View>
       <View style={styles.infoContainer}>
-        <Text style={[styles.nameText, { color: theme.table.rowText }]}>
+        <StyledText style={[styles.nameText, { color: theme.table.rowText }]}>
           {`${player.nombre} ${player.apellidos}`}
-        </Text>
-        <Text style={[styles.emailText, { color: theme.text.secondary }]}>
+        </StyledText>
+        <StyledText style={[styles.emailText, { color: theme.text.secondary }]}>
           {player.correo}
-        </Text>
+        </StyledText>
       </View>
     </View>
   );
@@ -155,6 +162,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: 'bold',
     fontSize: 14,
+    textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
@@ -182,6 +190,7 @@ const styles = StyleSheet.create({
   dorsalText: {
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   infoContainer: {
     flex: 1,
@@ -192,9 +201,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    textAlign: 'center',
   },
   emailText: {
     fontSize: 14,
+    textAlign: 'center',
   },
 });
 

@@ -50,6 +50,29 @@ export const equipoService = {
       };
     }
   },
+
+  getEquipos: async (temporadaId: string): Promise<ResultService<Equipo[]>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECION];
+      const res = await FirestoreService.getCollectionByPath(path);
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al obtener los equipos');
+      }
+      return {
+        success: true,
+        data: res.data as Equipo[],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener los equipos',
+      };
+    }
+  },
+
   deleteEquipo: async (
     temporadaId: string,
     id: string

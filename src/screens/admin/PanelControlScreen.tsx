@@ -6,6 +6,7 @@ import { useState } from 'react';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
+import TablaAdminEquipos from '../../components/admin/TablaEquiposAdmin';
 
 export default function PanelControlScreen() {
   const { temporada, refetchTemporada } = useTemporadaContext();
@@ -16,8 +17,6 @@ export default function PanelControlScreen() {
   const handleCreateTemporada = () => {
     setShowModal(true);
   };
-
-  const { theme } = useTheme();
 
   const handleConfirm = async () => {
     setShowModal(false);
@@ -72,5 +71,9 @@ export default function PanelControlScreen() {
       </View>
     );
   }
-  return null;
+  return (
+    <View>
+      <TablaAdminEquipos />
+    </View>
+  );
 }

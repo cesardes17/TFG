@@ -47,5 +47,7 @@ const styles = StyleSheet.create({
   default: {
     includeFontPadding: false,
     textAlignVertical: 'center',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
 });

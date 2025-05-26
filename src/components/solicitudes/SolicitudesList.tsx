@@ -328,18 +328,23 @@ export default function SolicitudesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <FlatList
-        data={filteredSolicitudes}
-        keyExtractor={(i) => i.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        style={{ marginTop: 16 }}
-        ListEmptyComponent={
+      <View style={[styles.listContent, { marginTop: 16 }]}>
+        {filteredSolicitudes.length === 0 ? (
           <View style={{ alignItems: 'center' }}>
             <StyledAlert variant='info' message='No hay solicitudes' />
           </View>
-        }
-      />
+        ) : (
+          filteredSolicitudes.map((item) => (
+            <SolicitudCard
+              key={item.id}
+              solicitud={item}
+              onAceptar={onAceptar}
+              onRechazar={onRechazar}
+              marcarLeidoSolicitante={marcarLeidoSolicitante}
+            />
+          ))
+        )}
+      </View>
       <BaseConfirmationModal
         visible={modalVisible}
         type={modalType}

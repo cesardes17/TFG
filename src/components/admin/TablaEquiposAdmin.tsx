@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,82 +8,40 @@ import {
 } from 'react-native';
 import { CircleCheckIcon, RefreshIcon, WarningIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { equipoService } from '../../services/equipoService';
-import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useToast } from '../../contexts/ToastContext';
-import { inscripcionesService } from '../../services/inscripcionesService';
 import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
 import LoadingIndicator from '../common/LoadingIndicator';
 import { router } from 'expo-router';
 import EstadoEquiposResumen from './EstadoEquiposResumen';
-
-interface Equipo {
-  id: string;
-  nombre: string;
-  escudoUrl: string;
-  jugadores: number;
-}
+import { useEquiposConEstado } from '../../hooks/useEquiposConEstado';
 
 const MINIMUM_PLAYERS = 8;
 
 export default function TablaAdminEquipos() {
   const { theme } = useTheme();
-  const { temporada } = useTemporadaContext();
   const { showToast } = useToast();
-  const [equipos, setEquipos] = useState<Equipo[]>([]);
-  const [equiposIncompletos, setEquiposIncompletos] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const fetchEquipos = async () => {
-    if (!temporada) return;
-    setIsLoading(true);
-    try {
-      const resEquipos = await equipoService.getEquipos(temporada.id);
-      if (!resEquipos.success || !resEquipos.data) {
-        throw new Error(resEquipos.errorMessage);
-      }
-      const equiposData = resEquipos.data;
-      const equiposConJugadores = await Promise.all(
-        equiposData.map(async (equipo) => {
-          const resJugadores =
-            await inscripcionesService.getInscripcionesByTeam(
-              temporada.id,
-              equipo.id
-            );
-          if (!resJugadores.success || !resJugadores.data) {
-            throw new Error(resJugadores.errorMessage);
-          }
-          const jugadores = resJugadores.data.length;
-          return {
-            id: equipo.id,
-            nombre: equipo.nombre,
-            escudoUrl: equipo.escudoUrl,
-            jugadores,
-          };
-        })
-      );
-      setEquipos(equiposConJugadores);
-      const eIncompletos = equiposConJugadores.filter(
-        (equipo) => equipo.jugadores < MINIMUM_PLAYERS
-      );
-      setEquiposIncompletos(eIncompletos.length);
-    } catch (error) {
-      console.error(error);
-      showToast('Error al cargar los equipos', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+  const {
+    equipos,
+    equiposIncompletos,
+    loading: isLoading,
+    error,
+    refetch,
+  } = useEquiposConEstado();
 
   useEffect(() => {
-    fetchEquipos();
-  }, []);
+    if (error) {
+      showToast(error, 'error');
+    }
+  }, [error]);
 
-  const renderItem = ({ item }: { item: Equipo }) => {
+  const renderItem = ({ item }: { item: (typeof equipos)[0] }) => {
     const cumple = item.jugadores >= MINIMUM_PLAYERS;
 
     return (
       <TouchableOpacity
+        key={item.id}
         style={[styles.row, { borderColor: theme.table.rowBorder }]}
         onPress={() =>
           router.push({
@@ -133,27 +91,18 @@ export default function TablaAdminEquipos() {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
           justifyContent: 'space-between',
+          marginBottom: 10,
         }}
       >
-        <View style={{ flex: 4 }}>
-          <Text style={[styles.title, { color: theme.text.primary }]}>
+        <View style={{ flex: 4, justifyContent: 'center' }}>
+          <StyledText style={[styles.title, { color: theme.text.primary }]}>
             Administración de Equipos
-          </Text>
-          <Text style={[styles.subtitle, { color: theme.text.secondary }]}>
-            Se requiere un mínimo de {MINIMUM_PLAYERS} jugadores por equipo.
-          </Text>
+          </StyledText>
         </View>
-        {!isLoading && (
-          <EstadoEquiposResumen
-            equiposIncompletos={equiposIncompletos}
-            equiposTotales={equipos.length}
-          />
-        )}
         <TouchableOpacity
-          style={{ padding: 12, alignItems: 'center', flex: 1 }}
-          onPress={() => fetchEquipos()}
+          style={{ alignItems: 'center', flex: 1 }}
+          onPress={refetch}
         >
           <RefreshIcon color={theme.text.primary} size={24} />
           <StyledText size='small'>Actualizar</StyledText>
@@ -175,24 +124,12 @@ export default function TablaAdminEquipos() {
           Escudo
         </Text>
         <Text
-          style={[
-            styles.colHeader,
-            {
-              flex: 3,
-              color: theme.table.headerText,
-            },
-          ]}
+          style={[styles.colHeader, { flex: 3, color: theme.table.headerText }]}
         >
           Nombre
         </Text>
         <Text
-          style={[
-            styles.colHeader,
-            {
-              flex: 1,
-              color: theme.table.headerText,
-            },
-          ]}
+          style={[styles.colHeader, { flex: 1, color: theme.table.headerText }]}
         >
           Jugadores
         </Text>
@@ -206,10 +143,13 @@ export default function TablaAdminEquipos() {
       {isLoading ? (
         <LoadingIndicator text='Obteniendo información...' />
       ) : (
-        <FlatList
-          data={equipos}
-          keyExtractor={(item) => item.nombre}
-          renderItem={renderItem}
+        equipos.map((item) => renderItem({ item }))
+      )}
+
+      {!isLoading && (
+        <EstadoEquiposResumen
+          equiposIncompletos={equiposIncompletos}
+          equiposTotales={equipos}
         />
       )}
     </View>
@@ -221,16 +161,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 20,
     borderRadius: 8,
-    maxHeight: 400,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',
@@ -241,7 +176,7 @@ const styles = StyleSheet.create({
   },
   colHeader: {
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
     textAlign: 'center',
   },
   row: {
@@ -276,7 +211,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-
     marginRight: 12,
   },
 });

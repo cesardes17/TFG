@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledAlert from '../common/StyledAlert';
 import { Inscripcion } from '../../types/Inscripcion';
@@ -26,7 +19,10 @@ interface PlayerRowProps {
   isEven: boolean;
 }
 
-// Table header component
+interface TablaJugadoresProps {
+  players: Inscripcion[];
+}
+
 const TableHeader = () => {
   const { theme } = useTheme();
   return (
@@ -61,7 +57,6 @@ const TableHeader = () => {
   );
 };
 
-// Player row component
 const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
   const { theme } = useTheme();
   return (
@@ -98,48 +93,36 @@ const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
     </View>
   );
 };
-interface TablaJugadoresProps {
-  players: Inscripcion[];
-}
-// Main player table component
-const TablaJugadores = ({ players }: TablaJugadoresProps) => {
+
+export default function TablaJugadores({ players }: TablaJugadoresProps) {
   const { theme } = useTheme();
+
   return (
     <View style={[styles.container, { backgroundColor: theme.cardDefault }]}>
       <TableHeader />
-      <FlatList
-        data={players}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <PlayerRow player={item.jugador} isEven={index % 2 === 0} />
-        )}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={() => {
-          return (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: 10,
-              }}
-            >
-              <StyledAlert
-                message='No hay jugadores en este equipo'
-                variant='info'
-              />
-            </View>
-          );
-        }}
-      />
+      {players.length === 0 ? (
+        <View style={{ padding: 10, alignItems: 'center' }}>
+          <StyledAlert
+            message='No hay jugadores en este equipo'
+            variant='info'
+          />
+        </View>
+      ) : (
+        players.map((inscripcion, index) => (
+          <PlayerRow
+            key={inscripcion.id}
+            player={inscripcion.jugador}
+            isEven={index % 2 === 0}
+          />
+        ))
+      )}
     </View>
   );
-};
+}
 
-// Get screen width for responsive design
+// Estilos
 const { width } = Dimensions.get('window');
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     borderRadius: 10,
@@ -151,7 +134,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    maxHeight: 400,
   },
   headerRow: {
     flexDirection: 'row',
@@ -208,5 +190,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-export default TablaJugadores;

@@ -61,14 +61,14 @@ export default function AnunciosList() {
         value={query}
         onChangeText={setQuery}
       />
-      <FlatList
-        data={filteredAnuncios}
-        renderItem={({ item }) => renderItem(item)}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={() => {
-          return <StyledAlert variant='info' message='No hay Anuncios' />;
-        }}
-      />
+
+      {filteredAnuncios.length === 0 ? (
+        <StyledAlert variant='info' message='No hay Anuncios' />
+      ) : (
+        filteredAnuncios.map((anuncio) => (
+          <AnuncioCompactoCard key={anuncio.id} anuncio={anuncio} />
+        ))
+      )}
     </View>
   );
 }

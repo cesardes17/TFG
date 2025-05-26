@@ -1,12 +1,14 @@
-import { ActivityIndicator, Button, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import StyledAlert from '../../components/common/StyledAlert';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { temporadaService } from '../../services/temporadaService';
 import { useState } from 'react';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
-import { useTheme } from '../../contexts/ThemeContext';
+
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import TablaAdminEquipos from '../../components/admin/TablaEquiposAdmin';
+import AdministracionCompeticiones from '../../components/admin/AdministracionCompeticiones';
+import StyledButton from '../../components/common/StyledButton';
 
 export default function PanelControlScreen() {
   const { temporada, refetchTemporada } = useTemporadaContext();
@@ -55,11 +57,7 @@ export default function PanelControlScreen() {
           variant='info'
           message='No hay Temporada activa. Para poder operar crea una temporda nueva'
         />
-        <Button
-          color={'#00dd00'}
-          title='Crear Temporada'
-          onPress={handleCreateTemporada}
-        />
+        <StyledButton title='Crear Temporada' onPress={handleCreateTemporada} />
         <BaseConfirmationModal
           visible={showModal}
           title='Crear Nueva Temporada'
@@ -73,6 +71,10 @@ export default function PanelControlScreen() {
   }
   return (
     <View>
+      <AdministracionCompeticiones
+        setLoading={setShowLoading}
+        setLoadingText={setLoadingMessage}
+      />
       <TablaAdminEquipos />
     </View>
   );

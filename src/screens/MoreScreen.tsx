@@ -1,6 +1,6 @@
 // src/screens/MoreScreen.tsx
 import React from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { navigationItems } from '../constants/navigationsItems';
@@ -33,16 +33,15 @@ export default function MoreScreen() {
   };
 
   return (
-    <FlatList
-      data={filteredItems}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
+    <View style={{ gap: 12 }}>
+      {filteredItems.map((item) => (
         <NavigationCard
+          key={item.id}
           onPress={() => router.push(item.path)}
           item={item}
           badgeCount={item.showBadge ? getBadgeCount(item.id) : 0}
         />
-      )}
-    />
+      ))}
+    </View>
   );
 }

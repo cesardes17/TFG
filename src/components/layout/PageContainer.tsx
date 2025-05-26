@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   StatusBar,
   ViewStyle,
+  ScrollView,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useResponsiveWidth } from '../../hooks/useResponsiveWidth';
@@ -27,7 +28,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
         backgroundColor={theme.background.primary}
         translucent
       />
-      <View
+      <ScrollView
         style={[
           styles.container,
           {
@@ -37,7 +38,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
         ]}
       >
         {children}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

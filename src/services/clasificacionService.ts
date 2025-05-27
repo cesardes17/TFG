@@ -55,4 +55,39 @@ export const clasificacionService = {
       };
     }
   },
+  get: async (
+    temporadaId: string,
+    competicionId: string
+  ): Promise<ResultService<Clasificacion[]>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'clasificacion',
+      ];
+
+      const res: ResultService<Clasificacion[]> =
+        await FirestoreService.getCollectionByPath<Clasificacion>(
+          path,
+          [],
+          [],
+          [['puntos', 'desc']]
+        );
+
+      if (!res.success) {
+        throw new Error(res.errorMessage);
+      }
+      return res;
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener clasificación',
+      };
+    }
+  },
 };

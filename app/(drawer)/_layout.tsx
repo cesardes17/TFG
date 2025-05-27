@@ -41,6 +41,12 @@ export default function WebLayout() {
             drawerLabel: () => <DrawerLabelWithBadge label={'Inicio'} />,
           }}
         />
+        <Drawer.Screen
+          name='clasificacion'
+          options={{
+            drawerLabel: () => <DrawerLabelWithBadge label={'Clasificación'} />,
+          }}
+        />
 
         <Drawer.Screen
           name='perfil-helper'

@@ -125,3 +125,7 @@ export const RefreshIcon = ({ size = 24, color }: IconProps) => {
 export const CrossCricleIcon = ({ size = 24, color }: IconProps) => {
   return <Entypo name='circle-with-cross' size={size} color={color} />;
 };
+
+export const TrophyIcon = ({ size = 24, color }: IconProps) => {
+  return <AntDesign name='Trophy' size={size} color={color} />;
+};

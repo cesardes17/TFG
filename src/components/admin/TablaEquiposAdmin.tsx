@@ -1,11 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CircleCheckIcon, RefreshIcon, WarningIcon } from '../Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -56,31 +50,30 @@ export default function TablaAdminEquipos() {
             containerStyle={styles.image}
           />
         </View>
-        <Text style={[styles.nombre, { color: theme.table.rowText }]}>
-          {item.nombre}
-        </Text>
+
         <Text
           style={[
-            styles.jugadores,
-            { color: cumple ? theme.text.success : theme.text.error },
+            styles.nombre,
+            { color: theme.table.rowText, textAlign: 'center' },
           ]}
         >
-          {item.jugadores}
+          {item.nombre}
         </Text>
-        <View style={styles.estado}>
-          {cumple ? (
-            <CircleCheckIcon size={20} color={theme.text.success} />
-          ) : (
-            <WarningIcon size={20} color={theme.text.error} />
-          )}
+
+        <View style={styles.jugadoresEstado}>
           <Text
-            style={{
-              color: cumple ? theme.text.success : theme.text.error,
-              marginLeft: 6,
-            }}
+            style={[
+              styles.jugadoresText,
+              { color: cumple ? theme.text.success : theme.text.error },
+            ]}
           >
-            {cumple ? 'Completo' : 'Incompleto'}
+            {item.jugadores}
           </Text>
+          {cumple ? (
+            <CircleCheckIcon size={18} color={theme.text.success} />
+          ) : (
+            <WarningIcon size={18} color={theme.text.error} />
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -119,24 +112,19 @@ export default function TablaAdminEquipos() {
         ]}
       >
         <Text
-          style={[styles.colHeader, { flex: 1, color: theme.table.headerText }]}
+          style={[styles.colHeader, { flex: 2, color: theme.table.headerText }]}
         >
           Escudo
         </Text>
         <Text
-          style={[styles.colHeader, { flex: 3, color: theme.table.headerText }]}
+          style={[styles.colHeader, { flex: 6, color: theme.table.headerText }]}
         >
           Nombre
         </Text>
         <Text
-          style={[styles.colHeader, { flex: 1, color: theme.table.headerText }]}
-        >
-          Jugadores
-        </Text>
-        <Text
           style={[styles.colHeader, { flex: 2, color: theme.table.headerText }]}
         >
-          Estado
+          Jugadores
         </Text>
       </View>
 
@@ -158,7 +146,7 @@ export default function TablaAdminEquipos() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 8,
     marginTop: 20,
     borderRadius: 8,
   },
@@ -186,10 +174,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   imageContainer: {
-    flex: 1,
+    flex: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
   },
   image: {
     width: 40,
@@ -197,20 +184,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   nombre: {
-    flex: 3,
+    flex: 6,
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'left',
+    paddingLeft: 4,
   },
-  jugadores: {
-    flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  estado: {
+  jugadoresEstado: {
     flex: 2,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    gap: 4, // si no está disponible en tu versión, usa marginRight en el texto
+  },
+  jugadoresText: {
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

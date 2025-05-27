@@ -7,6 +7,7 @@ import {
   HomeIcon,
   LogInIcon,
   MenuIcon,
+  TrophyIcon,
   UserCircleIcon,
 } from '../../src/components/Icons';
 import { useVerificarAnunciosNuevos } from '../../src/hooks/useVerificarAnunciosNuevos';
@@ -39,6 +40,15 @@ export default function NativeLayout() {
         headerShadowVisible: false,
       }}
     >
+      <Tabs.Screen
+        name='clasificacion'
+        options={{
+          title: 'Clasificación',
+          tabBarIcon: ({ color, size }) => (
+            <TrophyIcon color={color} size={size} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name='index'
         options={{

@@ -1,7 +1,8 @@
 // src/types/Partido.ts:
 type EstadoPartido = 'pendiente' | 'en-juego' | 'finalizado';
 
-type Partido = {
+export type Partido = {
+  jornadaId: string;
   id: string;
   equipoLocal: {
     id: string;
@@ -18,7 +19,7 @@ type Partido = {
     puntosVisitante: number;
   } | null;
   estado: EstadoPartido;
-  fecha: Date;
+  fecha?: Date;
   cancha?: string;
   idEliminatoria?: string;
 };

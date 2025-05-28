@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useUser } from '../../src/contexts/UserContext';
 import {
+  CalendarIcon,
   HomeIcon,
   LogInIcon,
   MenuIcon,
@@ -40,6 +41,15 @@ export default function NativeLayout() {
         headerShadowVisible: false,
       }}
     >
+      <Tabs.Screen
+        name='jornadas'
+        options={{
+          title: 'Jornadas',
+          tabBarIcon: ({ color, size }) => (
+            <CalendarIcon color={color} size={size} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name='clasificacion'
         options={{

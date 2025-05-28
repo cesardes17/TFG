@@ -3,6 +3,7 @@ import { useClasificacion } from '../../hooks/useClasificacion';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import StyledAlert from '../../components/common/StyledAlert';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
+import { View } from 'react-native';
 
 export default function ClasificacionScreen() {
   const { temporada } = useTemporadaContext();
@@ -19,10 +20,16 @@ export default function ClasificacionScreen() {
 
   if (clasificacion.length === 0) {
     return (
-      <StyledAlert
-        message='No se encontraron datos de clasificación'
-        variant='warning'
-      />
+      <View
+        style={{
+          paddingHorizontal: 10,
+        }}
+      >
+        <StyledAlert
+          message='No se encontraron datos de clasificación'
+          variant='warning'
+        />
+      </View>
     );
   }
 

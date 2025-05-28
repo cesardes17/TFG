@@ -4,6 +4,7 @@ import { EquipoEstado } from '../../hooks/useEquiposConEstado';
 import { Clasificacion } from '../../types/Clasificacion';
 import { Competicion } from '../../types/Competicion';
 import { ResultService } from '../../types/ResultService';
+import { generarCalendarioLiga } from '../../utils/calendario/generarJornadas';
 import { disolverEquipo } from '../../utils/equipos/disolverEquipo';
 import { clasificacionService } from '../clasificacionService';
 import { competitionBaseService } from './baseService';
@@ -48,6 +49,8 @@ export const ligaService = {
           errorMessage: 'Error al crear clasificacion',
         };
       }
+
+      await generarCalendarioLiga(temporadaId, equiposCompletos, onProgress);
 
       return { success: true, data: null };
     } catch (error) {

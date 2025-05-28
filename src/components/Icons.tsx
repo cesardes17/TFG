@@ -1,6 +1,7 @@
 import {
   AntDesign,
   Entypo,
+  EvilIcons,
   Feather,
   FontAwesome,
   FontAwesome5,
@@ -128,4 +129,12 @@ export const CrossCricleIcon = ({ size = 24, color }: IconProps) => {
 
 export const TrophyIcon = ({ size = 24, color }: IconProps) => {
   return <AntDesign name='Trophy' size={size} color={color} />;
+};
+
+export const CalendarIcon = ({ size = 24, color }: IconProps) => {
+  return <Feather name='calendar' size={size} color={color} />;
+};
+
+export const LocationIcon = ({ size = 24, color }: IconProps) => {
+  return <EvilIcons name='location' size={size} color={color} />;
 };

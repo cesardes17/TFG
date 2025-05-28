@@ -26,6 +26,7 @@ export default ({ config }) => ({
     ...config.ios,
     bundleIdentifier: 'com.cesardelgado.glmba',
     googleServicesFile: './GoogleService-Info.plist',
+    supportsTablet: true,
   },
   android: {
     ...config.android,

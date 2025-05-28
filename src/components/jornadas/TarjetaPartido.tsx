@@ -11,6 +11,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import { CalendarIcon, LocationIcon } from '../Icons';
 import ProgressiveImage from '../common/ProgressiveImage';
+import { router } from 'expo-router';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
@@ -32,7 +33,7 @@ interface Props {
 
 export default function TarjetaPartido({ partido }: Props) {
   const { theme } = useTheme();
-
+  console.log('TarjetaPartido.tsx', partido);
   const getEstadoStyle = (estado: string) => {
     switch (estado) {
       case 'pendiente':
@@ -77,7 +78,14 @@ export default function TarjetaPartido({ partido }: Props) {
 
   return (
     <TouchableOpacity
-      onPress={() => {}}
+      onPress={() => {
+        router.push({
+          pathname: '/partido/[id]',
+          params: {
+            id: partido.id,
+          },
+        });
+      }}
       style={[styles.tarjetaContainer, { backgroundColor: theme.cardDefault }]}
     >
       <View style={styles.tarjetaHeader}>

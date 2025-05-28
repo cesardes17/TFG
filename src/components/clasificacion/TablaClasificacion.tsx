@@ -9,6 +9,7 @@ import {
 import { Clasificacion } from '../../types/Clasificacion';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
+import ProgressiveImage from '../common/ProgressiveImage';
 
 interface Props {
   data: Clasificacion[];
@@ -130,9 +131,9 @@ export default function TablaClasificacion({ data }: Props) {
         <StyledText style={styles.statText}>{index + 1}</StyledText>
       </View>
       <View style={styles.escudoColumn}>
-        <Image
-          source={{ uri: item.equipo.escudoUrl }}
-          style={styles.escudoImage}
+        <ProgressiveImage
+          uri={item.equipo.escudoUrl}
+          containerStyle={styles.escudoImage}
         />
       </View>
       <View style={styles.nombreColumn}>

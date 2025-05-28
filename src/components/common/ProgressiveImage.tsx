@@ -42,7 +42,7 @@ export default function ProgressiveImage({
       ])
     ).start();
   }, [pulse]);
-
+  console.log('Cargando imagen:', uri);
   return (
     <View style={[styles.container, containerStyle]}>
       {/** placeholder skeleton */}
@@ -72,7 +72,7 @@ export default function ProgressiveImage({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 1, // POR DEFECTO cuadrado
+    aspectRatio: 1,
     overflow: 'hidden',
   },
   image: {

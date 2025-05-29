@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
   },
   tituloEstadistica: {
     fontSize: 16,
+    marginTop: 24,
     fontWeight: '600',
-    marginBottom: 12,
     textAlign: 'center',
   },
   valoresContainer: {

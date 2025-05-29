@@ -1,3 +1,4 @@
+//src/screens/user/PerfilScreen.tsx
 import { StyleSheet, View } from 'react-native';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useState } from 'react';
@@ -22,7 +23,7 @@ export default function PerfilScreen() {
   }
 
   if (!user) {
-    return;
+    return <LoadingIndicator text='Cargando usuario…' />;
   }
   let editarPerfil = false;
   if (user.rol === 'espectador') {

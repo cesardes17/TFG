@@ -4,16 +4,22 @@ import NuevaSolicitudScreen from '../../../src/screens/solicitud/NuevaSolicitudS
 import HeaderConfig from '../../../src/components/layout/HeaderConfig';
 import { useUser } from '../../../src/contexts/UserContext';
 import { useEffect } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import EditarPartidoScreen from '../../../src/screens/partido/EditarPartidoScreen';
+import { TipoCompeticion } from '../../../src/types/Competicion';
 
-export default function NuevaSolicitudPage() {
+export default function EditarPartidoPage() {
   const { user, loadingUser } = useUser();
+  const { id, tipoCompeticion } = useLocalSearchParams<{
+    id: string;
+    tipoCompeticion: TipoCompeticion;
+  }>(); // 1️⃣
 
   useEffect(() => {
     if (loadingUser) return;
     if (!user) return router.replace('/');
     //solo tienen acceso a esta pagina
-    if (user.rol !== 'jugador' && user.rol !== 'capitan')
+    if (user.rol !== 'organizador' && user.rol !== 'coorganizador')
       return router.replace('/');
   }, []);
 
@@ -21,8 +27,8 @@ export default function NuevaSolicitudPage() {
 
   return (
     <PageContainer>
-      {Platform.OS !== 'web' && <HeaderConfig title='Nueva Solicitud' />}
-      <NuevaSolicitudScreen />
+      {Platform.OS !== 'web' && <HeaderConfig title='Editar Partido' />}
+      <EditarPartidoScreen idPartido={id} tipoCompeticion={tipoCompeticion} />
     </PageContainer>
   );
 }

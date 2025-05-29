@@ -1,5 +1,4 @@
-import { View } from 'react-native';
-import StyledText from '../common/StyledText';
+//src/components/user/UserCardInfo.tsx
 import { PlayerUser } from '../../types/User';
 import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import PlayerMobileInfo from './PlayerDisplay/PlayerMobileInfo';

@@ -1,3 +1,4 @@
+//src/components/user/UserCardInfo.tsx
 import { StyleSheet, View } from 'react-native';
 import StyledText from '../common/StyledText';
 import { UserBase } from '../../types/User';

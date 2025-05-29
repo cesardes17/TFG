@@ -8,6 +8,7 @@ export const partidoEjemploFinalizado: Partido = {
   estado: 'finalizado',
   fecha: new Date('2025-05-15T19:00:00'),
   cancha: 'Pabellón Central Las Palmas',
+  tipoCompeticion: 'liga-regular',
   equipoLocal: {
     id: '92a2d70d-199b-4b40-8694-2636cd7a9429',
     nombre: 'Minesota Caballo y Rey',

@@ -71,4 +71,37 @@ export const partidoService = {
       };
     }
   },
+
+  getPartido: async (
+    temporadaId: string,
+    competicionId: string,
+    partidoId: string
+  ): Promise<ResultService<Partido>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'partidos',
+        partidoId,
+      ];
+      const partidoRes = await FirestoreService.getDocumentByPath<Partido>(
+        ...path
+      );
+      if (!partidoRes.success || !partidoRes.data) {
+        throw new Error(partidoRes.errorMessage);
+      }
+      return {
+        success: true,
+        data: partidoRes.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error al obtener partido',
+      };
+    }
+  },
 };

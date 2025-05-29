@@ -12,20 +12,10 @@ import StyledText from '../common/StyledText';
 import { CalendarIcon, LocationIcon } from '../Icons';
 import ProgressiveImage from '../common/ProgressiveImage';
 import { router } from 'expo-router';
+import { Partido } from '../../types/Partido';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
-
-export type Partido = {
-  jornadaId: string;
-  id: string;
-  equipoLocal: { id: string; nombre: string; escudoUrl: string };
-  equipoVisitante: { id: string; nombre: string; escudoUrl: string };
-  resultado?: { puntosLocal: number; puntosVisitante: number } | null;
-  estado: 'pendiente' | 'en-juego' | 'finalizado';
-  fecha?: Date;
-  cancha?: string;
-};
 
 interface Props {
   partido: Partido;
@@ -83,6 +73,7 @@ export default function TarjetaPartido({ partido }: Props) {
           pathname: '/partido/[id]',
           params: {
             id: partido.id,
+            tipoCompeticion: partido.tipoCompeticion,
           },
         });
       }}

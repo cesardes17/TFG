@@ -2,8 +2,18 @@ import { StyleSheet, View } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import { Rol } from '../../types/User';
 import StyledButton from '../common/StyledButton';
+import { router } from 'expo-router';
+import { TipoCompeticion } from '../../types/Competicion';
 
-export default function AccionesPartido() {
+interface AccionesPartidoProps {
+  partidoId: string;
+  tipoCompeticion: TipoCompeticion;
+}
+
+export default function AccionesPartido({
+  partidoId,
+  tipoCompeticion,
+}: AccionesPartidoProps) {
   const { user } = useUser();
 
   if (user?.rol === 'arbitro') {
@@ -26,6 +36,13 @@ export default function AccionesPartido() {
           title='Editar partido'
           onPress={() => {
             console.log('Editar partido');
+            router.push({
+              pathname: '/editarPartido/[id]',
+              params: {
+                id: partidoId,
+                tipoCompeticion: tipoCompeticion,
+              },
+            });
           }}
         />
       </View>

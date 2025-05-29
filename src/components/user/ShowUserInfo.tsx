@@ -1,5 +1,5 @@
-import { Text, View } from 'react-native';
-import { User, isPlayer } from '../../types/User';
+//src/components/user/ShowUserInfo.tsx
+import { isPlayer } from '../../types/User';
 import UserCardInfo from './UserCardInfo';
 import PlayerCardInfo from './PlayerCardInfo';
 import { useUser } from '../../contexts/UserContext';
@@ -13,7 +13,7 @@ export default function ShowUserInfo({ screenLoading }: ShowUserInfoProps) {
   const { user, loadingUser } = useUser();
   if (loadingUser) {
     screenLoading(true);
-    return;
+    return <></>;
   }
   if (!user) {
     return <StyledAlert variant='error' message='No hay usuario Activo' />;

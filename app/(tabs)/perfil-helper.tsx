@@ -28,7 +28,7 @@ export default function Profile() {
   }
 
   return (
-    <PageContainer>
+    <PageContainer key={user?.uid}>
       <PerfilScreen />
     </PageContainer>
   );

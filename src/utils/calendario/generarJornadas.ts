@@ -63,6 +63,7 @@ export async function generarCalendarioLiga(
         equipoLocal: local,
         equipoVisitante: visitante,
         estado: 'pendiente',
+        tipoCompeticion: 'liga-regular',
       };
 
       partidosPorJornadaMap[jornadaId].push(partido);

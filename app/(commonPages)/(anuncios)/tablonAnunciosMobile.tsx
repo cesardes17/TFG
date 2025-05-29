@@ -22,7 +22,7 @@ export default function TablonAnunciosPage() {
     )
       return null;
     return (
-      <TouchableOpacity onPress={() => router.push('/nuevaSolicitud')}>
+      <TouchableOpacity onPress={() => router.push('/crearAnuncio')}>
         <AddIcon color={theme.text.light} />
       </TouchableOpacity>
     );

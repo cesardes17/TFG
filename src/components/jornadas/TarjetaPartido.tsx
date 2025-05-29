@@ -33,7 +33,7 @@ interface Props {
 
 export default function TarjetaPartido({ partido }: Props) {
   const { theme } = useTheme();
-  console.log('TarjetaPartido.tsx', partido);
+
   const getEstadoStyle = (estado: string) => {
     switch (estado) {
       case 'pendiente':

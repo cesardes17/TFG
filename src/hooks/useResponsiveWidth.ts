@@ -1,22 +1,13 @@
-import { useWindowDimensions, DimensionValue } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 
 export const useResponsiveWidth = () => {
   const { width } = useWindowDimensions();
 
-  const getContainerWidth = (): DimensionValue => {
-    if (width < 768) {
-      // móvil
-      return '100%';
-    } else if (width < 1024) {
-      // tablet
-      return '80%';
-    } else if (width < 1440) {
-      // desktop pequeño
-      return '70%';
-    } else {
-      // desktop grande
-      return '60%';
-    }
+  const getContainerWidth = (): number => {
+    if (width < 768) return width; // móvil, 100%
+    if (width < 1024) return width * 0.8; // tablet, 80%
+    if (width < 1440) return width * 0.7; // desktop pequeño
+    return width * 0.6; // desktop grande
   };
 
   return {

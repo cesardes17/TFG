@@ -37,8 +37,6 @@ export default function JornadasScreen() {
     }
   }, [jornadaSeleccionada]);
 
-  console.log('partidosPorJornada:', partidosPorJornada);
-
   const partidos: Partido[] = jornadaSeleccionada
     ? partidosPorJornada[jornadaSeleccionada] || []
     : [];

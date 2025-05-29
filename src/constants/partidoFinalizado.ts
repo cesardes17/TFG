@@ -27,6 +27,9 @@ export const partidoEjemploFinalizado: Partido = {
   estadisticasJugadores: {
     local: {
       jugador1: {
+        nombre: 'Jugador 1',
+        apellidos: 'Apellido 1',
+        fotoUrl: 'https://example.com/fotos/jugador1.jpg',
         puntos: 15,
         tirosLibres: { anotados: 3, fallados: 1 },
         tirosDos: { anotados: 4, fallados: 3 },
@@ -36,6 +39,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 1,
       },
       jugador2: {
+        nombre: 'Jugador 2',
+        apellidos: 'Apellido 2',
+        fotoUrl: 'https://example.com/fotos/jugador2.jpg',
         puntos: 12,
         tirosLibres: { anotados: 2, fallados: 0 },
         tirosDos: { anotados: 3, fallados: 2 },
@@ -45,6 +51,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 2,
       },
       jugador3: {
+        nombre: 'Jugador 3',
+        apellidos: 'Apellido 3',
+        fotoUrl: 'https://example.com/fotos/jugador3.jpg',
         puntos: 10,
         tirosLibres: { anotados: 1, fallados: 0 },
         tirosDos: { anotados: 3, fallados: 1 },
@@ -54,6 +63,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 1,
       },
       jugador4: {
+        nombre: 'Jugador 4',
+        apellidos: 'Apellido 4',
+        fotoUrl: 'https://example.com/fotos/jugador4.jpg',
         puntos: 18,
         tirosLibres: { anotados: 4, fallados: 1 },
         tirosDos: { anotados: 5, fallados: 2 },
@@ -63,6 +75,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 2,
       },
       jugador5: {
+        nombre: 'Jugador 5',
+        apellidos: 'Apellido 5',
+        fotoUrl: 'https://example.com/fotos/jugador5.jpg',
         puntos: 16,
         tirosLibres: { anotados: 2, fallados: 1 },
         tirosDos: { anotados: 4, fallados: 2 },
@@ -74,6 +89,9 @@ export const partidoEjemploFinalizado: Partido = {
     },
     visitante: {
       jugador6: {
+        nombre: 'Jugador 6',
+        apellidos: 'Apellido 6',
+        fotoUrl: 'https://example.com/fotos/jugador6.jpg',
         puntos: 14,
         tirosLibres: { anotados: 2, fallados: 2 },
         tirosDos: { anotados: 4, fallados: 3 },
@@ -83,6 +101,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 2,
       },
       jugador7: {
+        nombre: 'Jugador 7',
+        apellidos: 'Apellido 7',
+        fotoUrl: 'https://example.com/fotos/jugador7.jpg',
         puntos: 13,
         tirosLibres: { anotados: 1, fallados: 0 },
         tirosDos: { anotados: 4, fallados: 2 },
@@ -92,6 +113,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 1,
       },
       jugador8: {
+        nombre: 'Jugador 8',
+        apellidos: 'Apellido 8',
+        fotoUrl: 'https://example.com/fotos/jugador8.jpg',
         puntos: 12,
         tirosLibres: { anotados: 3, fallados: 1 },
         tirosDos: { anotados: 3, fallados: 1 },
@@ -101,6 +125,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 2,
       },
       jugador9: {
+        nombre: 'Jugador 9',
+        apellidos: 'Apellido 9',
+        fotoUrl: 'https://example.com/fotos/jugador9.jpg',
         puntos: 15,
         tirosLibres: { anotados: 4, fallados: 0 },
         tirosDos: { anotados: 4, fallados: 3 },
@@ -110,6 +137,9 @@ export const partidoEjemploFinalizado: Partido = {
         faltasCometidas: 1,
       },
       jugador10: {
+        nombre: 'Jugador 10',
+        apellidos: 'Apellido 10',
+        fotoUrl: 'https://example.com/fotos/jugador10.jpg',
         puntos: 12,
         tirosLibres: { anotados: 2, fallados: 1 },
         tirosDos: { anotados: 3, fallados: 2 },
@@ -120,6 +150,7 @@ export const partidoEjemploFinalizado: Partido = {
       },
     },
   },
+
   estadisticasEquipos: {
     porCuarto: {
       Q1: {
@@ -221,62 +252,6 @@ export const partidoEjemploFinalizado: Partido = {
         asistencias: 10,
         rebotes: 19,
         faltasCometidas: 7,
-      },
-    },
-  },
-  jugadoresPresentes: {
-    local: {
-      jugador1: {
-        nombre: 'Carlos',
-        apellidos: 'Gómez Pérez',
-        photoURL: 'https://example.com/foto1.png',
-      },
-      jugador2: {
-        nombre: 'Luis',
-        apellidos: 'Martínez Ruiz',
-        photoURL: 'https://example.com/foto2.png',
-      },
-      jugador3: {
-        nombre: 'Andrés',
-        apellidos: 'López Díaz',
-        photoURL: 'https://example.com/foto3.png',
-      },
-      jugador4: {
-        nombre: 'Pedro',
-        apellidos: 'Fernández Mora',
-        photoURL: 'https://example.com/foto4.png',
-      },
-      jugador5: {
-        nombre: 'Javier',
-        apellidos: 'Sánchez León',
-        photoURL: 'https://example.com/foto5.png',
-      },
-    },
-    visitante: {
-      jugador6: {
-        nombre: 'Iván',
-        apellidos: 'Ramírez Torres',
-        photoURL: 'https://example.com/foto6.png',
-      },
-      jugador7: {
-        nombre: 'Miguel',
-        apellidos: 'Hernández Ruiz',
-        photoURL: 'https://example.com/foto7.png',
-      },
-      jugador8: {
-        nombre: 'David',
-        apellidos: 'Ortega Méndez',
-        photoURL: 'https://example.com/foto8.png',
-      },
-      jugador9: {
-        nombre: 'Adrián',
-        apellidos: 'García Romero',
-        photoURL: 'https://example.com/foto9.png',
-      },
-      jugador10: {
-        nombre: 'Sergio',
-        apellidos: 'Castro Delgado',
-        photoURL: 'https://example.com/foto10.png',
       },
     },
   },

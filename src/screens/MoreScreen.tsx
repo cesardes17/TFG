@@ -1,8 +1,8 @@
 // src/screens/MoreScreen.tsx
 import React from 'react';
-import { FlatList, View } from 'react-native';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../contexts/ThemeContext';
+
 import { navigationItems } from '../constants/navigationsItems';
 import { useUser } from '../contexts/UserContext';
 import NavigationCard from '../components/navigation/NavigationCard';
@@ -11,7 +11,6 @@ import { useVerificarSolicitudes } from '../hooks/useVerificarSolicitudes';
 
 export default function MoreScreen() {
   const router = useRouter();
-  const { theme } = useTheme();
   const { user } = useUser();
 
   const nAnuncios = useVerificarAnunciosNuevos();
@@ -33,7 +32,7 @@ export default function MoreScreen() {
   };
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 12, padding: 8 }}>
       {filteredItems.map((item) => (
         <NavigationCard
           key={item.id}

@@ -42,7 +42,7 @@ export default function ProgressiveImage({
       ])
     ).start();
   }, [pulse]);
-  console.log('Cargando imagen:', uri);
+
   return (
     <View style={[styles.container, containerStyle]}>
       {/** placeholder skeleton */}

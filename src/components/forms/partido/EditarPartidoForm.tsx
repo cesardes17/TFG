@@ -101,6 +101,9 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
                     setFieldValue('fechaHora', fechaHora)
                   }
                 />
+                <View style={{ marginTop: 16 }}>
+                  <StyledButton title='Siguiente' onPress={() => setStep(2)} />
+                </View>
               </View>
             )}
 

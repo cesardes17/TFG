@@ -13,6 +13,7 @@ import { useResponsiveWidth } from '../../hooks/useResponsiveWidth';
 interface PageContainerProps {
   children: React.ReactNode;
   style?: ViewStyle;
+  centrar?: boolean;
 }
 
 const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
@@ -49,7 +50,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-
     alignSelf: 'center',
   },
 });

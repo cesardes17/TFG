@@ -18,7 +18,7 @@ export default function PartidoInfoScreen({
   console.log('tipoCompeticion', tipoCompeticion);
   const { error, isLoading, partido } = usePartido(idPartido, tipoCompeticion);
 
-  const { resultado, estadisticasEquipos, estadisticasJugadores } =
+  const { estado, resultado, estadisticasEquipos, estadisticasJugadores } =
     partidoEjemploFinalizado;
 
   if (!estadisticasEquipos || !estadisticasJugadores || !partido) {
@@ -41,7 +41,7 @@ export default function PartidoInfoScreen({
       <BodyPartido
         estadisticasEquipos={estadisticasEquipos}
         estadisticasJugadores={estadisticasJugadores}
-        estado={partido.estado}
+        estado={estado}
       />
     </View>
   );

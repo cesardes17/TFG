@@ -1,6 +1,11 @@
+// src/components/common/StyledDateTimePicker.tsx
 import React, { useState } from 'react';
-import { View, Button, Platform } from 'react-native';
+import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import StyledButton from './StyledButton';
+import StyledText from './StyledText';
+import { useTheme } from '../../contexts/ThemeContext';
+import { CalendarIcon, ClockCircleOIcon } from '../Icons';
 
 interface Props {
   value: Date;
@@ -8,26 +13,31 @@ interface Props {
 }
 
 const StyledDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
+  return Platform.OS === 'ios' ? (
+    <IOSDateTimePicker value={value} onChange={onChange} />
+  ) : (
+    <AndroidDateTimePicker value={value} onChange={onChange} />
+  );
+};
+
+export default StyledDateTimePicker;
+
+// --------------------------------------------
+// Android Picker
+const AndroidDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [tempDate, setTempDate] = useState(value);
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
+  const handleDateChange = (_: any, selectedDate?: Date) => {
     setShowDate(false);
     if (selectedDate) {
-      const currentDate = selectedDate;
-      setTempDate(currentDate);
-
-      // En Android, lanza el time picker después de seleccionar la fecha
-      if (Platform.OS === 'android') {
-        setShowTime(true);
-      } else {
-        onChange(currentDate); // En iOS podría ser inline, pero preferimos separarlo
-      }
+      setTempDate(selectedDate);
+      setShowTime(true);
     }
   };
 
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
+  const handleTimeChange = (_: any, selectedTime?: Date) => {
     setShowTime(false);
     if (selectedTime) {
       const finalDate = new Date(
@@ -43,24 +53,27 @@ const StyledDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
 
   return (
     <View>
-      <Button title='Seleccionar fecha' onPress={() => setShowDate(true)} />
+      <RenderFechaSeleccionada value={value} />
+
+      <StyledButton
+        title='Seleccionar fecha y hora'
+        variant='outline'
+        onPress={() => setShowDate(true)}
+      />
 
       {showDate && (
         <DateTimePicker
           value={tempDate}
           mode='date'
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          display='default'
           onChange={handleDateChange}
         />
       )}
-
-      <Button title='Seleccionar hora' onPress={() => setShowDate(true)} />
-
       {showTime && (
         <DateTimePicker
           value={tempDate}
           mode='time'
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          display='default'
           onChange={handleTimeChange}
         />
       )}
@@ -68,4 +81,102 @@ const StyledDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
   );
 };
 
-export default StyledDateTimePicker;
+// --------------------------------------------
+// iOS Picker
+const IOSDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
+  const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+
+  const handleDateChange = (_: any, selectedDate?: Date) => {
+    if (selectedDate) onChange(new Date(selectedDate));
+    setShowDate(false);
+  };
+
+  const handleTimeChange = (_: any, selectedTime?: Date) => {
+    if (selectedTime) {
+      const updated = new Date(value);
+      updated.setHours(selectedTime.getHours());
+      updated.setMinutes(selectedTime.getMinutes());
+      onChange(updated);
+    }
+    setShowTime(false);
+  };
+
+  return (
+    <>
+      <RenderFechaSeleccionada value={value} />
+      <View style={{ alignItems: 'center', gap: 12 }}>
+        <StyledButton
+          variant='outline'
+          title='Cambiar fecha'
+          onPress={() => setShowDate(true)}
+        />
+        <StyledButton
+          variant='outline'
+          title='Cambiar hora'
+          onPress={() => setShowTime(true)}
+        />
+      </View>
+      {showDate && (
+        <DateTimePicker
+          value={value}
+          mode='date'
+          display='inline'
+          onChange={handleDateChange}
+        />
+      )}
+      {showTime && (
+        <DateTimePicker
+          value={value}
+          mode='time'
+          display='inline'
+          onChange={handleTimeChange}
+        />
+      )}
+    </>
+  );
+};
+
+const RenderFechaSeleccionada: React.FC<Omit<Props, 'onChange'>> = ({
+  value,
+}) => {
+  const { theme } = useTheme();
+
+  return (
+    <View style={{ marginBottom: 16, gap: 8 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <CalendarIcon size={24} color={theme.text.primary} />
+        <StyledText>
+          {value.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </StyledText>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <ClockCircleOIcon size={24} color={theme.text.primary} />
+
+        <StyledText>
+          {value.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </StyledText>
+      </View>
+    </View>
+  );
+};

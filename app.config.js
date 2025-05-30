@@ -27,13 +27,7 @@ export default ({ config }) => ({
     bundleIdentifier: 'com.cesardelgado.glmba',
     googleServicesFile: './GoogleService-Info.plist',
     supportsTablet: true,
-    infoPlist: {
-      UISupportedInterfaceOrientations: [
-        'UIInterfaceOrientationPortrait',
-        'UIInterfaceOrientationLandscapeLeft',
-        'UIInterfaceOrientationLandscapeRight',
-      ],
-    },
+    requireFullScreen: true,
   },
   android: {
     ...config.android,
@@ -47,5 +41,11 @@ export default ({ config }) => ({
   plugins: [
     '@react-native-firebase/app',
     ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
+    [
+      'expo-screen-orientation',
+      {
+        initialOrientation: 'DEFAULT',
+      },
+    ],
   ],
 });

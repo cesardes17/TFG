@@ -9,9 +9,9 @@ export default function ModoMesaScreen() {
   const { width, height } = useWindowDimensions();
   const router = useRouter();
 
-  // Fuerza la orientación landscape (horizontal) al entrar
   useEffect(() => {
     const lockOrientation = async () => {
+      console.log('Forzando landscape...');
       try {
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.LANDSCAPE
@@ -23,7 +23,6 @@ export default function ModoMesaScreen() {
 
     lockOrientation();
 
-    // Cuando el componente se desmonta, libera la orientación (opcional)
     return () => {
       ScreenOrientation.unlockAsync();
     };

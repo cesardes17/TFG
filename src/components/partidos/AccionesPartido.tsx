@@ -23,6 +23,13 @@ export default function AccionesPartido({
           title='Iniciar partido'
           onPress={() => {
             console.log('Iniciar partido');
+            router.push({
+              pathname: '/iniciarPartido/[id]',
+              params: {
+                id: partidoId,
+                tipoCompeticion: tipoCompeticion,
+              },
+            });
           }}
         />
       </View>

@@ -27,6 +27,13 @@ export default ({ config }) => ({
     bundleIdentifier: 'com.cesardelgado.glmba',
     googleServicesFile: './GoogleService-Info.plist',
     supportsTablet: true,
+    infoPlist: {
+      UISupportedInterfaceOrientations: [
+        'UIInterfaceOrientationPortrait',
+        'UIInterfaceOrientationLandscapeLeft',
+        'UIInterfaceOrientationLandscapeRight',
+      ],
+    },
   },
   android: {
     ...config.android,

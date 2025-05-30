@@ -24,6 +24,9 @@ export default function PartidoInfoScreen({
   if (!estadisticasEquipos || !estadisticasJugadores || !partido) {
     return null; // Manejo de caso en el que estadisticasEquipos o estadisticasJugadores son undefined o null
   }
+
+  console.log('partido', partido);
+
   return (
     <View style={{ paddingVertical: 16 }}>
       <HeaderPartido

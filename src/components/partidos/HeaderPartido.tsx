@@ -36,7 +36,7 @@ const HeaderPartido: React.FC<Props> = ({
 }) => {
   const { layoutType, isDesktop } = useResponsiveLayout();
   const { theme } = useTheme();
-
+  console.log(fecha, cancha);
   const formatearFecha = (fecha: Date): string => {
     const dia = fecha.getDate().toString().padStart(2, '0');
     const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');

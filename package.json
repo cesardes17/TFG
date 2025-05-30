@@ -43,7 +43,8 @@
     "react-native-screens": "~4.10.0",
     "react-native-web": "^0.20.0",
     "uuid": "^11.1.0",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-screen-orientation": "~8.1.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

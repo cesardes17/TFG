@@ -99,40 +99,26 @@ const IOSDateTimePicker: React.FC<Props> = ({ value, onChange }) => {
       updated.setMinutes(selectedTime.getMinutes());
       onChange(updated);
     }
-    setShowTime(false);
   };
 
   return (
     <>
       <RenderFechaSeleccionada value={value} />
-      <View style={{ alignItems: 'center', gap: 12 }}>
-        <StyledButton
-          variant='outline'
-          title='Cambiar fecha'
-          onPress={() => setShowDate(true)}
-        />
-        <StyledButton
-          variant='outline'
-          title='Cambiar hora'
-          onPress={() => setShowTime(true)}
-        />
-      </View>
-      {showDate && (
-        <DateTimePicker
-          value={value}
-          mode='date'
-          display='inline'
-          onChange={handleDateChange}
-        />
-      )}
-      {showTime && (
-        <DateTimePicker
-          value={value}
-          mode='time'
-          display='inline'
-          onChange={handleTimeChange}
-        />
-      )}
+
+      <DateTimePicker
+        value={value}
+        mode='date'
+        display='inline'
+        onChange={handleDateChange}
+      />
+
+      <DateTimePicker
+        value={value}
+        mode='time'
+        display='inline'
+        onChange={handleTimeChange}
+        minuteInterval={15}
+      />
     </>
   );
 };

@@ -104,4 +104,42 @@ export const partidoService = {
       };
     }
   },
+
+  actualizarFechaCancha: async (
+    temporadaId: string,
+    competicionId: string,
+    partidoId: string,
+    fecha: Date,
+    cancha: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'partidos',
+        partidoId,
+      ];
+      const partidoRes = await FirestoreService.updateDocumentByPath(path, {
+        fecha,
+        cancha,
+      });
+      if (!partidoRes.success) {
+        throw new Error(partidoRes.errorMessage);
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al actualizar partido',
+      };
+    }
+  },
 };

@@ -28,8 +28,8 @@ export default function TarjetaPartido({ partido }: Props) {
     switch (estado) {
       case 'pendiente':
         return {
-          backgroundColor: theme.background.primary,
-          color: theme.text.dark,
+          backgroundColor: theme.background.warning,
+          color: theme.text.light,
           text: 'Pendiente',
         };
       case 'en-juego':

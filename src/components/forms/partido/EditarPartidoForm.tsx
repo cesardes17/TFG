@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Formik } from 'formik';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Formik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import { router } from 'expo-router';
 import StyledText from '../../common/StyledText';
@@ -13,18 +13,45 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import StyledDateTimePicker from '../../common/StyledDateTimePicker';
 import SelectableCardGroup, { Option } from '../../common/SelectableCardGroup';
 import { Partido } from '../../../types/Partido';
-import { TipoCompeticion } from '../../../types/Competicion';
+import { partidoService } from '../../../services/partidoService';
+import { useTemporadaContext } from '../../../contexts/TemporadaContext';
+import { useToast } from '../../../contexts/ToastContext';
 
-const esquemaEditarPartido = Yup.object().shape({
-  fechaHora: Yup.date().required(
-    'La fecha y hora del partido son obligatorias'
-  ),
+const pabellonesDisponibles: Option<string>[] = [
+  {
+    value: 'pabMontaña',
+    label: 'Pabellón de la Montaña',
+    description: 'Pabellón de la Montaña de Gáldar',
+  },
+  {
+    value: 'pabVega',
+    label: 'Pabellón de la Vega',
+    description: 'Pabellón de la Vega de San José',
+  },
+];
+
+// Paso 1: fecha y hora
+const esquemaPaso1 = Yup.object().shape({
+  fechaHora: Yup.date()
+    .min(new Date(), 'La fecha y hora deben ser actuales o futuras')
+    .required('La fecha y hora del partido son obligatorias'),
+});
+
+// Paso 2: cancha
+const esquemaPaso2 = Yup.object().shape({
   cancha: Yup.string().required('Selecciona un pabellón'),
 });
-const pabellonesDisponibles: Option<string>[] = [
-  { value: 'pabMontaña', label: 'Pabellón de la Montaña', description: '' },
-  { value: 'pabVega', label: 'Pabellón de la Vega', description: '' },
-];
+
+function getValidationSchema(step: number) {
+  switch (step) {
+    case 1:
+      return esquemaPaso1;
+    case 2:
+      return esquemaPaso2;
+    default:
+      return null;
+  }
+}
 
 interface PartidoFormProps {
   partido: Partido;
@@ -32,28 +59,64 @@ interface PartidoFormProps {
 
 export default function EditarPartidoForm({ partido }: PartidoFormProps) {
   const { theme } = useTheme();
+  const { temporada } = useTemporadaContext();
+  const { showToast } = useToast();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingText, setIsLoadingText] = useState('');
-
   const valoresIniciales = {
-    fechaHora: partido?.fecha ? new Date(partido.fecha) : new Date(),
+    fechaHora: partido.fecha ? new Date(partido.fecha) : new Date(),
     cancha: partido?.cancha || '',
   };
+
   const manejarEnvio = async (valores: typeof valoresIniciales) => {
     setIsLoading(true);
     setIsLoadingText('Actualizando partido');
     setError(null);
     try {
+      if (!temporada) return;
       // await PartidoService.actualizarPartido(partido.id, valores);
-      router.back();
+      // router.back();
+      const cancha = pabellonesDisponibles.find(
+        (pab) => pab.value === valores.cancha
+      )?.label;
+      if (!cancha) throw new Error('Pabellón no encontrado');
+      console.log('Actualizando partido con id', partido.id);
+      const res = await partidoService.actualizarFechaCancha(
+        temporada.id,
+        partido.tipoCompeticion,
+        partido.id,
+        valores.fechaHora,
+        cancha
+      );
+      if (!res) throw new Error('Error al actualizar el partido');
+      showToast('Partido actualizado correctamente', 'success');
     } catch (err: any) {
+      showToast(err.message || 'Error al actualizar el partido', 'error');
       setError(err.message || 'Error al actualizar el partido');
     } finally {
       setIsLoading(false);
       setIsLoadingText('');
+      router.back();
     }
+  };
+
+  const manejarSiguiente = async (
+    formikProps: FormikProps<typeof valoresIniciales>
+  ) => {
+    const errors = await formikProps.validateForm();
+    if (Object.keys(errors).length === 0) {
+      setStep(step + 1);
+    } else {
+      Object.keys(errors).forEach((campo) =>
+        formikProps.setFieldTouched(campo, true)
+      );
+    }
+  };
+
+  const manejarAtras = () => {
+    setStep(step - 1);
   };
 
   if (isLoading) {
@@ -70,46 +133,65 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
   }
 
   return (
-    <View
+    <ScrollView
       style={[styles.contenedor, { backgroundColor: theme.background.primary }]}
     >
       {error && <StyledAlert variant='error' message={error} />}
       <Formik
         initialValues={valoresIniciales}
-        validationSchema={esquemaEditarPartido}
+        validationSchema={getValidationSchema(step)}
         onSubmit={manejarEnvio}
       >
-        {({ handleSubmit, values, setFieldValue, errors, touched }) => (
-          <View
-            style={[styles.formulario, { backgroundColor: theme.cardDefault }]}
-          >
-            <StyledText style={[styles.titulo, { color: theme.text.primary }]}>
-              Editar Partido
-            </StyledText>
+        {(formikProps: FormikProps<typeof valoresIniciales>) => {
+          const { values, setFieldValue, errors, touched } = formikProps;
+          const totalSteps = 2;
+          const esPasoFinal = step === totalSteps;
 
-            {step === 1 && (
-              <View style={styles.campoFormulario}>
+          return (
+            <View
+              style={[
+                styles.formulario,
+                { backgroundColor: theme.cardDefault },
+              ]}
+            >
+              <View
+                style={[
+                  styles.indicadorPasos,
+                  { borderBottomColor: theme.border.primary },
+                ]}
+              >
                 <StyledText
-                  style={[styles.etiqueta, { color: theme.text.primary }]}
+                  style={[styles.textoPasos, { color: theme.text.primary }]}
                 >
-                  Fecha y hora del partido
+                  Paso {step} de {totalSteps}
                 </StyledText>
-                <StyledDateTimePicker
-                  mode='datetime'
-                  value={values.fechaHora}
-                  onChange={(fechaHora: Date) =>
-                    setFieldValue('fechaHora', fechaHora)
-                  }
-                />
-                <View style={{ marginTop: 16 }}>
-                  <StyledButton title='Siguiente' onPress={() => setStep(2)} />
-                </View>
               </View>
-            )}
 
-            {step === 2 && (
-              <>
-                <View style={styles.campoFormulario}>
+              {step === 1 && (
+                <View style={styles.paso}>
+                  <StyledText
+                    style={[styles.etiqueta, { color: theme.text.primary }]}
+                  >
+                    Fecha y hora del partido
+                  </StyledText>
+                  <StyledDateTimePicker
+                    mode='datetime'
+                    value={values.fechaHora}
+                    onChange={(fechaHora: Date) =>
+                      setFieldValue('fechaHora', fechaHora)
+                    }
+                  />
+                  {touched.fechaHora &&
+                    typeof errors.fechaHora === 'string' && (
+                      <StyledText style={styles.mensajeError}>
+                        {errors.fechaHora}
+                      </StyledText>
+                    )}
+                </View>
+              )}
+
+              {step === 2 && (
+                <View style={styles.paso}>
                   <StyledText
                     style={[styles.etiqueta, { color: theme.text.primary }]}
                   >
@@ -120,26 +202,43 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
                     value={values.cancha}
                     onChange={(id: string) => setFieldValue('cancha', id)}
                   />
+                  {touched.cancha && errors.cancha && (
+                    <StyledText style={styles.mensajeError}>
+                      {errors.cancha}
+                    </StyledText>
+                  )}
                 </View>
+              )}
 
-                <StyledButton
-                  title='Guardar cambios'
-                  onPress={handleSubmit as any}
-                />
-
-                <View style={{ marginTop: 12 }}>
+              <View style={styles.contenedorBotones}>
+                {step > 1 && (
+                  <View style={styles.botonMitad}>
+                    <StyledButton
+                      variant='outline'
+                      title='Atrás'
+                      onPress={manejarAtras}
+                      fullWidth
+                    />
+                  </View>
+                )}
+                <View style={styles.botonMitad}>
                   <StyledButton
-                    variant='outline'
-                    title='Volver'
-                    onPress={() => setStep(1)}
+                    variant='primary'
+                    title={esPasoFinal ? 'Guardar' : 'Siguiente'}
+                    onPress={
+                      esPasoFinal
+                        ? () => formikProps.submitForm()
+                        : () => manejarSiguiente(formikProps)
+                    }
+                    fullWidth
                   />
                 </View>
-              </>
-            )}
-          </View>
-        )}
+              </View>
+            </View>
+          );
+        }}
       </Formik>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -147,7 +246,6 @@ const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
   },
   formulario: {
     borderRadius: 8,
@@ -158,17 +256,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
+  indicadorPasos: {
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+  },
+  textoPasos: {
+    fontSize: 14,
     textAlign: 'center',
   },
-  campoFormulario: {
-    marginBottom: 16,
+  paso: {
+    marginBottom: 20,
   },
   etiqueta: {
-    marginBottom: 8,
+    fontSize: 16,
     fontWeight: '500',
+    marginBottom: 8,
+  },
+  mensajeError: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  contenedorBotones: {
+    flexDirection: 'row',
+    marginTop: 20,
+    gap: 10,
+    alignItems: 'center',
+  },
+  botonMitad: {
+    flex: 1,
   },
 });

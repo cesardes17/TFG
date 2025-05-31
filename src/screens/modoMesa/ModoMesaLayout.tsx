@@ -19,19 +19,18 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
   const { theme, mode } = useTheme();
   const { partido, isLoading, error } = usePartido(idPartido, tipoCompeticion);
 
-  // Estado local para manipular el partido durante el modo mesa
   const [partidoActual, setPartidoActual] = useState<typeof partido | null>(
     null
   );
-
-  // Estado para controlar el cuarto actual
   const [cuartoActual, setCuartoActual] = useState('Q1');
-  const [tiempoMuertoSolicitado, setTiempoMuertoSolicitado] = useState<{
-    local: boolean;
-    visitante: boolean;
-  }>({ local: false, visitante: false });
+  const [tiemposMuertosUsados, setTiemposMuertosUsados] = useState({
+    local: { primeraMitad: false, segundaMitad: false, prorroga: false },
+    visitante: { primeraMitad: false, segundaMitad: false, prorroga: false },
+  });
+  const [equipoSolicitandoTM, setEquipoSolicitandoTM] = useState<
+    'local' | 'visitante' | null
+  >(null);
 
-  // Inicializar el cuarto cuando llega el partido o cambia el cuarto actual
   useEffect(() => {
     if (partido) {
       const partidoInicializado = inicializarCuarto(partido, cuartoActual);
@@ -43,9 +42,57 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     if (partidoActual) {
       const partidoActualizado = inicializarCuarto(partidoActual, cuartoActual);
       setPartidoActual(partidoActualizado);
-      setTiempoMuertoSolicitado({ local: false, visitante: false }); // Reinicia el estado de tiempo muerto al cambiar de cuarto
+      setEquipoSolicitandoTM(null);
     }
   }, [cuartoActual]);
+
+  const obtenerMitadActual = (cuarto: string) => {
+    if (cuarto === 'Q1' || cuarto === 'Q2') return 'primeraMitad';
+    if (cuarto === 'Q3' || cuarto === 'Q4') return 'segundaMitad';
+    return 'prorroga';
+  };
+
+  const puedeSolicitarTiempoMuerto = (equipo: 'local' | 'visitante') => {
+    const mitad = obtenerMitadActual(cuartoActual);
+    return !tiemposMuertosUsados[equipo][mitad];
+  };
+
+  const handleSolicitarTiempoMuerto = (equipo: 'local' | 'visitante') => {
+    const mitad = obtenerMitadActual(cuartoActual);
+
+    // Si ya está solicitado por este equipo, se cancela (no se marca como usado aún)
+    if (equipoSolicitandoTM === equipo) {
+      setEquipoSolicitandoTM(null); // lo cancela
+      console.log(`Tiempo muerto cancelado por ${equipo} en la ${mitad}.`);
+      return;
+    }
+
+    // Si no está solicitado, pero ya lo usó antes => no se puede volver a pedir
+    if (tiemposMuertosUsados[equipo][mitad]) {
+      console.log(
+        `El equipo ${equipo} ya usó su tiempo muerto en la ${mitad}.`
+      );
+      return;
+    }
+
+    // Solicitar nuevo tiempo muerto
+    setEquipoSolicitandoTM(equipo);
+    console.log(`Tiempo muerto solicitado por ${equipo} en la ${mitad}.`);
+  };
+  const handleFinCuarto = () => {
+    setCuartoActual((prevCuarto) => {
+      if (prevCuarto === 'Q1') return 'Q2';
+      if (prevCuarto === 'Q2') return 'DESCANSO';
+      if (prevCuarto === 'DESCANSO') return 'Q3';
+      if (prevCuarto === 'Q3') return 'Q4';
+      if (prevCuarto === 'Q4') return 'PR1';
+      if (prevCuarto.startsWith('PR')) {
+        const num = parseInt(prevCuarto.replace('PR', ''), 10) || 1;
+        return `PR${num + 1}`;
+      }
+      return 'Q1';
+    });
+  };
 
   if (isLoading) {
     return <LoadingIndicator text='Cargando partido...' />;
@@ -60,109 +107,13 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     );
   }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.background.primary,
-    },
-    superior: {
-      flex: 1,
-    },
-    inferior: {
-      flex: 2,
-    },
-  });
-
-  const handleSolicitarTiempoMuerto = (equipo: 'local' | 'visitante') => {
-    setPartidoActual((prev) => {
-      if (!prev || !prev.estadisticasEquipos) return prev;
-      console.log('handleSolicitarTiempoMuerto', equipo);
-      const cuartoStats = prev.estadisticasEquipos.porCuarto[cuartoActual];
-      if (!cuartoStats) return prev; // Asegura que existe el cuarto actual
-
-      const actualizado = { ...prev };
-      if (!actualizado.estadisticasEquipos) {
-        return prev;
-      }
-
-      if (equipo === 'local') {
-        if (tiempoMuertoSolicitado.local) {
-          actualizado.estadisticasEquipos.porCuarto[cuartoActual].local = {
-            ...cuartoStats.local,
-            tiemposMuertos: cuartoStats.local.tiemposMuertos - 1,
-          };
-          setTiempoMuertoSolicitado({
-            local: false,
-            visitante: false,
-          });
-        } else {
-          actualizado.estadisticasEquipos.porCuarto[cuartoActual].local = {
-            ...cuartoStats.local,
-            tiemposMuertos: cuartoStats.local.tiemposMuertos + 1,
-          };
-          setTiempoMuertoSolicitado({
-            local: true,
-            visitante: false,
-          });
-        }
-      } else {
-        if (tiempoMuertoSolicitado.visitante) {
-          actualizado.estadisticasEquipos.porCuarto[cuartoActual].visitante = {
-            ...cuartoStats.visitante,
-            tiemposMuertos: cuartoStats.visitante.tiemposMuertos - 1,
-          };
-          setTiempoMuertoSolicitado({
-            local: false,
-            visitante: false,
-          });
-        } else {
-          actualizado.estadisticasEquipos.porCuarto[cuartoActual].visitante = {
-            ...cuartoStats.visitante,
-            tiemposMuertos: cuartoStats.visitante.tiemposMuertos + 1,
-          };
-          setTiempoMuertoSolicitado({
-            local: false,
-            visitante: true,
-          });
-        }
-      }
-      return actualizado;
-    });
-  };
-
-  const handleFinCuarto = () => {
-    if (
-      partidoActual.estadisticasEquipos!.totales.local.puntos ===
-      partidoActual.estadisticasEquipos!.totales.visitante.puntos
-    ) {
-      setCuartoActual((prevCuarto) => {
-        // Si es Q1 pasa a Q2, Q2 a DESCANSO,DESCANSO a Q3, Q3 a Q4
-        if (prevCuarto === 'Q1') return 'Q2';
-        if (prevCuarto === 'Q2') return 'DESCANSO';
-        if (prevCuarto === 'DESCANSO') return 'Q3';
-        if (prevCuarto === 'Q3') return 'Q4';
-
-        // Si es Q4, decide si hay empate y debe haber prórroga
-
-        // (Idealmente aquí podrías hacer una comprobación de empate)
-        if (prevCuarto === 'Q4') return 'PR1';
-
-        // Si es una prórroga, por ejemplo PR1, PR2, etc.
-        if (prevCuarto.startsWith('PR')) {
-          const numeroProrroga =
-            parseInt(prevCuarto.replace('PR', ''), 10) || 1;
-          return `PR${numeroProrroga + 1}`;
-        }
-
-        // Si no se reconoce el cuarto, queda en Q1 por defecto
-        return 'Q1';
-      });
-    }
-
-    console.log('Fin de cuarto detectado. Avanzando al siguiente cuarto.');
-  };
-
   if (!partidoActual.estadisticasEquipos) return;
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.background.primary },
+    superior: { flex: 1 },
+    inferior: { flex: 2 },
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -187,12 +138,26 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           onSolicitarTiempoMuerto={handleSolicitarTiempoMuerto}
           onFinCuarto={handleFinCuarto}
           onFinTiempoMuerto={() => {
-            setTiempoMuertoSolicitado({ local: false, visitante: false });
+            setTiemposMuertosUsados((prev) => ({
+              ...prev,
+              [equipoSolicitandoTM!]: {
+                ...prev[equipoSolicitandoTM!],
+                [obtenerMitadActual(cuartoActual)]: true,
+              },
+            }));
+            setEquipoSolicitandoTM(null);
           }}
-          tiempoMuertoSolicitado={tiempoMuertoSolicitado}
+          tiempoMuertoSolicitado={
+            equipoSolicitandoTM
+              ? {
+                  local: equipoSolicitandoTM === 'local',
+                  visitante: equipoSolicitandoTM === 'visitante',
+                }
+              : { local: false, visitante: false }
+          }
+          puedeSolicitarTiempoMuerto={puedeSolicitarTiempoMuerto}
         />
       </View>
-      {/* La parte inferior la dejamos comentada por ahora */}
       <View style={styles.inferior}>
         <MesaInferior />
       </View>

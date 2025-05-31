@@ -1,4 +1,3 @@
-// MesaSuperior.tsx
 import { View, StyleSheet } from 'react-native';
 import { EstadisticasEquipo } from '../../../types/estadisticas/equipo';
 import { EquipoPartido } from '../../../types/Equipo';
@@ -19,7 +18,7 @@ interface MesaSuperiorProps {
   };
   cuartoActual: string;
   tiempoMuertoSolicitado: { local: boolean; visitante: boolean };
-
+  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
   onFinTiempoMuerto: () => void;
   onFinCuarto: () => void;
@@ -32,7 +31,7 @@ export default function MesaSuperior({
   cuartoActual,
   tiempoMuertoSolicitado,
   puntos,
-
+  puedeSolicitarTiempoMuerto,
   onSolicitarTiempoMuerto,
   onFinTiempoMuerto,
   onFinCuarto,
@@ -53,17 +52,16 @@ export default function MesaSuperior({
       <View style={styles.tercio}>
         <MesaEquipo
           equipo={equipoLocal}
-          tiemposMuertos={tiemposMuertosLocal}
-          faltasCometidas={faltasCometidasLocal}
-          tipo='local'
           puntos={puntos.local}
-          onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          faltasCometidas={faltasCometidasLocal}
+          puedeSolicitarTiempoMuerto={puedeSolicitarTiempoMuerto}
           tiempoMuertoSolicitado={tiempoMuertoSolicitado.local}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
+          tipo='local'
+          onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
         />
       </View>
 
-      {/* Control de cuarto lo dejamos para después */}
       <View style={styles.tercio}>
         <MesaControlTiempo
           cuartoActual={cuartoActual}
@@ -73,7 +71,6 @@ export default function MesaSuperior({
           onFinTiempoMuerto={() => {
             console.log('Fin tiempo muerto');
             setTiempoMuertoIniciado(false);
-
             onFinTiempoMuerto();
           }}
           onInitTiempoMuerto={() => {
@@ -89,13 +86,13 @@ export default function MesaSuperior({
       <View style={styles.tercio}>
         <MesaEquipo
           equipo={equipoVisitante}
-          tiemposMuertos={tiemposMuertosVisitante}
-          faltasCometidas={faltasCometidasVisitante}
-          tipo='visitante'
           puntos={puntos.visitante}
-          onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          faltasCometidas={faltasCometidasVisitante}
+          puedeSolicitarTiempoMuerto={puedeSolicitarTiempoMuerto}
           tiempoMuertoSolicitado={tiempoMuertoSolicitado.visitante}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
+          tipo='visitante'
+          onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
         />
       </View>
     </View>

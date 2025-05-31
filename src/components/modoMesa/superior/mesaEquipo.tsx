@@ -11,38 +11,32 @@ interface Equipo {
 
 interface MesaEquipoProps {
   equipo: Equipo;
-  faltasCometidas: number;
-  tiemposMuertos: number;
   puntos: number;
-  tipo: 'local' | 'visitante';
+  faltasCometidas: number;
   tiempoMuertoSolicitado: boolean;
   tiempoMuertoIniciado: boolean;
+  tipo: 'local' | 'visitante';
+  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
 }
 
 const MesaEquipo: React.FC<MesaEquipoProps> = ({
   equipo,
-  faltasCometidas,
   puntos,
-  tiemposMuertos,
-  tipo,
+  faltasCometidas,
+  puedeSolicitarTiempoMuerto,
   tiempoMuertoSolicitado,
-  onSolicitarTiempoMuerto,
   tiempoMuertoIniciado,
+  tipo,
+  onSolicitarTiempoMuerto,
 }) => {
+  const hayTiempoMuertoDisponible = puedeSolicitarTiempoMuerto(tipo);
+
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
   const faltasRestantes = Math.max(0, 5 - faltasCometidas);
   const estaEnBonus = faltasRestantes === 0;
-
-  const timeoutsMaximosPorMitad = 1;
-  const timeoutsDisponibles = Math.max(
-    0,
-    timeoutsMaximosPorMitad - tiemposMuertos
-  );
-
-  const sinTimeoutsDisponibles = timeoutsDisponibles === 0;
 
   return (
     <View
@@ -51,16 +45,14 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
         { flexDirection: tipo === 'local' ? 'row' : 'row-reverse' },
       ]}
     >
-      {/* Columna Izquierda (Zona superior e inferior) */}
+      {/* Columna izquierda: escudo, nombre, puntos, botón */}
       <View style={styles.columnaIzquierda}>
-        {/* Zona Superior: Escudo + Nombre + Puntos */}
         <View
           style={[
             styles.zonaSuperior,
             { flexDirection: tipo === 'local' ? 'row' : 'row-reverse' },
           ]}
         >
-          {/* Escudo + Nombre */}
           <View style={styles.escudoNombreContainer}>
             <Image
               source={{ uri: equipo.escudoUrl }}
@@ -70,12 +62,11 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
               ]}
               resizeMode='contain'
             />
-            <StyledText size='small' style={[styles.nombreEquipo]}>
+            <StyledText size='small' style={styles.nombreEquipo}>
               {equipo.nombre}
             </StyledText>
           </View>
 
-          {/* Puntuación */}
           <View style={styles.puntosContainer}>
             <Text
               style={[
@@ -89,23 +80,19 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
           </View>
         </View>
 
-        {/* Zona Inferior: Botón */}
-
-        {!tiempoMuertoSolicitado && (
+        {/* Botón para solicitar/cancelar tiempo muerto */}
+        {hayTiempoMuertoDisponible && !tiempoMuertoSolicitado && (
           <StyledButton
             onPress={() => {
               onSolicitarTiempoMuerto(tipo);
             }}
             title='Solicitar Tiempo Muerto'
-            disabled={sinTimeoutsDisponibles}
           />
         )}
 
         {tiempoMuertoSolicitado && (
           <StyledButton
-            onPress={() => {
-              onSolicitarTiempoMuerto(tipo);
-            }}
+            onPress={() => onSolicitarTiempoMuerto(tipo)}
             variant='error-outline'
             title='Cancelar Tiempo Muerto'
             disabled={tiempoMuertoIniciado}
@@ -113,7 +100,7 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
         )}
       </View>
 
-      {/* Columna Derecha: Estadísticas */}
+      {/* Columna derecha: estadísticas */}
       <View style={styles.columnaDerecha}>
         <View style={[styles.tarjeta, estaEnBonus && styles.tarjetaBonus]}>
           <Text style={[styles.numero, { fontSize: isTablet ? 32 : 28 }]}>
@@ -127,11 +114,11 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
         <View
           style={[
             styles.tarjeta,
-            sinTimeoutsDisponibles && styles.tarjetaBonus,
+            !hayTiempoMuertoDisponible && styles.tarjetaBonus,
           ]}
         >
           <Text style={[styles.numero, { fontSize: isTablet ? 32 : 28 }]}>
-            {timeoutsDisponibles}
+            {hayTiempoMuertoDisponible ? '1' : '0'}
           </Text>
           <Text style={[styles.etiqueta, { fontSize: isTablet ? 14 : 12 }]}>
             TIMEOUTS DISPONIBLES
@@ -152,11 +139,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  botonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   columnaIzquierda: {
     flex: 1,
@@ -207,7 +189,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
     paddingVertical: 12,
-
     marginVertical: 6,
     alignItems: 'center',
     borderWidth: 1,

@@ -4,8 +4,18 @@ import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
 import { useWindowDimensions } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import ModoMesaLayout from './ModoMesaLayout';
+import StyledText from '../../components/common/StyledText';
+import StyledButton from '../../components/common/StyledButton';
+import { TipoCompeticion } from '../../types/Competicion';
 
-export default function ModoMesaScreen() {
+export default function ModoMesaScreen({
+  idPartido,
+  tipoCompeticion,
+}: {
+  idPartido: string;
+  tipoCompeticion: TipoCompeticion;
+}) {
   const { width, height } = useWindowDimensions();
   const router = useRouter();
 
@@ -29,25 +39,32 @@ export default function ModoMesaScreen() {
   }, []);
 
   // Validación de tamaño mínimo (ejemplo: 768 px)
-  if (width < 768) {
+  if (height < 768) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>
+        <StyledText variant='error' style={styles.errorText}>
           La pantalla es demasiado pequeña. Usa una tablet o dispositivo más
           grande.
-        </Text>
+        </StyledText>
+        <View style={{ marginTop: 20 }}>
+          <StyledButton
+            title='Voler a Atrás'
+            onPress={async () => {
+              await ScreenOrientation.unlockAsync();
+              if (router.canGoBack()) {
+                return router.back();
+              }
+              return router.push('/');
+            }}
+          />
+        </View>
       </View>
     );
   }
 
   // Aquí la UI normal del modo mesa
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modo Mesa</Text>
-      <Text style={styles.subtitle}>
-        Esta es la vista básica forzada en modo landscape.
-      </Text>
-    </View>
+    <ModoMesaLayout idPartido={idPartido} tipoCompeticion={tipoCompeticion} />
   );
 }
 
@@ -61,7 +78,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: 'red',
-    fontSize: 16,
     textAlign: 'center',
   },
   title: {

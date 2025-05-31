@@ -163,6 +163,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 3,
           rebotes: 6,
           faltasCometidas: 2,
+          tiemposMuertos: 0,
         },
         visitante: {
           puntos: 15,
@@ -172,6 +173,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 2,
           rebotes: 5,
           faltasCometidas: 1,
+          tiemposMuertos: 0,
         },
       },
       Q2: {
@@ -183,6 +185,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 2,
           rebotes: 5,
           faltasCometidas: 1,
+          tiemposMuertos: 0,
         },
         visitante: {
           puntos: 16,
@@ -192,6 +195,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 3,
           rebotes: 5,
           faltasCometidas: 1,
+          tiemposMuertos: 0,
         },
       },
       Q3: {
@@ -203,6 +207,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 4,
           rebotes: 7,
           faltasCometidas: 2,
+          tiemposMuertos: 0,
         },
         visitante: {
           puntos: 17,
@@ -212,6 +217,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 3,
           rebotes: 5,
           faltasCometidas: 2,
+          tiemposMuertos: 0,
         },
       },
       Q4: {
@@ -223,6 +229,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 3,
           rebotes: 6,
           faltasCometidas: 2,
+          tiemposMuertos: 0,
         },
         visitante: {
           puntos: 18,
@@ -232,6 +239,7 @@ export const partidoEjemploFinalizado: Partido = {
           asistencias: 2,
           rebotes: 4,
           faltasCometidas: 3,
+          tiemposMuertos: 0,
         },
       },
     },
@@ -244,6 +252,7 @@ export const partidoEjemploFinalizado: Partido = {
         asistencias: 12,
         rebotes: 24,
         faltasCometidas: 7,
+        tiemposMuertos: 0,
       },
       visitante: {
         puntos: 66,
@@ -253,6 +262,7 @@ export const partidoEjemploFinalizado: Partido = {
         asistencias: 10,
         rebotes: 19,
         faltasCometidas: 7,
+        tiemposMuertos: 0,
       },
     },
   },

@@ -10,3 +10,9 @@ export type Equipo = {
   };
   fechaCreacion: Date; // ISO string (buena práctica)
 };
+
+export type EquipoPartido = {
+  id: string;
+  nombre: string;
+  escudoUrl: string;
+};

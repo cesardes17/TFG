@@ -25,7 +25,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
       style={[styles.safeArea, { backgroundColor: theme.background.primary }]}
     >
       <StatusBar
-        barStyle={mode ? 'light-content' : 'dark-content'}
+        barStyle='light-content'
         backgroundColor={theme.background.primary}
         translucent
       />

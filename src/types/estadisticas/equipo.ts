@@ -8,9 +8,9 @@ export type EstadisticasEquipo = {
   asistencias: number;
   rebotes: number;
   faltasCometidas: number;
+  tiemposMuertos: number;
 };
 
-// Un periodo puede ser "Q1", "Q2", ..., "T1", "T2", etc.
 export type EstadisticasEquiposPorPeriodo = {
   [periodo: string]: {
     local: EstadisticasEquipo;

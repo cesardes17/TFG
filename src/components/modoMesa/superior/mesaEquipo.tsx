@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import StyledButton from '../../common/StyledButton';
+import StyledText from '../../common/StyledText';
 
 interface Equipo {
   id: string;
@@ -12,31 +13,36 @@ interface MesaEquipoProps {
   equipo: Equipo;
   faltasCometidas: number;
   tiemposMuertos: number;
+  puntos: number;
   tipo: 'local' | 'visitante';
+  tiempoMuertoSolicitado: boolean;
+  tiempoMuertoIniciado: boolean;
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
 }
 
 const MesaEquipo: React.FC<MesaEquipoProps> = ({
   equipo,
   faltasCometidas,
+  puntos,
   tiemposMuertos,
   tipo,
+  tiempoMuertoSolicitado,
   onSolicitarTiempoMuerto,
+  tiempoMuertoIniciado,
 }) => {
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
   const faltasRestantes = Math.max(0, 5 - faltasCometidas);
-  //   const estaEnBonus = faltasRestantes === 0;
-  const estaEnBonus = true;
+  const estaEnBonus = faltasRestantes === 0;
+
   const timeoutsMaximosPorMitad = 1;
   const timeoutsDisponibles = Math.max(
     0,
     timeoutsMaximosPorMitad - tiemposMuertos
   );
 
-  //   const sinTimeoutsDisponibles = timeoutsDisponibles === 0;
-  const sinTimeoutsDisponibles = true;
+  const sinTimeoutsDisponibles = timeoutsDisponibles === 0;
 
   return (
     <View
@@ -45,34 +51,70 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
         { flexDirection: tipo === 'local' ? 'row' : 'row-reverse' },
       ]}
     >
-      {/* Columna Izquierda */}
+      {/* Columna Izquierda (Zona superior e inferior) */}
       <View style={styles.columnaIzquierda}>
-        <View style={styles.escudoContainer}>
-          <Image
-            source={{ uri: equipo.escudoUrl }}
-            style={[
-              styles.escudo,
-              { width: isTablet ? 80 : 60, height: isTablet ? 80 : 60 },
-            ]}
-            resizeMode='contain'
-          />
+        {/* Zona Superior: Escudo + Nombre + Puntos */}
+        <View
+          style={[
+            styles.zonaSuperior,
+            { flexDirection: tipo === 'local' ? 'row' : 'row-reverse' },
+          ]}
+        >
+          {/* Escudo + Nombre */}
+          <View style={styles.escudoNombreContainer}>
+            <Image
+              source={{ uri: equipo.escudoUrl }}
+              style={[
+                styles.escudo,
+                { width: isTablet ? 70 : 60, height: isTablet ? 70 : 60 },
+              ]}
+              resizeMode='contain'
+            />
+            <StyledText size='small' style={[styles.nombreEquipo]}>
+              {equipo.nombre}
+            </StyledText>
+          </View>
+
+          {/* Puntuación */}
+          <View style={styles.puntosContainer}>
+            <Text
+              style={[
+                styles.puntosTexto,
+                { fontSize: isTablet ? 28 : 24, fontWeight: 'bold' },
+              ]}
+            >
+              {puntos}
+            </Text>
+            <Text style={styles.puntosLabel}>PUNTOS</Text>
+          </View>
         </View>
 
-        <Text style={[styles.nombreEquipo, { fontSize: isTablet ? 18 : 16 }]}>
-          {equipo.nombre}
-        </Text>
+        {/* Zona Inferior: Botón */}
 
-        <StyledButton
-          onPress={() => {
-            onSolicitarTiempoMuerto(tipo);
-          }}
-          title='TIEMPO MUERTO'
-        />
+        {!tiempoMuertoSolicitado && (
+          <StyledButton
+            onPress={() => {
+              onSolicitarTiempoMuerto(tipo);
+            }}
+            title='Solicitar Tiempo Muerto'
+            disabled={sinTimeoutsDisponibles}
+          />
+        )}
+
+        {tiempoMuertoSolicitado && (
+          <StyledButton
+            onPress={() => {
+              onSolicitarTiempoMuerto(tipo);
+            }}
+            variant='error-outline'
+            title='Cancelar Tiempo Muerto'
+            disabled={tiempoMuertoIniciado}
+          />
+        )}
       </View>
 
-      {/* Columna Derecha */}
+      {/* Columna Derecha: Estadísticas */}
       <View style={styles.columnaDerecha}>
-        {/* Tarjeta de Faltas */}
         <View style={[styles.tarjeta, estaEnBonus && styles.tarjetaBonus]}>
           <Text style={[styles.numero, { fontSize: isTablet ? 32 : 28 }]}>
             {faltasRestantes}
@@ -82,7 +124,6 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
           </Text>
         </View>
 
-        {/* Tarjeta de Timeouts */}
         <View
           style={[
             styles.tarjeta,
@@ -112,17 +153,26 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  botonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   columnaIzquierda: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRightWidth: 1,
     borderRightColor: '#e5e5e5',
   },
-  escudoContainer: {
-    marginBottom: 12,
+  zonaSuperior: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+  escudoNombreContainer: {
+    alignItems: 'center',
   },
   escudo: {
     borderRadius: 8,
@@ -130,10 +180,22 @@ const styles = StyleSheet.create({
   },
   nombreEquipo: {
     fontWeight: 'bold',
-    textAlign: 'center',
     color: '#1a1a1a',
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    textAlign: 'center',
+    marginTop: 8,
+    maxWidth: 100,
+  },
+  puntosContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+  },
+  puntosTexto: {
+    color: '#3B82F6',
+  },
+  puntosLabel: {
+    fontSize: 12,
+    color: '#6c757d',
   },
   columnaDerecha: {
     flex: 1,
@@ -144,8 +206,8 @@ const styles = StyleSheet.create({
   tarjeta: {
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+
     marginVertical: 6,
     alignItems: 'center',
     borderWidth: 1,

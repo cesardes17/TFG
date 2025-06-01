@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   cuartoText: {
     fontWeight: 'bold',
@@ -259,7 +259,8 @@ const styles = StyleSheet.create({
   },
   controlesContainer: {
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
+    gap: 4,
   },
 });
 

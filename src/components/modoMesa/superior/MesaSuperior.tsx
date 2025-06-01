@@ -59,6 +59,7 @@ export default function MesaSuperior({
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           tipo='local'
           onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          cuartoActual={cuartoActual}
         />
       </View>
 
@@ -93,6 +94,7 @@ export default function MesaSuperior({
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           tipo='visitante'
           onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          cuartoActual={cuartoActual}
         />
       </View>
     </View>

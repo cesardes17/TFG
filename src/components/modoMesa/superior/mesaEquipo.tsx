@@ -16,6 +16,8 @@ interface MesaEquipoProps {
   tiempoMuertoSolicitado: boolean;
   tiempoMuertoIniciado: boolean;
   tipo: 'local' | 'visitante';
+  cuartoActual: string;
+
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
 }
@@ -28,10 +30,11 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
   tiempoMuertoSolicitado,
   tiempoMuertoIniciado,
   tipo,
+  cuartoActual,
   onSolicitarTiempoMuerto,
 }) => {
   const hayTiempoMuertoDisponible = puedeSolicitarTiempoMuerto(tipo);
-
+  console.log(tiempoMuertoSolicitado);
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
@@ -81,14 +84,16 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
         </View>
 
         {/* Botón para solicitar/cancelar tiempo muerto */}
-        {hayTiempoMuertoDisponible && !tiempoMuertoSolicitado && (
-          <StyledButton
-            onPress={() => {
-              onSolicitarTiempoMuerto(tipo);
-            }}
-            title='Solicitar Tiempo Muerto'
-          />
-        )}
+        {hayTiempoMuertoDisponible &&
+          !tiempoMuertoSolicitado &&
+          cuartoActual !== 'DESCANSO' && (
+            <StyledButton
+              onPress={() => {
+                onSolicitarTiempoMuerto(tipo);
+              }}
+              title='Solicitar Tiempo Muerto'
+            />
+          )}
 
         {tiempoMuertoSolicitado && (
           <StyledButton

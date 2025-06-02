@@ -85,6 +85,7 @@ export default function MesaSuperior({
             console.log('Fin cuarto');
             onFinCuarto();
           }}
+          setCuartoIniciado={setCuartoIniciado}
         />
       </View>
 

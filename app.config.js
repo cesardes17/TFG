@@ -5,7 +5,7 @@ export default ({ config }) => ({
   ...config,
   scheme: 'glmba',
   entryPoint: 'node_modules/expo-router/entry',
-  orientation: 'default',
+  orientation: 'DEFAULT',
   icon: './assets/icon.png',
   splash: {
     image: './assets/splash-icon.png',

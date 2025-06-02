@@ -18,10 +18,13 @@ interface MesaSuperiorProps {
   };
   cuartoActual: string;
   tiempoMuertoSolicitado: { local: boolean; visitante: boolean };
+  tiempoMuertoIniciado: boolean;
+  setTiempoMuertoIniciado: (iniciado: boolean) => void;
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
   onFinTiempoMuerto: () => void;
   onFinCuarto: () => void;
+  setCuartoIniciado: (iniciado: boolean) => void;
 }
 
 export default function MesaSuperior({
@@ -31,10 +34,13 @@ export default function MesaSuperior({
   cuartoActual,
   tiempoMuertoSolicitado,
   puntos,
+  tiempoMuertoIniciado,
+  setTiempoMuertoIniciado,
   puedeSolicitarTiempoMuerto,
   onSolicitarTiempoMuerto,
   onFinTiempoMuerto,
   onFinCuarto,
+  setCuartoIniciado,
 }: MesaSuperiorProps) {
   const tiemposMuertosLocal =
     estadisticasCuartoActual?.local.tiemposMuertos ?? 0;
@@ -44,8 +50,6 @@ export default function MesaSuperior({
     estadisticasCuartoActual?.visitante.faltasCometidas ?? 0;
   const tiemposMuertosVisitante =
     estadisticasCuartoActual?.visitante.tiemposMuertos ?? 0;
-
-  const [tiempoMuertoIniciado, setTiempoMuertoIniciado] = useState(false);
 
   return (
     <View style={styles.container}>

@@ -8,6 +8,7 @@ interface MesaControlTiempoProps {
   onFinTiempoMuerto: () => void;
   onInitTiempoMuerto: () => void;
   hayTiempoMuertoSolicitado: boolean;
+  setCuartoIniciado: (iniciado: boolean) => void;
 }
 
 const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
@@ -16,6 +17,7 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   onFinTiempoMuerto,
   onInitTiempoMuerto,
   hayTiempoMuertoSolicitado,
+  setCuartoIniciado,
 }) => {
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
@@ -136,6 +138,7 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
       if (prev) {
         // Reanudar ➜ reiniciar el startTime
         startTimeRef.current = Date.now();
+        setCuartoIniciado?.(true);
       } else {
         // Pausar ➜ sumar lo que pasó en esta sesión
         if (startTimeRef.current) {
@@ -145,6 +148,7 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
           elapsedTimeRef.current += elapsedThisSession;
           startTimeRef.current = null;
         }
+        setCuartoIniciado?.(false);
       }
       setHayTiempoMuertoActivo(hayTiempoMuertoSolicitado);
       return !prev;

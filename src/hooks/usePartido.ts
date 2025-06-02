@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useFocusEffect } from 'expo-router'; // o de '@react-navigation/native' si usas React Navigation directamente
+import { useFocusEffect } from 'expo-router';
 import { Partido } from '../types/Partido';
 import { partidoService } from '../services/partidoService';
 import { useTemporadaContext } from '../contexts/TemporadaContext';

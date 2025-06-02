@@ -10,8 +10,8 @@ import StyledAlert from '../common/StyledAlert';
 // import EstadisticasJugadores from './estadisticasComparativas/EstadisticasJugadores';
 
 interface Props {
-  estadisticasEquipos: EstadisticasEquiposPartido;
-  estadisticasJugadores: EstadisticasJugadores;
+  estadisticasEquipos: EstadisticasEquiposPartido | null;
+  estadisticasJugadores: EstadisticasJugadores | null;
   estado: EstadoPartido;
 }
 
@@ -22,7 +22,11 @@ export default function BodyPartido({
 }: Props) {
   const [vista, setVista] = useState<'equipos' | 'jugadores'>('equipos');
 
-  if (estado === 'pendiente') {
+  if (
+    estado === 'pendiente' ||
+    !estadisticasEquipos ||
+    !estadisticasJugadores
+  ) {
     return (
       <View style={{ padding: 8 }}>
         <StyledAlert

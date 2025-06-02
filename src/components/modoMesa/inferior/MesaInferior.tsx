@@ -1,32 +1,51 @@
 // MesaInferior.tsx
 import { View, StyleSheet } from 'react-native';
-import StyledText from '../../common/StyledText';
+import { EstadisticasJugadores } from '../../../types/estadisticas/jugador';
+import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
+import MesaJugadores from './MesaJugadores';
 
-export default function MesaInferior() {
+interface Props {
+  estadisticasJugadores: EstadisticasJugadores;
+  onActualizarEstadisticasJugadores: (
+    params: ActualizarEstadisticaJugadorParams
+  ) => void;
+  tiempoMuertoIniciado: boolean;
+  cuartoIniciado: boolean;
+}
+
+export default function MesaInferior({
+  estadisticasJugadores,
+  onActualizarEstadisticasJugadores,
+  tiempoMuertoIniciado,
+  cuartoIniciado,
+}: Props) {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <StyledText>MesaInferior</StyledText>
+    <View style={styles.container}>
+      <View style={styles.tercio}>
+        <MesaJugadores
+          equipo='local'
+          estadisticasJugadores={estadisticasJugadores.local}
+          onActualizarEstadisticasJugadores={onActualizarEstadisticasJugadores}
+          tiempoMuertoIniciado={tiempoMuertoIniciado}
+          cuartoIniciado={cuartoIniciado}
+        />
+      </View>
+
+      {/* <View style={styles.tercio}>
+        <MesaHistorial />
+
+      </View> */}
+      <View style={styles.tercio}>
+        <MesaJugadores
+          equipo='visitante'
+          estadisticasJugadores={estadisticasJugadores.visitante}
+          onActualizarEstadisticasJugadores={onActualizarEstadisticasJugadores}
+          tiempoMuertoIniciado={tiempoMuertoIniciado}
+          cuartoIniciado={cuartoIniciado}
+        />
+      </View>
     </View>
   );
-  //   return (
-  //     <View style={styles.container}>
-  //       <View style={styles.tercio}>
-  //         <MesaJugadores equipo='local' />
-  //       </View>
-  //       <View style={styles.tercio}>
-  //         <MesaHistorial />
-  //       </View>
-  //       <View style={styles.tercio}>
-  //         <MesaJugadores equipo='visitante' />
-  //       </View>
-  //     </View>
-  //   );
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View } from 'react-native';
-import { partidoEjemploFinalizado } from '../../constants/partidoFinalizado';
 import HeaderPartido from '../../components/partidos/HeaderPartido';
 import BodyPartido from '../../components/partidos/BodyPartido';
 import AccionesPartido from '../../components/partidos/AccionesPartido';
@@ -18,10 +17,7 @@ export default function PartidoInfoScreen({
   console.log('tipoCompeticion', tipoCompeticion);
   const { error, isLoading, partido } = usePartido(idPartido, tipoCompeticion);
 
-  const { estado, resultado, estadisticasEquipos, estadisticasJugadores } =
-    partidoEjemploFinalizado;
-
-  if (!estadisticasEquipos || !estadisticasJugadores || !partido) {
+  if (!partido) {
     return null; // Manejo de caso en el que estadisticasEquipos o estadisticasJugadores son undefined o null
   }
 
@@ -42,9 +38,13 @@ export default function PartidoInfoScreen({
         tipoCompeticion={tipoCompeticion}
       />
       <BodyPartido
-        estadisticasEquipos={estadisticasEquipos}
-        estadisticasJugadores={estadisticasJugadores}
-        estado={estado}
+        estadisticasEquipos={
+          partido.estadisticasEquipos ? partido.estadisticasEquipos : null
+        }
+        estadisticasJugadores={
+          partido.estadisticasJugadores ? partido.estadisticasJugadores : null
+        }
+        estado={partido.estado}
       />
     </View>
   );

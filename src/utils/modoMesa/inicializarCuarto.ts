@@ -63,6 +63,5 @@ export function inicializarCuarto(
     },
   };
 
-  console.log(JSON.stringify(partidoInicializado, null, 2));
   return partidoInicializado;
 }

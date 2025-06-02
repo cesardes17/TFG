@@ -8,9 +8,12 @@ export type EstadisticasJugador = {
   asistencias: number;
   rebotes: number;
   faltasCometidas: number;
+  jugadorId: string;
   nombre: string;
   apellidos: string;
   fotoUrl: string;
+  dorsal: number;
+  haJugado: boolean;
 };
 
 export type EstadisticasJugadores = {

@@ -9,6 +9,9 @@ interface MesaControlTiempoProps {
   onInitTiempoMuerto: () => void;
   hayTiempoMuertoSolicitado: boolean;
   setCuartoIniciado: (iniciado: boolean) => void;
+  quintetosListos: boolean;
+  partidoIniciado: boolean;
+  setPartidoIniciado: (iniciado: boolean) => void;
 }
 
 const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
@@ -18,6 +21,9 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   onInitTiempoMuerto,
   hayTiempoMuertoSolicitado,
   setCuartoIniciado,
+  quintetosListos,
+  partidoIniciado,
+  setPartidoIniciado,
 }) => {
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
@@ -139,6 +145,11 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
         // Reanudar ➜ reiniciar el startTime
         startTimeRef.current = Date.now();
         setCuartoIniciado?.(true);
+
+        // Si es el primer cuarto (Q1) y el partido aún no estaba iniciado, márcalo
+        if (cuartoActual === 'Q1' && !partidoIniciado) {
+          setPartidoIniciado(true);
+        }
       } else {
         // Pausar ➜ sumar lo que pasó en esta sesión
         if (startTimeRef.current) {
@@ -199,7 +210,9 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
           <StyledButton
             title={cronometroCuartoPausado ? 'Reanudar' : 'Pausar'}
             onPress={toggleCronometro}
-            disabled={tiempoCuarto === 0}
+            disabled={
+              tiempoCuarto === 0 || (!partidoIniciado && !quintetosListos)
+            }
           />
         )}
         {esDescanso && (

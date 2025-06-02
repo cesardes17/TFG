@@ -57,6 +57,11 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
   const [tiempoMuertoIniciado, setTiempoMuertoIniciado] = useState(false);
   const [cuartoIniciado, setCuartoIniciado] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [partidoIniciado, setPartidoIniciado] = useState(false);
+  const [quintetosListos, setQuintetosListos] = useState({
+    local: false,
+    visitante: false,
+  });
   // Cargar inscripciones de ambos equipos
   const temporadaId = temporada!.id;
   const equipoLocalId = partidoActual?.equipoLocal?.id;
@@ -271,6 +276,13 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     setPartidoActual(partidoCopia);
   };
 
+  const handleQuintetoListo = (
+    equipo: 'local' | 'visitante',
+    listo: boolean
+  ) => {
+    setQuintetosListos((prev) => ({ ...prev, [equipo]: listo }));
+  };
+
   if (isLoadingPartido || isLoadingInscripciones || isLoading) {
     return <LoadingIndicator text='Cargando datos del partido...' />;
   }
@@ -342,6 +354,9 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           setTiempoMuertoIniciado={setTiempoMuertoIniciado}
           setCuartoIniciado={setCuartoIniciado}
+          quintetosListos={quintetosListos}
+          partidoIniciado={partidoIniciado}
+          setPartidoIniciado={setPartidoIniciado}
         />
       </View>
       <View style={styles.inferior}>
@@ -350,6 +365,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           onActualizarEstadisticasJugadores={handleActualizarEstadisticaJugador}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           cuartoIniciado={cuartoIniciado}
+          setQuintetosListos={handleQuintetoListo}
         />
       </View>
     </SafeAreaView>

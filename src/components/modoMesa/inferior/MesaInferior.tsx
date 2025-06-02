@@ -11,6 +11,7 @@ interface Props {
   ) => void;
   tiempoMuertoIniciado: boolean;
   cuartoIniciado: boolean;
+  setQuintetosListos: (equipo: 'local' | 'visitante', listo: boolean) => void;
 }
 
 export default function MesaInferior({
@@ -18,6 +19,7 @@ export default function MesaInferior({
   onActualizarEstadisticasJugadores,
   tiempoMuertoIniciado,
   cuartoIniciado,
+  setQuintetosListos,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -28,6 +30,7 @@ export default function MesaInferior({
           onActualizarEstadisticasJugadores={onActualizarEstadisticasJugadores}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           cuartoIniciado={cuartoIniciado}
+          setQuintetosListos={setQuintetosListos}
         />
       </View>
 
@@ -42,6 +45,7 @@ export default function MesaInferior({
           onActualizarEstadisticasJugadores={onActualizarEstadisticasJugadores}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           cuartoIniciado={cuartoIniciado}
+          setQuintetosListos={setQuintetosListos}
         />
       </View>
     </View>

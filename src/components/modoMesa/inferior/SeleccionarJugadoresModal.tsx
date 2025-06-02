@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
+  Modal,
   View,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
-  Modal,
-  ScrollView,
-  Alert,
+  Image,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
 
@@ -16,7 +15,7 @@ interface SeleccionarJugadoresModalProps {
   jugadores: EstadisticasJugador[];
   jugadoresEnPistaIds: string[];
   onCerrar: () => void;
-  onConfirmar: (jugadoresSeleccionadosIds: string[]) => void;
+  onConfirmar: (jugadoresSeleccionados: string[]) => void;
 }
 
 const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
@@ -25,34 +24,60 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
   onCerrar,
   onConfirmar,
 }) => {
-  const [jugadoresSeleccionados, setJugadoresSeleccionados] = useState<
-    string[]
-  >([]);
-  const { width } = Dimensions.get('window');
+  const [jugadoresSeleccionados, setJugadoresSeleccionados] =
+    useState<string[]>(jugadoresEnPistaIds);
 
-  // Calculate card width for grid layout (3 columns with margins)
-  const cardWidth = (width - 60) / 3; // 60 = margins and gaps
+  const screenDimensions = Dimensions.get('window');
+  const modalWidth = Math.min(screenDimensions.width * 0.9, 800);
+  const modalHeight = Math.min(screenDimensions.height * 0.8, 600);
 
-  // Initialize selected players when modal opens
-  useEffect(() => {
-    setJugadoresSeleccionados([...jugadoresEnPistaIds]);
-  }, [jugadoresEnPistaIds]);
+  // Calcular layout dinámico
+  const layoutConfig = useMemo(() => {
+    const totalJugadores = jugadores.length;
+    if (totalJugadores === 0) return { filas: 0, jugadoresPorFila: 0 };
 
-  const handleJugadorPress = (jugadorId: string) => {
-    const estaSeleccionado = jugadoresSeleccionados.includes(jugadorId);
+    let mejorConfig = { filas: 1, jugadoresPorFila: totalJugadores };
+    let menorDiferencia = Infinity;
 
-    if (estaSeleccionado) {
-      // Deseleccionar jugador
+    for (
+      let filas = 1;
+      filas <= Math.ceil(Math.sqrt(totalJugadores));
+      filas++
+    ) {
+      const jugadoresPorFila = Math.ceil(totalJugadores / filas);
+      const aspectRatio = jugadoresPorFila / filas;
+      const diferencia = Math.abs(aspectRatio - 1.8);
+
+      if (diferencia < menorDiferencia) {
+        menorDiferencia = diferencia;
+        mejorConfig = { filas, jugadoresPorFila };
+      }
+    }
+
+    return mejorConfig;
+  }, [jugadores.length]);
+
+  const filasJugadores = useMemo(() => {
+    const filas: EstadisticasJugador[][] = [];
+    const { jugadoresPorFila } = layoutConfig;
+
+    for (let i = 0; i < jugadores.length; i += jugadoresPorFila) {
+      filas.push(jugadores.slice(i, i + jugadoresPorFila));
+    }
+
+    return filas;
+  }, [jugadores, layoutConfig]);
+
+  const toggleJugador = (jugadorId: string) => {
+    if (jugadoresSeleccionados.includes(jugadorId)) {
       setJugadoresSeleccionados((prev) =>
         prev.filter((id) => id !== jugadorId)
       );
     } else {
-      // Intentar seleccionar jugador
       if (jugadoresSeleccionados.length >= 5) {
         Alert.alert(
           'Límite alcanzado',
-          'Solo puedes tener 5 jugadores seleccionados en pista.',
-          [{ text: 'OK' }]
+          'Solo puedes seleccionar un máximo de 5 jugadores en pista.'
         );
         return;
       }
@@ -60,95 +85,109 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
     }
   };
 
-  const handleConfirmar = () => {
-    if (jugadoresSeleccionados.length !== 5) {
+  const confirmarSeleccion = () => {
+    if (jugadoresSeleccionados.length === 0) {
       Alert.alert(
-        'Selección incompleta',
-        'Debes seleccionar exactamente 5 jugadores para continuar.',
-        [{ text: 'OK' }]
+        'Selección requerida',
+        'Debes seleccionar al menos un jugador.'
       );
       return;
     }
     onConfirmar(jugadoresSeleccionados);
   };
 
-  const renderJugador = (jugador: EstadisticasJugador) => {
-    const estaSeleccionado = jugadoresSeleccionados.includes(jugador.jugadorId);
-
-    return (
-      <TouchableOpacity
-        key={jugador.jugadorId}
-        style={[
-          styles.tarjetaJugador,
-          { width: cardWidth },
-          estaSeleccionado && styles.tarjetaSeleccionada,
-        ]}
-        onPress={() => handleJugadorPress(jugador.jugadorId)}
-        activeOpacity={0.7}
-      >
-        {/* Indicador de selección */}
-        {estaSeleccionado && (
-          <View style={styles.indicadorSeleccion}>
-            <Text style={styles.textoSeleccion}>✓</Text>
-          </View>
-        )}
-
-        {/* Foto del jugador */}
-        <View style={styles.contenedorFoto}>
-          {jugador.fotoUrl ? (
-            <Image source={{ uri: jugador.fotoUrl }} style={styles.foto} />
-          ) : (
-            <View style={styles.fotoPlaceholder}>
-              <Text style={styles.textoPlaceholder}>
-                {jugador.nombre.charAt(0)}
-                {jugador.apellidos.charAt(0)}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Información del jugador */}
-        <View style={styles.infoJugador}>
-          <Text style={styles.dorsal}>#{jugador.dorsal}</Text>
-          <Text style={styles.nombre} numberOfLines={1}>
-            {jugador.nombre}
-          </Text>
-          <Text style={styles.apellidos} numberOfLines={1}>
-            {jugador.apellidos}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
+  const obtenerIniciales = (nombre: string, apellidos: string) => {
+    const inicialNombre = nombre.charAt(0).toUpperCase();
+    const inicialApellido =
+      apellidos.split(' ')[0]?.charAt(0).toUpperCase() || '';
+    return inicialNombre + inicialApellido;
   };
 
   return (
     <Modal
       visible={true}
-      animationType='slide'
       transparent={true}
+      animationType='fade'
       onRequestClose={onCerrar}
+      supportedOrientations={['portrait', 'landscape']}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          {/* Header */}
+      <View style={styles.overlay}>
+        <View
+          style={[
+            styles.modalContainer,
+            { width: modalWidth, height: modalHeight },
+          ]}
+        >
+          {/* HEADER */}
           <View style={styles.header}>
-            <Text style={styles.titulo}>Seleccionar Jugadores</Text>
-            <Text style={styles.contador}>
-              {jugadoresSeleccionados.length}/5 seleccionados
+            <Text style={styles.titulo}>Seleccionar Jugadores en Pista</Text>
+            <Text style={styles.subtitulo}>
+              {jugadoresSeleccionados.length}/5 jugadores seleccionados
             </Text>
           </View>
 
-          {/* Grid de jugadores */}
-          <ScrollView
-            style={styles.scrollContainer}
-            contentContainerStyle={styles.gridContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            {jugadores.map(renderJugador)}
-          </ScrollView>
+          {/* BODY */}
+          <View style={styles.body}>
+            {filasJugadores.map((fila, filaIndex) => (
+              <View key={filaIndex} style={styles.fila}>
+                {fila.map((jugador) => {
+                  const estaSeleccionado = jugadoresSeleccionados.includes(
+                    jugador.jugadorId
+                  );
+                  return (
+                    <TouchableOpacity
+                      key={jugador.jugadorId}
+                      style={[
+                        styles.tarjetaJugador,
+                        {
+                          height: '100%',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          borderWidth: 2,
+                          borderRadius: 8,
+                          borderColor: estaSeleccionado ? '#4CAF50' : '#E0E0E0',
+                          backgroundColor: estaSeleccionado
+                            ? '#E8F5E8'
+                            : '#FFFFFF',
+                        },
+                      ]}
+                      onPress={() => toggleJugador(jugador.jugadorId)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.fotoContainer}>
+                        {jugador.fotoUrl ? (
+                          <Image
+                            source={{ uri: jugador.fotoUrl }}
+                            style={styles.foto}
+                          />
+                        ) : (
+                          <View style={styles.inicialesContainer}>
+                            <Text style={styles.iniciales}>
+                              {obtenerIniciales(
+                                jugador.nombre,
+                                jugador.apellidos
+                              )}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
 
-          {/* Botones de acción */}
-          <View style={styles.botonesContainer}>
+                      <Text style={styles.dorsal}>#{jugador.dorsal}</Text>
+                      <Text style={styles.nombre} numberOfLines={1}>
+                        {jugador.nombre}
+                      </Text>
+                      <Text style={styles.apellidos} numberOfLines={1}>
+                        {jugador.apellidos}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+
+          {/* FOOTER */}
+          <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.boton, styles.botonCancelar]}
               onPress={onCerrar}
@@ -157,22 +196,11 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.boton,
-                styles.botonConfirmar,
-                jugadoresSeleccionados.length !== 5 &&
-                  styles.botonDeshabilitado,
-              ]}
-              onPress={handleConfirmar}
+              style={[styles.boton, styles.botonConfirmar]}
+              onPress={confirmarSeleccion}
             >
-              <Text
-                style={[
-                  styles.textoBotonConfirmar,
-                  jugadoresSeleccionados.length !== 5 &&
-                    styles.textoDeshabilitado,
-                ]}
-              >
-                Confirmar selección
+              <Text style={styles.textoBotonConfirmar}>
+                Confirmar selección ({jugadoresSeleccionados.length})
               </Text>
             </TouchableOpacity>
           </View>
@@ -183,165 +211,116 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   modalContainer: {
-    flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    width: '100%',
-    maxHeight: '90%',
+    flexDirection: 'column',
+    overflow: 'hidden',
   },
   header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 8,
   },
   titulo: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#212529',
-    marginBottom: 8,
+    color: '#333',
   },
-  contador: {
-    fontSize: 16,
-    color: '#6c757d',
-    fontWeight: '600',
+  subtitulo: {
+    fontSize: 12,
+    color: '#666',
   },
-  scrollContainer: {
+  body: {
+    flex: 8,
+
+    gap: 4,
+    padding: 16,
+  },
+  fila: {
     flex: 1,
-  },
-  gridContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-around',
-    padding: 15,
-    paddingBottom: 20,
+    alignItems: 'center',
   },
   tarjetaJugador: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 15,
-    alignItems: 'center',
+    flex: 1,
+    margin: 4,
     borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-  },
-  tarjetaSeleccionada: {
-    backgroundColor: '#e8f5e8',
-    borderColor: '#28a745',
-  },
-  indicadorSeleccion: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#28a745',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  textoSeleccion: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  contenedorFoto: {
-    marginBottom: 8,
-  },
-  foto: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  fotoPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#dee2e6',
-    justifyContent: 'center',
+    borderRadius: 8,
+    padding: 4,
     alignItems: 'center',
   },
-  textoPlaceholder: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#6c757d',
-  },
-  infoJugador: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  dorsal: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#495057',
+  fotoContainer: {
     marginBottom: 4,
   },
+  foto: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  inicialesContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#2196F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iniciales: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  dorsal: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#2196F3',
+  },
   nombre: {
-    fontSize: 14,
+    fontSize: 9,
     fontWeight: '600',
-    color: '#212529',
+    color: '#333333',
     textAlign: 'center',
   },
   apellidos: {
-    fontSize: 12,
-    color: '#6c757d',
+    fontSize: 8,
+    color: '#666666',
     textAlign: 'center',
-    marginTop: 2,
   },
-  botonesContainer: {
+  footer: {
+    flex: 1,
     flexDirection: 'row',
-    padding: 20,
-    paddingTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
-    gap: 12,
+    borderTopColor: '#e0e0e0',
   },
   boton: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   botonCancelar: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#f0f0f0',
   },
   botonConfirmar: {
-    backgroundColor: '#28a745',
-  },
-  botonDeshabilitado: {
-    backgroundColor: '#dee2e6',
+    backgroundColor: '#4CAF50',
   },
   textoBotonCancelar: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: '#666666',
+    fontSize: 14,
     fontWeight: '600',
   },
   textoBotonConfirmar: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '600',
-  },
-  textoDeshabilitado: {
-    color: '#6c757d',
   },
 });
 

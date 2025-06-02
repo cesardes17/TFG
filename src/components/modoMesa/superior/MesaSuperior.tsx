@@ -19,6 +19,9 @@ interface MesaSuperiorProps {
   cuartoActual: string;
   tiempoMuertoSolicitado: { local: boolean; visitante: boolean };
   tiempoMuertoIniciado: boolean;
+  quintetosListos: { local: boolean; visitante: boolean };
+  partidoIniciado: boolean;
+  setPartidoIniciado: (iniciado: boolean) => void;
   setTiempoMuertoIniciado: (iniciado: boolean) => void;
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
@@ -35,6 +38,9 @@ export default function MesaSuperior({
   tiempoMuertoSolicitado,
   puntos,
   tiempoMuertoIniciado,
+  quintetosListos,
+  partidoIniciado,
+  setPartidoIniciado,
   setTiempoMuertoIniciado,
   puedeSolicitarTiempoMuerto,
   onSolicitarTiempoMuerto,
@@ -86,6 +92,9 @@ export default function MesaSuperior({
             onFinCuarto();
           }}
           setCuartoIniciado={setCuartoIniciado}
+          partidoIniciado={partidoIniciado}
+          setPartidoIniciado={setPartidoIniciado}
+          quintetosListos={quintetosListos.local && quintetosListos.visitante}
         />
       </View>
 

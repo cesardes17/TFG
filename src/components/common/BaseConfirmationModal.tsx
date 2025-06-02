@@ -59,7 +59,12 @@ export default function BaseConfirmationModal({
   };
 
   return (
-    <Modal animationType='fade' transparent visible={visible}>
+    <Modal
+      animationType='fade'
+      transparent
+      visible={visible}
+      supportedOrientations={['landscape', 'portrait']}
+    >
       <Pressable
         style={{
           flex: 1,

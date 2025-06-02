@@ -5,6 +5,7 @@ import { EstadisticasTiro } from '../../../types/estadisticas/tiro';
 import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
 import RenderEstadisticaJugador from './RenderEstadisticaJugador';
 import SeleccionarJugadoresModal from './SeleccionarJugadoresModal';
+import StyledButton from '../../common/StyledButton';
 
 interface MesaJugadoresProps {
   equipo: 'local' | 'visitante';
@@ -14,6 +15,7 @@ interface MesaJugadoresProps {
   ) => void;
   tiempoMuertoIniciado: boolean;
   cuartoIniciado: boolean;
+  setQuintetosListos: (equipo: 'local' | 'visitante', listo: boolean) => void;
 }
 
 const MesaJugadores: React.FC<MesaJugadoresProps> = ({
@@ -22,6 +24,7 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   onActualizarEstadisticasJugadores,
   tiempoMuertoIniciado,
   cuartoIniciado,
+  setQuintetosListos,
 }) => {
   // Estado local para IDs de jugadores en pista
   const [jugadoresEnPista, setJugadoresEnPista] = useState<string[]>([]);
@@ -76,22 +79,37 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   return (
     <View style={styles.container}>
       {jugadoresEnPista.length !== 5 ? (
-        <Button
-          title='Seleccionar Quinteto Inicial'
-          onPress={handleAbrirModal}
-        />
-      ) : (
-        jugadoresEnPistaList.map((jugador, index) => (
-          <RenderEstadisticaJugador
-            key={jugador.jugadorId}
-            jugador={jugador}
-            equipo={equipo}
-            index={index}
-            botonesDeshabilitados={botonesDeshabilitados}
-            handleActualizarEstadistica={handleActualizarEstadistica}
-            calcularIntentos={calcularIntentos}
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+          }}
+        >
+          <StyledButton
+            title='Seleccionar Quinteto Inicial'
+            onPress={handleAbrirModal}
           />
-        ))
+        </View>
+      ) : (
+        <>
+          <StyledButton
+            title='Seleccionar Quinteto Inicial'
+            onPress={handleAbrirModal}
+          />
+          {jugadoresEnPistaList.map((jugador, index) => (
+            <RenderEstadisticaJugador
+              key={jugador.jugadorId}
+              jugador={jugador}
+              equipo={equipo}
+              index={index}
+              botonesDeshabilitados={botonesDeshabilitados}
+              handleActualizarEstadistica={handleActualizarEstadistica}
+              calcularIntentos={calcularIntentos}
+            />
+          ))}
+        </>
       )}
 
       {mostrarModal && (

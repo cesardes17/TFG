@@ -3,7 +3,7 @@ import { EstadisticasEquipo } from '../../../types/estadisticas/equipo';
 import { EquipoPartido } from '../../../types/Equipo';
 import MesaEquipo from './MesaEquipo';
 import MesaControlTiempo from './MesaControlTiempo';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface MesaSuperiorProps {
   equipoLocal: EquipoPartido;
@@ -21,6 +21,8 @@ interface MesaSuperiorProps {
   tiempoMuertoIniciado: boolean;
   quintetosListos: { local: boolean; visitante: boolean };
   partidoIniciado: boolean;
+  pararCronometro: boolean;
+  setPararCronometro: (parar: boolean) => void;
   setPartidoIniciado: (iniciado: boolean) => void;
   setTiempoMuertoIniciado: (iniciado: boolean) => void;
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
@@ -40,6 +42,8 @@ export default function MesaSuperior({
   tiempoMuertoIniciado,
   quintetosListos,
   partidoIniciado,
+  pararCronometro,
+  setPararCronometro,
   setPartidoIniciado,
   setTiempoMuertoIniciado,
   puedeSolicitarTiempoMuerto,
@@ -56,6 +60,18 @@ export default function MesaSuperior({
     estadisticasCuartoActual?.visitante.faltasCometidas ?? 0;
   const tiemposMuertosVisitante =
     estadisticasCuartoActual?.visitante.tiemposMuertos ?? 0;
+
+  //en caso de cambiar de cuarto, los tiempos muertos solicitados se cancelan
+  useEffect(() => {
+    if (tiempoMuertoSolicitado.local) {
+      console.log('Cancelando tiempo muerto solicitado, local');
+      onSolicitarTiempoMuerto('local');
+    }
+    if (tiempoMuertoSolicitado.visitante) {
+      console.log('Cancelando tiempo muerto solicitado, visitante');
+      onSolicitarTiempoMuerto('visitante');
+    }
+  }, [cuartoActual]);
 
   return (
     <View style={styles.container}>
@@ -75,6 +91,8 @@ export default function MesaSuperior({
 
       <View style={styles.tercio}>
         <MesaControlTiempo
+          setPararCronometro={setPararCronometro}
+          pararCronometro={pararCronometro}
           cuartoActual={cuartoActual}
           hayTiempoMuertoSolicitado={
             tiempoMuertoSolicitado.local || tiempoMuertoSolicitado.visitante

@@ -12,17 +12,22 @@ interface MesaControlTiempoProps {
   quintetosListos: boolean;
   partidoIniciado: boolean;
   setPartidoIniciado: (iniciado: boolean) => void;
+  setPararCronometro: (parar: boolean) => void;
+  pararCronometro: boolean;
 }
 
 const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   cuartoActual,
+  hayTiempoMuertoSolicitado,
+  quintetosListos,
+  partidoIniciado,
+  pararCronometro,
+  setPararCronometro,
+
   onFinCuarto,
   onFinTiempoMuerto,
   onInitTiempoMuerto,
-  hayTiempoMuertoSolicitado,
   setCuartoIniciado,
-  quintetosListos,
-  partidoIniciado,
   setPartidoIniciado,
 }) => {
   const { width } = Dimensions.get('window');
@@ -51,6 +56,13 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   };
 
   useEffect(() => {
+    if (pararCronometro) {
+      setPararCronometro(false);
+      toggleCronometro();
+    }
+  }, [pararCronometro]);
+
+  useEffect(() => {
     const duracion = obtenerDuracionCuarto(cuartoActual);
     setTiempoCuarto(duracion);
     tiempoInicialRef.current = duracion;
@@ -71,6 +83,7 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
 
     if (restante === 0) {
       setCronometroCuartoPausado(true);
+
       onFinCuarto();
       return;
     }

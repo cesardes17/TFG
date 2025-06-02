@@ -86,13 +86,6 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
   };
 
   const confirmarSeleccion = () => {
-    if (jugadoresSeleccionados.length === 0) {
-      Alert.alert(
-        'Selección requerida',
-        'Debes seleccionar al menos un jugador.'
-      );
-      return;
-    }
     onConfirmar(jugadoresSeleccionados);
   };
 
@@ -153,22 +146,16 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                       ]}
                       onPress={() => toggleJugador(jugador.jugadorId)}
                       activeOpacity={0.7}
+                      disabled={
+                        jugador.faltasCometidas >= 5 && !estaSeleccionado
+                      }
                     >
                       <View style={styles.fotoContainer}>
-                        {jugador.fotoUrl ? (
+                        {jugador.fotoUrl && (
                           <Image
                             source={{ uri: jugador.fotoUrl }}
                             style={styles.foto}
                           />
-                        ) : (
-                          <View style={styles.inicialesContainer}>
-                            <Text style={styles.iniciales}>
-                              {obtenerIniciales(
-                                jugador.nombre,
-                                jugador.apellidos
-                              )}
-                            </Text>
-                          </View>
                         )}
                       </View>
 
@@ -178,6 +165,9 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                       </Text>
                       <Text style={styles.apellidos} numberOfLines={1}>
                         {jugador.apellidos}
+                      </Text>
+                      <Text style={styles.faltas} numberOfLines={1}>
+                        Faltas: {jugador.faltasCometidas}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -196,8 +186,13 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.boton, styles.botonConfirmar]}
+              style={[
+                styles.boton,
+                styles.botonConfirmar,
+                { opacity: jugadoresSeleccionados.length !== 5 ? 0.5 : 1 },
+              ]}
               onPress={confirmarSeleccion}
+              disabled={jugadoresSeleccionados.length !== 5}
             >
               <Text style={styles.textoBotonConfirmar}>
                 Confirmar selección ({jugadoresSeleccionados.length})
@@ -294,6 +289,12 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#666666',
     textAlign: 'center',
+  },
+  faltas: {
+    fontSize: 11,
+    color: '#FF0000',
+    textAlign: 'center',
+    marginTop: 4,
   },
   footer: {
     flex: 1,

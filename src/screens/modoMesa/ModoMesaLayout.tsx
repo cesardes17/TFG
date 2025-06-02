@@ -13,6 +13,7 @@ import MesaInferior from '../../components/modoMesa/inferior/MesaInferior';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useInscripcionesPartido } from '../../hooks/useInscripcionesPartido';
 import { inicializarPartido } from '../../utils/modoMesa/inicializarPartido';
+import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
 
 interface Props {
   idPartido: string;
@@ -61,6 +62,16 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
   const [quintetosListos, setQuintetosListos] = useState({
     local: false,
     visitante: false,
+  });
+  const [pararCronometro, setPararCronometro] = useState(false);
+  const [modal, setModal] = useState<{
+    title: string;
+    message: string;
+    visible: boolean;
+  }>({
+    title: '',
+    message: '',
+    visible: false,
   });
   // Cargar inscripciones de ambos equipos
   const temporadaId = temporada!.id;
@@ -207,6 +218,14 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
         }
       }
     }
+    if (jugadorStats.faltasCometidas >= 5) {
+      setPararCronometro(true);
+      setModal({
+        title: 'JugadorExpulsado!',
+        message: 'El jugador ha cometido 5 faltas.',
+        visible: true,
+      });
+    }
 
     // 3️⃣ Actualizar estadística del equipo en el cuarto actual
     const equipoStatsCuarto =
@@ -283,6 +302,10 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     setQuintetosListos((prev) => ({ ...prev, [equipo]: listo }));
   };
 
+  const pararCronometroHandler = (parar: boolean) => {
+    setPararCronometro(parar);
+  };
+
   if (isLoadingPartido || isLoadingInscripciones || isLoading) {
     return <LoadingIndicator text='Cargando datos del partido...' />;
   }
@@ -357,10 +380,13 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           quintetosListos={quintetosListos}
           partidoIniciado={partidoIniciado}
           setPartidoIniciado={setPartidoIniciado}
+          pararCronometro={pararCronometro}
+          setPararCronometro={pararCronometroHandler}
         />
       </View>
       <View style={styles.inferior}>
         <MesaInferior
+          cuartoActual={cuartoActual}
           estadisticasJugadores={partidoActual.estadisticasJugadores}
           onActualizarEstadisticasJugadores={handleActualizarEstadisticaJugador}
           tiempoMuertoIniciado={tiempoMuertoIniciado}
@@ -368,6 +394,26 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           setQuintetosListos={handleQuintetoListo}
         />
       </View>
+      <BaseConfirmationModal
+        onCancel={() => {
+          setModal({
+            title: '',
+            message: '',
+            visible: false,
+          });
+        }}
+        onConfirm={() => {
+          setModal({
+            title: '',
+            message: '',
+            visible: false,
+          });
+        }}
+        title={modal.title}
+        type='create'
+        visible={modal.visible}
+        description={modal.message}
+      />
     </SafeAreaView>
   );
 }

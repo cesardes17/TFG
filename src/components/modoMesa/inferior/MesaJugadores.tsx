@@ -6,6 +6,7 @@ import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/Mo
 import RenderEstadisticaJugador from './RenderEstadisticaJugador';
 import SeleccionarJugadoresModal from './SeleccionarJugadoresModal';
 import StyledButton from '../../common/StyledButton';
+import StyledAlert from '../../common/StyledAlert';
 
 interface MesaJugadoresProps {
   equipo: 'local' | 'visitante';
@@ -16,6 +17,7 @@ interface MesaJugadoresProps {
   tiempoMuertoIniciado: boolean;
   cuartoIniciado: boolean;
   setQuintetosListos: (equipo: 'local' | 'visitante', listo: boolean) => void;
+  cuartoActual: string;
 }
 
 const MesaJugadores: React.FC<MesaJugadoresProps> = ({
@@ -25,6 +27,7 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   tiempoMuertoIniciado,
   cuartoIniciado,
   setQuintetosListos,
+  cuartoActual,
 }) => {
   // Estado local para IDs de jugadores en pista
   const [jugadoresEnPista, setJugadoresEnPista] = useState<string[]>([]);
@@ -65,6 +68,7 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   const handleConfirmarSeleccion = (ids: string[]) => {
     console.log('IDs confirmados:', ids);
     setJugadoresEnPista(ids);
+    setQuintetosListos(equipo, true);
     setMostrarModal(false);
   };
 
@@ -94,21 +98,32 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
         </View>
       ) : (
         <>
-          <StyledButton
-            title='Seleccionar Quinteto Inicial'
-            onPress={handleAbrirModal}
-          />
-          {jugadoresEnPistaList.map((jugador, index) => (
-            <RenderEstadisticaJugador
-              key={jugador.jugadorId}
-              jugador={jugador}
-              equipo={equipo}
-              index={index}
-              botonesDeshabilitados={botonesDeshabilitados}
-              handleActualizarEstadistica={handleActualizarEstadistica}
-              calcularIntentos={calcularIntentos}
+          <View style={{ padding: 4 }}>
+            <StyledButton
+              title='Cambiar Jugadores'
+              onPress={handleAbrirModal}
             />
-          ))}
+          </View>
+          {cuartoActual !== 'DESCANSO' ? (
+            <>
+              {jugadoresEnPistaList.map((jugador, index) => (
+                <RenderEstadisticaJugador
+                  key={jugador.jugadorId}
+                  jugador={jugador}
+                  equipo={equipo}
+                  index={index}
+                  botonesDeshabilitados={botonesDeshabilitados}
+                  handleActualizarEstadistica={handleActualizarEstadistica}
+                  calcularIntentos={calcularIntentos}
+                />
+              ))}
+            </>
+          ) : (
+            <StyledAlert
+              variant='info'
+              message='En Descanso no se pueden modificar las estadisticas'
+            />
+          )}
         </>
       )}
 

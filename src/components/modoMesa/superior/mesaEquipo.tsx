@@ -34,7 +34,7 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
   onSolicitarTiempoMuerto,
 }) => {
   const hayTiempoMuertoDisponible = puedeSolicitarTiempoMuerto(tipo);
-  console.log(tiempoMuertoSolicitado);
+
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
@@ -92,6 +92,7 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
                 onSolicitarTiempoMuerto(tipo);
               }}
               title='Solicitar Tiempo Muerto'
+              disabled={tiempoMuertoIniciado}
             />
           )}
 

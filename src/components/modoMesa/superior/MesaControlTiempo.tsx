@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import StyledButton from '../../common/StyledButton';
 
@@ -14,6 +14,7 @@ interface MesaControlTiempoProps {
   setPartidoIniciado: (iniciado: boolean) => void;
   setPararCronometro: (parar: boolean) => void;
   pararCronometro: boolean;
+  jugadorExpulsadoPendiente: boolean;
 }
 
 const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
@@ -22,8 +23,8 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   quintetosListos,
   partidoIniciado,
   pararCronometro,
+  jugadorExpulsadoPendiente,
   setPararCronometro,
-
   onFinCuarto,
   onFinTiempoMuerto,
   onInitTiempoMuerto,
@@ -55,10 +56,13 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
     return 1 * 60;
   };
 
-  useEffect(() => {
+  // ✅ Corrección aquí
+  useLayoutEffect(() => {
     if (pararCronometro) {
       setPararCronometro(false);
-      toggleCronometro();
+      setTimeout(() => {
+        toggleCronometro();
+      }, 0);
     }
   }, [pararCronometro]);
 
@@ -83,7 +87,6 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
 
     if (restante === 0) {
       setCronometroCuartoPausado(true);
-
       onFinCuarto();
       return;
     }
@@ -155,16 +158,13 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   const toggleCronometro = () => {
     setCronometroCuartoPausado((prev) => {
       if (prev) {
-        // Reanudar ➜ reiniciar el startTime
         startTimeRef.current = Date.now();
         setCuartoIniciado?.(true);
 
-        // Si es el primer cuarto (Q1) y el partido aún no estaba iniciado, márcalo
         if (cuartoActual === 'Q1' && !partidoIniciado) {
           setPartidoIniciado(true);
         }
       } else {
-        // Pausar ➜ sumar lo que pasó en esta sesión
         if (startTimeRef.current) {
           const elapsedThisSession = Math.floor(
             (Date.now() - startTimeRef.current) / 1000
@@ -224,7 +224,9 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
             title={cronometroCuartoPausado ? 'Reanudar' : 'Pausar'}
             onPress={toggleCronometro}
             disabled={
-              tiempoCuarto === 0 || (!partidoIniciado && !quintetosListos)
+              tiempoCuarto === 0 ||
+              (!partidoIniciado && !quintetosListos) ||
+              jugadorExpulsadoPendiente
             }
           />
         )}

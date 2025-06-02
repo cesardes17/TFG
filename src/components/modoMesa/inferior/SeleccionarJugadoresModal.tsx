@@ -31,7 +31,6 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
   const modalWidth = Math.min(screenDimensions.width * 0.9, 800);
   const modalHeight = Math.min(screenDimensions.height * 0.8, 600);
 
-  // Calcular layout dinámico
   const layoutConfig = useMemo(() => {
     const totalJugadores = jugadores.length;
     if (totalJugadores === 0) return { filas: 0, jugadoresPorFila: 0 };
@@ -89,13 +88,6 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
     onConfirmar(jugadoresSeleccionados);
   };
 
-  const obtenerIniciales = (nombre: string, apellidos: string) => {
-    const inicialNombre = nombre.charAt(0).toUpperCase();
-    const inicialApellido =
-      apellidos.split(' ')[0]?.charAt(0).toUpperCase() || '';
-    return inicialNombre + inicialApellido;
-  };
-
   return (
     <Modal
       visible={true}
@@ -127,6 +119,8 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                   const estaSeleccionado = jugadoresSeleccionados.includes(
                     jugador.jugadorId
                   );
+                  const estaExpulsado = jugador.faltasCometidas >= 5;
+
                   return (
                     <TouchableOpacity
                       key={jugador.jugadorId}
@@ -138,37 +132,70 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                           alignItems: 'center',
                           borderWidth: 2,
                           borderRadius: 8,
-                          borderColor: estaSeleccionado ? '#4CAF50' : '#E0E0E0',
-                          backgroundColor: estaSeleccionado
+                          borderColor: estaSeleccionado
+                            ? '#4CAF50'
+                            : estaExpulsado
+                            ? '#FF0000'
+                            : '#E0E0E0',
+                          backgroundColor: estaExpulsado
+                            ? '#FFE0E0'
+                            : estaSeleccionado
                             ? '#E8F5E8'
                             : '#FFFFFF',
+                          paddingHorizontal: 8,
                         },
                       ]}
                       onPress={() => toggleJugador(jugador.jugadorId)}
                       activeOpacity={0.7}
-                      disabled={
-                        jugador.faltasCometidas >= 5 && !estaSeleccionado
-                      }
+                      disabled={estaExpulsado && !estaSeleccionado}
                     >
-                      <View style={styles.fotoContainer}>
-                        {jugador.fotoUrl && (
-                          <Image
-                            source={{ uri: jugador.fotoUrl }}
-                            style={styles.foto}
-                          />
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          alignItems: 'flex-end',
+                        }}
+                      >
+                        {estaSeleccionado && (
+                          <Text style={styles.jugadorSeleccionadoTexto}>
+                            Jugador en pista
+                          </Text>
+                        )}
+                        {estaExpulsado && (
+                          <Text style={styles.jugadorExpulsadoTexto}>
+                            Jugador expulsado
+                          </Text>
                         )}
                       </View>
 
-                      <Text style={styles.dorsal}>#{jugador.dorsal}</Text>
-                      <Text style={styles.nombre} numberOfLines={1}>
-                        {jugador.nombre}
-                      </Text>
-                      <Text style={styles.apellidos} numberOfLines={1}>
-                        {jugador.apellidos}
-                      </Text>
-                      <Text style={styles.faltas} numberOfLines={1}>
-                        Faltas: {jugador.faltasCometidas}
-                      </Text>
+                      <View
+                        style={{
+                          flex: 1,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <View style={styles.fotoContainer}>
+                          {jugador.fotoUrl && (
+                            <Image
+                              source={{ uri: jugador.fotoUrl }}
+                              style={styles.foto}
+                            />
+                          )}
+                        </View>
+
+                        <Text style={styles.dorsal}>#{jugador.dorsal}</Text>
+                        <Text style={styles.nombre} numberOfLines={1}>
+                          {jugador.nombre}
+                        </Text>
+                        <Text style={styles.apellidos} numberOfLines={1}>
+                          {jugador.apellidos}
+                        </Text>
+                        <Text style={styles.faltas} numberOfLines={1}>
+                          Faltas: {jugador.faltasCometidas}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -212,6 +239,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  jugadorSeleccionadoTexto: {
+    color: '#4CAF50',
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  jugadorExpulsadoTexto: {
+    color: '#FF0000',
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
   modalContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -235,7 +274,6 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 8,
-
     gap: 4,
     padding: 16,
   },
@@ -260,19 +298,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-  },
-  inicialesContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#2196F3',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iniciales: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   dorsal: {
     fontSize: 10,

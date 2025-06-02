@@ -64,6 +64,10 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     visitante: false,
   });
   const [pararCronometro, setPararCronometro] = useState(false);
+  const [jugadorExpulsadoPendiente, setJugadorExpulsadoPendiente] = useState({
+    local: false,
+    visitante: false,
+  });
   const [modal, setModal] = useState<{
     title: string;
     message: string;
@@ -306,6 +310,13 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     setPararCronometro(parar);
   };
 
+  const setJugadorExpulsadoPendienteHandler = (
+    equipo: 'local' | 'visitante',
+    pendiente: boolean
+  ) => {
+    setJugadorExpulsadoPendiente((prev) => ({ ...prev, [equipo]: pendiente }));
+  };
+
   if (isLoadingPartido || isLoadingInscripciones || isLoading) {
     return <LoadingIndicator text='Cargando datos del partido...' />;
   }
@@ -382,6 +393,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           setPartidoIniciado={setPartidoIniciado}
           pararCronometro={pararCronometro}
           setPararCronometro={pararCronometroHandler}
+          jugadorExpulsadoPendiente={jugadorExpulsadoPendiente}
         />
       </View>
       <View style={styles.inferior}>
@@ -392,6 +404,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           cuartoIniciado={cuartoIniciado}
           setQuintetosListos={handleQuintetoListo}
+          setJugadorExpulsadoPendiente={setJugadorExpulsadoPendienteHandler}
         />
       </View>
       <BaseConfirmationModal

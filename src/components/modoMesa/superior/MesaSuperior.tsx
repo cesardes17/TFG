@@ -30,6 +30,7 @@ interface MesaSuperiorProps {
   onFinTiempoMuerto: () => void;
   onFinCuarto: () => void;
   setCuartoIniciado: (iniciado: boolean) => void;
+  jugadorExpulsadoPendiente: { local: boolean; visitante: boolean };
 }
 
 export default function MesaSuperior({
@@ -43,6 +44,7 @@ export default function MesaSuperior({
   quintetosListos,
   partidoIniciado,
   pararCronometro,
+  jugadorExpulsadoPendiente,
   setPararCronometro,
   setPartidoIniciado,
   setTiempoMuertoIniciado,
@@ -113,6 +115,10 @@ export default function MesaSuperior({
           partidoIniciado={partidoIniciado}
           setPartidoIniciado={setPartidoIniciado}
           quintetosListos={quintetosListos.local && quintetosListos.visitante}
+          jugadorExpulsadoPendiente={
+            jugadorExpulsadoPendiente.local ||
+            jugadorExpulsadoPendiente.visitante
+          }
         />
       </View>
 

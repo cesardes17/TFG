@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
 import { EstadisticasTiro } from '../../../types/estadisticas/tiro';
 import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
@@ -18,6 +18,10 @@ interface MesaJugadoresProps {
   cuartoIniciado: boolean;
   setQuintetosListos: (equipo: 'local' | 'visitante', listo: boolean) => void;
   cuartoActual: string;
+  setJugadorExpulsadoPendiente: (
+    equipo: 'local' | 'visitante',
+    pendiente: boolean
+  ) => void;
 }
 
 const MesaJugadores: React.FC<MesaJugadoresProps> = ({
@@ -28,9 +32,11 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   cuartoIniciado,
   setQuintetosListos,
   cuartoActual,
+  setJugadorExpulsadoPendiente,
 }) => {
-  // Estado local para IDs de jugadores en pista
   const [jugadoresEnPista, setJugadoresEnPista] = useState<string[]>([]);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [expulsadoAnterior, setExpulsadoAnterior] = useState(false);
 
   const botonesDeshabilitados = !cuartoIniciado || tiempoMuertoIniciado;
 
@@ -53,11 +59,7 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
     return tiro.anotados + tiro.fallados;
   };
 
-  // Estado para mostrar el modal
-  const [mostrarModal, setMostrarModal] = useState(false);
-
   const handleAbrirModal = () => {
-    console.log('Mostrar modal');
     setMostrarModal(true);
   };
 
@@ -66,31 +68,40 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   };
 
   const handleConfirmarSeleccion = (ids: string[]) => {
-    console.log('IDs confirmados:', ids);
     setJugadoresEnPista(ids);
     setQuintetosListos(equipo, true);
     setMostrarModal(false);
   };
 
-  // Lista de jugadores en pista
+  // 🔍 Detectar si hay algún jugador expulsado en pista y solo notificar si cambia
+  useEffect(() => {
+    const expulsado = jugadoresEnPista.some((id) => {
+      const jugador = estadisticasJugadores[id];
+      return jugador && jugador.faltasCometidas >= 5;
+    });
+
+    if (expulsado !== expulsadoAnterior) {
+      setJugadorExpulsadoPendiente(equipo, expulsado);
+      setExpulsadoAnterior(expulsado);
+    }
+  }, [
+    jugadoresEnPista,
+    estadisticasJugadores,
+    equipo,
+    expulsadoAnterior,
+    setJugadorExpulsadoPendiente,
+  ]);
+
   const jugadoresEnPistaList = jugadoresEnPista
     .map((id) => estadisticasJugadores[id])
     .filter(Boolean);
 
-  // Lista de todos los jugadores disponibles
   const jugadoresDisponibles = Object.values(estadisticasJugadores);
 
   return (
     <View style={styles.container}>
       {jugadoresEnPista.length !== 5 ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 16,
-          }}
-        >
+        <View style={styles.centro}>
           <StyledButton
             title='Seleccionar Quinteto Inicial'
             onPress={handleAbrirModal}
@@ -121,7 +132,7 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
           ) : (
             <StyledAlert
               variant='info'
-              message='En Descanso no se pueden modificar las estadisticas'
+              message='En Descanso no se pueden modificar las estadísticas'
             />
           )}
         </>
@@ -143,6 +154,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  centro: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
 });
 

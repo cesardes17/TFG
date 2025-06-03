@@ -8,6 +8,7 @@ export type EstadisticasSimpleJugador = {
   asistencias: number;
   rebotes: number;
   faltasCometidas: number;
+  partidosJugados: number;
 };
 export type EstadisticasJugador = EstadisticasSimpleJugador & {
   jugadorId: string;
@@ -21,4 +22,10 @@ export type EstadisticasJugador = EstadisticasSimpleJugador & {
 export type EstadisticasJugadores = {
   local: Record<string, EstadisticasJugador>;
   visitante: Record<string, EstadisticasJugador>;
+};
+
+export type DocumentoEstadisticasJugador = {
+  estadisticasLiga: EstadisticasSimpleJugador;
+  estadisticasCopa: EstadisticasSimpleJugador;
+  estadisticasPlayoff: EstadisticasSimpleJugador;
 };

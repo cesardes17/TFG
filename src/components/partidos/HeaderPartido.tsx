@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Touchable } from 'react-native';
 import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
 import { CalendarIcon, LocationIcon } from '../Icons';
+import { router } from 'expo-router';
 
 type Equipo = {
   nombre: string;
   escudoUrl: string;
+  id: string;
 };
 
 type Resultado = {
@@ -87,7 +89,17 @@ const HeaderPartido: React.FC<Props> = ({
 
       <View style={styles.contenidoPrincipal}>
         {/* Equipo Local */}
-        <View style={styles.equipoContainer}>
+        <TouchableOpacity
+          style={styles.equipoContainer}
+          onPress={() => {
+            router.push({
+              pathname: '/equipo/[id]',
+              params: {
+                id: equipoLocal.id,
+              },
+            });
+          }}
+        >
           <ProgressiveImage
             uri={equipoLocal.escudoUrl}
             containerStyle={styles.escudo}
@@ -98,7 +110,7 @@ const HeaderPartido: React.FC<Props> = ({
           >
             {equipoLocal.nombre}
           </StyledText>
-        </View>
+        </TouchableOpacity>
 
         {/* Resultado */}
         <View style={styles.resultadoContainer}>
@@ -126,7 +138,17 @@ const HeaderPartido: React.FC<Props> = ({
         </View>
 
         {/* Equipo Visitante */}
-        <View style={styles.equipoContainer}>
+        <TouchableOpacity
+          style={styles.equipoContainer}
+          onPress={() => {
+            router.push({
+              pathname: '/equipo/[id]',
+              params: {
+                id: equipoVisitante.id,
+              },
+            });
+          }}
+        >
           <ProgressiveImage
             uri={equipoVisitante.escudoUrl}
             containerStyle={styles.escudo}
@@ -137,7 +159,7 @@ const HeaderPartido: React.FC<Props> = ({
           >
             {equipoVisitante.nombre}
           </StyledText>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );

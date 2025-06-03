@@ -47,22 +47,26 @@ export async function FormatearYGuardarPartido(
     );
 
     const actualizarJugadorPromises = [
-      ...jugadoresLocales.map((jugador) =>
-        jugadorEstadisticasService.actualizarEstadisticasJugador(
-          jugador.jugadorId,
-          temporadaId,
-          partidoFinalizado.tipoCompeticion,
-          jugador
-        )
-      ),
-      ...jugadoresVisitantes.map((jugador) =>
-        jugadorEstadisticasService.actualizarEstadisticasJugador(
-          jugador.jugadorId,
-          temporadaId,
-          partidoFinalizado.tipoCompeticion,
-          jugador
-        )
-      ),
+      ...jugadoresLocales
+        .filter((jugador) => jugador.haJugado)
+        .map((jugador) =>
+          jugadorEstadisticasService.actualizarEstadisticasJugador(
+            jugador.jugadorId,
+            temporadaId,
+            partidoFinalizado.tipoCompeticion,
+            jugador
+          )
+        ),
+      ...jugadoresVisitantes
+        .filter((jugador) => jugador.haJugado)
+        .map((jugador) =>
+          jugadorEstadisticasService.actualizarEstadisticasJugador(
+            jugador.jugadorId,
+            temporadaId,
+            partidoFinalizado.tipoCompeticion,
+            jugador
+          )
+        ),
     ];
     await Promise.all(actualizarJugadorPromises);
 

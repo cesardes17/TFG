@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
 import { EstadisticasTiro } from '../../../types/estadisticas/tiro';
 import { useResponsiveWidth } from '../../../hooks/useResponsiveWidth';
 import StyledText from '../../common/StyledText';
 import { useTheme } from '../../../contexts/ThemeContext';
 import ProgressiveImage from '../../common/ProgressiveImage';
+import { router } from 'expo-router';
 
 type Props = {
   local: Record<string, EstadisticasJugador>;
@@ -75,7 +76,13 @@ const EstadisticasJugadoresTabla: React.FC<Props> = ({ local, visitante }) => {
   );
 
   const renderJugador = (jugador: EstadisticasJugador, index: number) => (
-    <View
+    <TouchableOpacity
+      onPress={() => {
+        router.push({
+          pathname: 'jugador/[id]',
+          params: { id: jugador.jugadorId },
+        });
+      }}
       key={index}
       style={[
         styles.row,
@@ -132,7 +139,7 @@ const EstadisticasJugadoresTabla: React.FC<Props> = ({ local, visitante }) => {
           {jugador.faltasCometidas}
         </StyledText>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const minTableWidth = 580;

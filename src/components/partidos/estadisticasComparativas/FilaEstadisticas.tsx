@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import BarraProgreso from './BarraProgreso';
+import BarraProgreso from './BarraProgresoComparativa';
 import StyledText from '../../common/StyledText';
 import { useTheme } from '../../../contexts/ThemeContext';
+import BarraProgresoComparativa from './BarraProgresoComparativa';
 
 interface Props {
   titulo: string;
@@ -37,10 +38,9 @@ const FilaEstadistica: React.FC<Props> = ({
         <StyledText style={styles.valorVisitante}>{valorVisitante}</StyledText>
       </View>
 
-      <BarraProgreso
+      <BarraProgresoComparativa
         porcentajeLocal={porcentajeLocal}
         porcentajeVisitante={porcentajeVisitante}
-        esTiro={esTiro}
       />
     </View>
   );

@@ -1,9 +1,17 @@
 import React from 'react';
-import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledAlert from '../common/StyledAlert';
 import { Inscripcion } from '../../types/Inscripcion';
 import StyledText from '../common/StyledText';
+import ProgressiveImage from '../common/ProgressiveImage';
+import { router } from 'expo-router';
 
 interface Player {
   id: string;
@@ -60,7 +68,13 @@ const TableHeader = () => {
 const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
   const { theme } = useTheme();
   return (
-    <View
+    <TouchableOpacity
+      onPress={() => {
+        router.push({
+          pathname: 'jugador/[id]',
+          params: { id: player.id },
+        });
+      }}
       style={[
         styles.row,
         {
@@ -72,9 +86,9 @@ const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
       ]}
     >
       <View style={styles.photoContainer}>
-        <Image
-          source={{ uri: player.fotoUrl }}
-          style={[styles.photo, { borderColor: theme.border.primary }]}
+        <ProgressiveImage
+          uri={player.fotoUrl}
+          containerStyle={[styles.photo, { borderColor: theme.border.primary }]}
         />
       </View>
       <View style={styles.dorsalContainer}>
@@ -90,7 +104,7 @@ const PlayerRow = ({ player, isEven }: PlayerRowProps) => {
           {player.correo}
         </StyledText>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

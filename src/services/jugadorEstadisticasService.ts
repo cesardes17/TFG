@@ -1,6 +1,7 @@
 // src/services/jugadorEstadisticasService.ts
 import { TipoCompeticion } from '../types/Competicion';
 import {
+  DocumentoEstadisticasJugador,
   EstadisticasJugador,
   EstadisticasSimpleJugador,
 } from '../types/estadisticas/jugador';
@@ -8,12 +9,6 @@ import { ResultService } from '../types/ResultService';
 import { FirestoreService } from './core/firestoreService';
 
 const COLLECTION_NAME = 'estadisticas';
-
-type DocumentoEstadisticasJugador = {
-  estadisticasLiga: EstadisticasSimpleJugador;
-  estadisticasCopa: EstadisticasSimpleJugador;
-  estadisticasPlayoff: EstadisticasSimpleJugador;
-};
 
 export const jugadorEstadisticasService = {
   /** Obtiene las estadísticas del jugador para una temporada */
@@ -122,6 +117,7 @@ function sumarEstadisticas(
       anotados: prev.tirosTres.anotados + nueva.tirosTres.anotados,
       fallados: prev.tirosTres.fallados + nueva.tirosTres.fallados,
     },
+    partidosJugados: prev.partidosJugados + nueva.partidosJugados,
   };
 }
 
@@ -135,5 +131,6 @@ function crearEstadisticasBase(): EstadisticasSimpleJugador {
     tirosLibres: { anotados: 0, fallados: 0 },
     tirosDos: { anotados: 0, fallados: 0 },
     tirosTres: { anotados: 0, fallados: 0 },
+    partidosJugados: 0,
   };
 }

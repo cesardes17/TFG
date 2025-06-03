@@ -14,6 +14,10 @@ import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { useInscripcionesPartido } from '../../hooks/useInscripcionesPartido';
 import { inicializarPartido } from '../../utils/modoMesa/inicializarPartido';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
+import { getRandomUID } from '../../utils/getRandomUID';
+import { FormatearYGuardarPartido } from '../../utils/modoMesa/FormatearYGurardarPartido';
+import { useToast } from '../../contexts/ToastContext';
+import { router } from 'expo-router';
 
 interface Props {
   idPartido: string;
@@ -33,6 +37,14 @@ export type ActualizarEstadisticaJugadorParams = {
   valor: number; // Ejemplo: +1 o -1
   tipoTiro?: TipoTiro; // solo para tiros
 };
+
+export type HistorialAccion = ActualizarEstadisticaJugadorParams & {
+  nombre: string;
+  apellidos: string;
+  dorsal: number;
+  id: string;
+};
+
 export type TipoTiro = 'anotados' | 'fallados';
 
 export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
@@ -43,7 +55,9 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     isLoading: isLoadingPartido,
     error,
   } = usePartido(idPartido, tipoCompeticion);
-
+  const { showToast } = useToast();
+  const [isGuardadando, setIsGuardando] = useState(false);
+  const [textoGuardando, setTextoGuardando] = useState('');
   const [partidoActual, setPartidoActual] = useState<typeof partido | null>(
     null
   );
@@ -77,6 +91,9 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     message: '',
     visible: false,
   });
+  const [accionesRealizadas, setAccionesRealizadas] = useState<
+    HistorialAccion[]
+  >([]);
   // Cargar inscripciones de ambos equipos
   const temporadaId = temporada!.id;
   const equipoLocalId = partidoActual?.equipoLocal?.id;
@@ -120,14 +137,31 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
 
   //Actualizamos las estadisticas del equipo para los cuartos
   useEffect(() => {
-    if (cuartoActual === 'Q1' || cuartoActual === 'DESCANSO') return;
-    if (partidoActual) {
-      const partidoActualizado = inicializarCuarto(partidoActual, cuartoActual);
-      setPartidoActual(partidoActualizado);
-      setEquipoSolicitandoTM(null);
-    }
-  }, [cuartoActual]);
+    if (!partidoActual) return;
 
+    if (cuartoActual === 'Q1' || cuartoActual === 'DESCANSO') return;
+
+    if (cuartoActual === 'FINALIZADO') {
+      // Llama a tu función auxiliar para guardar el partido finalizado
+      FormatearYGuardarPartido(
+        temporadaId,
+        partidoActual,
+        setIsGuardando,
+        setTextoGuardando
+      ).then(({ message, type }) => {
+        if (type === 'success') {
+          showToast(message, type);
+          router.back();
+        }
+      });
+      return;
+    }
+
+    const partidoActualizado = inicializarCuarto(partidoActual, cuartoActual);
+    setPartidoActual(partidoActualizado);
+    setEquipoSolicitandoTM(null);
+    setAccionesRealizadas([]);
+  }, [cuartoActual]);
   const obtenerMitadActual = (cuarto: string) => {
     if (cuarto === 'Q1' || cuarto === 'Q2') return 'primeraMitad';
     if (cuarto === 'Q3' || cuarto === 'Q4') return 'segundaMitad';
@@ -160,18 +194,33 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
   };
 
   const handleFinCuarto = () => {
-    setCuartoActual((prevCuarto) => {
-      if (prevCuarto === 'Q1') return 'Q2';
-      if (prevCuarto === 'Q2') return 'DESCANSO';
-      if (prevCuarto === 'DESCANSO') return 'Q3';
-      if (prevCuarto === 'Q3') return 'Q4';
-      if (prevCuarto === 'Q4') return 'PR1';
-      if (prevCuarto.startsWith('PR')) {
-        const num = parseInt(prevCuarto.replace('PR', ''), 10) || 1;
-        return `PR${num + 1}`;
+    if (!partidoActual || !partidoActual.estadisticasEquipos) return;
+
+    const puntosLocal = partidoActual.estadisticasEquipos.totales.local.puntos;
+    const puntosVisitante =
+      partidoActual.estadisticasEquipos.totales.visitante.puntos;
+
+    // Lógica especial para final del Q4 o una prórroga
+    if (cuartoActual === 'Q4' || cuartoActual.startsWith('PR')) {
+      if (puntosLocal === puntosVisitante) {
+        // Empate ➜ generar siguiente prórroga
+        if (cuartoActual.startsWith('PR')) {
+          const num = parseInt(cuartoActual.replace('PR', ''), 10) || 1;
+          setCuartoActual(`PR${num + 1}`);
+        } else {
+          setCuartoActual('PR1');
+        }
+      } else {
+        // Hay ganador ➜ finalizar partido
+        setCuartoActual('FINALIZADO');
       }
-      return 'Q1';
-    });
+    } else {
+      // Secuencia normal de cuartos
+      if (cuartoActual === 'Q1') return setCuartoActual('Q2');
+      if (cuartoActual === 'Q2') return setCuartoActual('DESCANSO');
+      if (cuartoActual === 'DESCANSO') return setCuartoActual('Q3');
+      if (cuartoActual === 'Q3') return setCuartoActual('Q4');
+    }
   };
 
   const handleActualizarEstadisticaJugador = ({
@@ -181,7 +230,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     valor,
     tipoTiro,
   }: ActualizarEstadisticaJugadorParams) => {
-    // 1️⃣ Copia del estado
+    // Paso 1: Copia del estado
     if (!partidoActual) return;
 
     const partidoCopia = { ...partidoActual };
@@ -192,7 +241,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     )
       return;
 
-    // 2️⃣ Actualizar estadística del jugador
+    //Paso 2: Actualizar estadística del jugador
     const jugadorStats = partidoCopia.estadisticasJugadores[equipo][jugadorId];
     if (!jugadorStats) return;
 
@@ -231,7 +280,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
       });
     }
 
-    // 3️⃣ Actualizar estadística del equipo en el cuarto actual
+    // Paso 3: Actualizar estadística del equipo en el cuarto actual
     const equipoStatsCuarto =
       partidoCopia.estadisticasEquipos.porCuarto[cuartoActual][equipo];
     if (
@@ -261,7 +310,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
       }
     }
 
-    // 4️⃣ Actualizar estadística total del equipo
+    // Paso 4: Actualizar estadística total del equipo
     const equipoStatsTotales = partidoCopia.estadisticasEquipos.totales[equipo];
     if (
       accion === 'puntos' ||
@@ -290,13 +339,46 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
       }
     }
 
-    // 5️⃣ Marcar que el jugador ha jugado
+    // Paso 5: Marcar que el jugador ha jugado
     if (!jugadorStats.haJugado) {
       jugadorStats.haJugado = true;
     }
 
-    // 6️⃣ Guardar el nuevo estado
+    // Paso 6: Agregar la acción al historial
+    if (valor > 0) {
+      const accionRealizada: HistorialAccion = {
+        nombre: jugadorStats.nombre,
+        apellidos: jugadorStats.apellidos,
+        dorsal: jugadorStats.dorsal,
+        jugadorId,
+        equipo,
+        accion,
+        valor,
+        tipoTiro,
+        id: getRandomUID(),
+      };
+      setAccionesRealizadas((prev) => [accionRealizada, ...prev]);
+    }
+    // Paso 7: Actualizar el estado
     setPartidoActual(partidoCopia);
+  };
+
+  const handleEliminarAccion = (idAccion: string) => {
+    // Buscar la acción
+    const accion = accionesRealizadas.find((a) => a.id === idAccion);
+    if (!accion) return;
+
+    // Deshacer la acción (aplicando la misma acción pero con valor negativo)
+    handleActualizarEstadisticaJugador({
+      jugadorId: accion.jugadorId,
+      equipo: accion.equipo,
+      accion: accion.accion,
+      valor: -accion.valor,
+      tipoTiro: accion.tipoTiro,
+    });
+
+    // Eliminarla del historial
+    setAccionesRealizadas((prev) => prev.filter((a) => a.id !== idAccion));
   };
 
   const handleQuintetoListo = (
@@ -343,6 +425,10 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     superior: { flex: 1 },
     inferior: { flex: 2 },
   });
+
+  if (isGuardadando) {
+    return <LoadingIndicator text={textoGuardando} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -405,6 +491,8 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           cuartoIniciado={cuartoIniciado}
           setQuintetosListos={handleQuintetoListo}
           setJugadorExpulsadoPendiente={setJugadorExpulsadoPendienteHandler}
+          historialAcciones={accionesRealizadas}
+          onEliminarAccion={handleEliminarAccion}
         />
       </View>
       <BaseConfirmationModal

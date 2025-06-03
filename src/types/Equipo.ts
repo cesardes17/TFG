@@ -1,3 +1,5 @@
+import { EstadisticasEquipo } from './estadisticas/equipo';
+
 export type Equipo = {
   id: string;
   nombre: string;
@@ -9,6 +11,9 @@ export type Equipo = {
     correo: string;
   };
   fechaCreacion: Date; // ISO string (buena práctica)
+  estadisticasLigaRegular?: EstadisticasEquipo | null;
+  estadisticasCopa?: EstadisticasEquipo | null;
+  estadisticasPlayoff?: EstadisticasEquipo | null;
 };
 
 export type EquipoPartido = {

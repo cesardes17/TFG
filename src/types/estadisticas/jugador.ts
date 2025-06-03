@@ -1,6 +1,6 @@
 import { EstadisticasTiro } from './tiro';
 
-export type EstadisticasJugador = {
+export type EstadisticasSimpleJugador = {
   puntos: number;
   tirosLibres: EstadisticasTiro;
   tirosDos: EstadisticasTiro;
@@ -8,6 +8,8 @@ export type EstadisticasJugador = {
   asistencias: number;
   rebotes: number;
   faltasCometidas: number;
+};
+export type EstadisticasJugador = EstadisticasSimpleJugador & {
   jugadorId: string;
   nombre: string;
   apellidos: string;

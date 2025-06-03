@@ -13,8 +13,6 @@ export default function PartidoInfoScreen({
   idPartido: string;
   tipoCompeticion: TipoCompeticion;
 }) {
-  console.log('idPartido', idPartido);
-  console.log('tipoCompeticion', tipoCompeticion);
   const { error, isLoading, partido } = usePartido(idPartido, tipoCompeticion);
 
   if (!partido) {
@@ -33,10 +31,12 @@ export default function PartidoInfoScreen({
         fecha={partido.fecha}
         cancha={partido.cancha}
       />
-      <AccionesPartido
-        partidoId={idPartido}
-        tipoCompeticion={tipoCompeticion}
-      />
+      {partido.estado === 'pendiente' && (
+        <AccionesPartido
+          partidoId={idPartido}
+          tipoCompeticion={tipoCompeticion}
+        />
+      )}
       <BodyPartido
         estadisticasEquipos={
           partido.estadisticasEquipos ? partido.estadisticasEquipos : null

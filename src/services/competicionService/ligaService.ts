@@ -3,6 +3,7 @@
 import { EquipoEstado } from '../../hooks/useEquiposConEstado';
 import { Clasificacion } from '../../types/Clasificacion';
 import { Competicion } from '../../types/Competicion';
+import { Partido } from '../../types/Partido';
 import { ResultService } from '../../types/ResultService';
 import { generarCalendarioLiga } from '../../utils/calendario/generarJornadas';
 import { disolverEquipo } from '../../utils/equipos/disolverEquipo';
@@ -81,5 +82,77 @@ export const ligaService = {
       temporadaId,
       ID_LIGA_REGULAR
     );
+  },
+
+  onFinalizarPartido: async (
+    temporadaId: string,
+    partido: Partido
+  ): Promise<ResultService<null>> => {
+    try {
+      const puntosLocal = partido.estadisticasEquipos!.totales.local.puntos;
+      const puntosVisitante =
+        partido.estadisticasEquipos!.totales.visitante.puntos;
+
+      const baseLocal: Clasificacion = {
+        id: partido.equipoLocal.id,
+        equipo: partido.equipoLocal,
+        puntosFavor: puntosLocal,
+        puntosContra: puntosVisitante,
+        partidosJugados: 1,
+        victorias: 0,
+        derrotas: 0,
+        puntos: 1, // Por defecto 1 punto (derrota)
+        diferencia: puntosLocal - puntosVisitante,
+      };
+
+      const baseVisitante: Clasificacion = {
+        id: partido.equipoVisitante.id,
+        equipo: partido.equipoVisitante,
+        puntosFavor: puntosVisitante,
+        puntosContra: puntosLocal,
+        partidosJugados: 1,
+        victorias: 0,
+        derrotas: 0,
+        puntos: 1, // Por defecto 1 punto (derrota)
+        diferencia: puntosVisitante - puntosLocal,
+      };
+
+      if (puntosLocal > puntosVisitante) {
+        baseLocal.victorias = 1;
+        baseVisitante.derrotas = 1;
+        baseLocal.puntos = 2;
+      } else {
+        baseVisitante.victorias = 1;
+        baseLocal.derrotas = 1;
+        baseVisitante.puntos = 2;
+      }
+      // Actualizar clasificación de forma acumulativa
+      const resLocal =
+        await clasificacionService.actualizarClasificacionAcumulativa(
+          temporadaId,
+          ID_LIGA_REGULAR,
+          baseLocal
+        );
+      const resVisitante =
+        await clasificacionService.actualizarClasificacionAcumulativa(
+          temporadaId,
+          ID_LIGA_REGULAR,
+          baseVisitante
+        );
+      if (!resLocal.success || !resVisitante.success) {
+        return {
+          success: false,
+          errorMessage: 'Error al actualizar clasificación acumulada',
+        };
+      }
+
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
   },
 };

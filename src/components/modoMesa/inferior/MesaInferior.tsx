@@ -1,8 +1,12 @@
 // MesaInferior.tsx
 import { View, StyleSheet } from 'react-native';
 import { EstadisticasJugadores } from '../../../types/estadisticas/jugador';
-import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
+import {
+  ActualizarEstadisticaJugadorParams,
+  HistorialAccion,
+} from '../../../screens/modoMesa/ModoMesaLayout';
 import MesaJugadores from './MesaJugadores';
+import MesaHistorial from './MesaHistorial';
 
 interface Props {
   estadisticasJugadores: EstadisticasJugadores;
@@ -17,6 +21,8 @@ interface Props {
     equipo: 'local' | 'visitante',
     pendiente: boolean
   ) => void;
+  historialAcciones: HistorialAccion[];
+  onEliminarAccion: (idAccion: string) => void;
 }
 
 export default function MesaInferior({
@@ -27,6 +33,8 @@ export default function MesaInferior({
   setQuintetosListos,
   cuartoActual,
   setJugadorExpulsadoPendiente,
+  historialAcciones,
+  onEliminarAccion,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -43,10 +51,12 @@ export default function MesaInferior({
         />
       </View>
 
-      {/* <View style={styles.tercio}>
-        <MesaHistorial />
-
-      </View> */}
+      <View style={styles.tercio}>
+        <MesaHistorial
+          acciones={historialAcciones}
+          onEliminarAccion={onEliminarAccion}
+        />
+      </View>
       <View style={styles.tercio}>
         <MesaJugadores
           equipo='visitante'

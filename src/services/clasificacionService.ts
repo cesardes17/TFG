@@ -90,4 +90,76 @@ export const clasificacionService = {
       };
     }
   },
+
+  actualizarClasificacionAcumulativa: async (
+    temporadaId: string,
+    competicionId: string,
+    clasificacionBase: Clasificacion
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'clasificacion',
+        clasificacionBase.equipo.id,
+      ];
+
+      // Obtener la clasificación actual
+      const resGet = await FirestoreService.getDocumentByPath<Clasificacion>(
+        ...path
+      );
+
+      if (!resGet.success || !resGet.data) {
+        return {
+          success: false,
+          errorMessage: 'No se pudo obtener la clasificación actual del equipo',
+        };
+      }
+
+      const clasificacionActual = resGet.data;
+
+      // Crear la nueva clasificación acumulada
+      const nuevaClasificacion: Clasificacion = {
+        ...clasificacionActual,
+        puntos: clasificacionActual.puntos + clasificacionBase.puntos,
+        partidosJugados:
+          clasificacionActual.partidosJugados +
+          clasificacionBase.partidosJugados,
+        victorias: clasificacionActual.victorias + clasificacionBase.victorias,
+        derrotas: clasificacionActual.derrotas + clasificacionBase.derrotas,
+        puntosFavor:
+          clasificacionActual.puntosFavor + clasificacionBase.puntosFavor,
+        puntosContra:
+          clasificacionActual.puntosContra + clasificacionBase.puntosContra,
+        diferencia:
+          clasificacionActual.diferencia +
+          (clasificacionBase.puntosFavor - clasificacionBase.puntosContra),
+      };
+
+      // Guardar la nueva clasificación
+      const resUpdate = await FirestoreService.setDocumentByPath(
+        ...path,
+        nuevaClasificacion
+      );
+
+      if (!resUpdate.success) {
+        return {
+          success: false,
+          errorMessage: 'Error al actualizar la clasificación en Firestore',
+        };
+      }
+
+      return { success: true, data: null };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error desconocido al actualizar la clasificación',
+      };
+    }
+  },
 };

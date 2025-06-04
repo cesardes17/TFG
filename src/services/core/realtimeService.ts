@@ -1,12 +1,11 @@
 // src/services/realtimeService.ts
-
 import {
   getValueRT,
   onValueRT,
   removeValueRT,
   setValueRT,
   updateValueRT,
-} from '../../api/realTimeFirebase';
+} from '../../api/realtimeFirebase';
 import { ResultService } from '../../types/ResultService';
 
 /**

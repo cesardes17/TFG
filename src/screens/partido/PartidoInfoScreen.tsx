@@ -31,7 +31,7 @@ export default function PartidoInfoScreen({
         fecha={partido.fecha}
         cancha={partido.cancha}
       />
-      {partido.estado === 'pendiente' && (
+      {partido.estado !== 'finalizado' && (
         <AccionesPartido
           partidoId={idPartido}
           tipoCompeticion={tipoCompeticion}

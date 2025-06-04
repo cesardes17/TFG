@@ -15,13 +15,10 @@ export default function JornadasScreen() {
   const [jornadaSeleccionada, setJornadaSeleccionada] = useState<string | null>(
     null
   );
+  const [partidos, setPartidos] = useState<Partido[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    partidosPorJornada,
-    obtenerPartidosSiNoExisten,
-    loading: loadingPartidos,
-  } = usePartidosPorJornada();
+  const { getPartidos, loading: loadingPartidos } = usePartidosPorJornada();
 
   // Establecer jornada inicial
   useEffect(() => {
@@ -33,13 +30,12 @@ export default function JornadasScreen() {
   // Obtener partidos si no existen en cache
   useEffect(() => {
     if (jornadaSeleccionada) {
-      obtenerPartidosSiNoExisten(jornadaSeleccionada);
+      getPartidos(jornadaSeleccionada).then((partidos) => {
+        setPartidos(partidos);
+        setIsLoading(false);
+      });
     }
   }, [jornadaSeleccionada]);
-
-  const partidos: Partido[] = jornadaSeleccionada
-    ? partidosPorJornada[jornadaSeleccionada] || []
-    : [];
 
   if (loadingJornadas || loadingPartidos || isLoading) {
     return <LoadingIndicator text='Cargando jornadas...' />;

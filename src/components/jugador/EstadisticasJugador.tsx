@@ -1,6 +1,7 @@
-// src/components/jugador/EstadisticasJugador.tsx
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 import { EstadisticasSimpleJugador } from '../../types/estadisticas/jugador';
 
 interface Props {
@@ -11,11 +12,13 @@ interface Props {
 
 type CompeticionTipo = 'Liga' | 'Copa' | 'Playoff' | 'Totales';
 
-const EstadisticasJugador: React.FC<Props> = ({
+export default function EstadisticasJugador({
   estadisticasLiga,
   estadisticasCopa,
   estadisticasPlayoff,
-}) => {
+}: Props) {
+  const { theme } = useTheme();
+
   const competicionesDisponibles = useMemo(() => {
     const competiciones: {
       tipo: CompeticionTipo;
@@ -91,19 +94,24 @@ const EstadisticasJugador: React.FC<Props> = ({
         key={comp.tipo}
         style={[
           styles.botonCompeticion,
-          competicionSeleccionada === comp.tipo && styles.botonSeleccionado,
+          { backgroundColor: theme.background.primary },
+          competicionSeleccionada === comp.tipo && {
+            backgroundColor: theme.button.primary.background,
+          },
         ]}
         onPress={() => setCompeticionSeleccionada(comp.tipo)}
       >
-        <Text
+        <StyledText
           style={[
             styles.textoBoton,
-            competicionSeleccionada === comp.tipo &&
-              styles.textoBotonSeleccionado,
+            competicionSeleccionada === comp.tipo && {
+              color: theme.button.primary.text,
+            },
           ]}
+          variant='primary'
         >
           {comp.tipo}
-        </Text>
+        </StyledText>
       </TouchableOpacity>
     ));
 
@@ -113,19 +121,24 @@ const EstadisticasJugador: React.FC<Props> = ({
           key='Totales'
           style={[
             styles.botonCompeticion,
-            competicionSeleccionada === 'Totales' && styles.botonSeleccionado,
+            { backgroundColor: theme.background.primary },
+            competicionSeleccionada === 'Totales' && {
+              backgroundColor: theme.button.primary.background,
+            },
           ]}
           onPress={() => setCompeticionSeleccionada('Totales')}
         >
-          <Text
+          <StyledText
             style={[
               styles.textoBoton,
-              competicionSeleccionada === 'Totales' &&
-                styles.textoBotonSeleccionado,
+              competicionSeleccionada === 'Totales' && {
+                color: theme.button.primary.text,
+              },
             ]}
+            variant='primary'
           >
             Totales
-          </Text>
+          </StyledText>
         </TouchableOpacity>
       );
     }
@@ -134,9 +147,13 @@ const EstadisticasJugador: React.FC<Props> = ({
   };
 
   const renderEstadisticaItem = (titulo: string, valor: number | string) => (
-    <View style={styles.estadisticaItem}>
-      <Text style={styles.tituloEstadistica}>{titulo}</Text>
-      <Text style={styles.valorEstadistica}>{valor}</Text>
+    <View style={[styles.estadisticaItem, { backgroundColor: '#F8F9FA0E' }]}>
+      <StyledText style={styles.tituloEstadistica} variant='secondary'>
+        {titulo}
+      </StyledText>
+      <StyledText style={styles.valorEstadistica} variant='primary'>
+        {valor}
+      </StyledText>
     </View>
   );
 
@@ -150,7 +167,9 @@ const EstadisticasJugador: React.FC<Props> = ({
 
     return (
       <View style={styles.estadisticaGrupo}>
-        <Text style={styles.tituloGrupo}>{titulo}</Text>
+        <StyledText style={styles.tituloGrupo} variant='primary'>
+          {titulo}
+        </StyledText>
 
         <View style={styles.estadisticaRow}>
           {renderEstadisticaItem('Anotados', anotados)}
@@ -164,7 +183,11 @@ const EstadisticasJugador: React.FC<Props> = ({
 
   const renderContenidoEstadisticas = () => {
     if (!estadisticasAMostrar) {
-      return <Text style={styles.noData}>No hay estadísticas disponibles</Text>;
+      return (
+        <StyledText style={styles.noData} variant='secondary'>
+          No hay estadísticas disponibles
+        </StyledText>
+      );
     }
 
     return (
@@ -191,13 +214,11 @@ const EstadisticasJugador: React.FC<Props> = ({
           estadisticasAMostrar.tirosLibres.anotados,
           estadisticasAMostrar.tirosLibres.fallados
         )}
-
         {renderEstadisticaTiros(
           'Tiros de 2',
           estadisticasAMostrar.tirosDos.anotados,
           estadisticasAMostrar.tirosDos.fallados
         )}
-
         {renderEstadisticaTiros(
           'Tiros de 3',
           estadisticasAMostrar.tirosTres.anotados,
@@ -208,18 +229,26 @@ const EstadisticasJugador: React.FC<Props> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.cardDefault,
+          borderColor: theme.border.secondary,
+          borderWidth: 1,
+        },
+      ]}
+    >
       <View style={styles.botonesContainer}>{renderBotones()}</View>
       {renderContenidoEstadisticas()}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
-    paddingVertical: 10,
     borderRadius: 8,
+    paddingVertical: 10,
     paddingHorizontal: 8,
   },
   botonesContainer: {
@@ -232,13 +261,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
-    backgroundColor: '#f0f0f0',
     minWidth: 80,
     alignItems: 'center',
+    marginRight: 8,
   },
-  botonSeleccionado: { backgroundColor: '#2B7631FF' },
-  textoBoton: { fontWeight: '500', color: '#333' },
-  textoBotonSeleccionado: { color: '#fff' },
+  textoBoton: { fontWeight: '500' },
   contenidoEstadisticas: { paddingHorizontal: 16 },
   estadisticasSimples: {
     flexDirection: 'row',
@@ -250,11 +277,10 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: 12,
     padding: 8,
-    backgroundColor: '#f9f9f9',
     borderRadius: 6,
   },
-  tituloEstadistica: { fontSize: 12, color: '#666', marginBottom: 4 },
-  valorEstadistica: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  tituloEstadistica: { fontSize: 12, marginBottom: 4 },
+  valorEstadistica: { fontSize: 16, fontWeight: 'bold' },
   estadisticaGrupo: { marginBottom: 16 },
   tituloGrupo: {
     fontSize: 14,
@@ -273,8 +299,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontSize: 16,
-    color: '#999',
   },
 });
-
-export default EstadisticasJugador;

@@ -1,5 +1,4 @@
 // src/screens/JugadorInfoScreen.tsx
-
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
@@ -15,7 +14,7 @@ interface Props {
   jugadorId: string;
 }
 
-const JugadorInfoScreen: React.FC<Props> = ({ jugadorId }) => {
+export default function JugadorInfoScreen({ jugadorId }: Props) {
   const { temporada } = useTemporadaContext();
   const { theme } = useTheme();
 
@@ -66,7 +65,7 @@ const JugadorInfoScreen: React.FC<Props> = ({ jugadorId }) => {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -78,5 +77,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-export default JugadorInfoScreen;

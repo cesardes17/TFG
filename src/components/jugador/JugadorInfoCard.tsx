@@ -1,4 +1,7 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 import { PlayerUser } from '../../types/User';
 import { EstadisticasSimpleJugador } from '../../types/estadisticas/jugador';
 
@@ -8,9 +11,11 @@ interface JugadorInfoCardProps {
 }
 
 export default function JugadorInfoCard({
-  jugadorInfo, // Agrega aquí los campos que necesitas de jugadorInfo según tu estructura de datos en Firestore o de la API de Futb
+  jugadorInfo,
   estadisticas,
 }: JugadorInfoCardProps) {
+  const { theme } = useTheme();
+
   const { nombre, apellidos, dorsal, altura, peso, posicion, correo, fotoUrl } =
     jugadorInfo;
   const nombreCompleto = `${nombre} ${apellidos}`;
@@ -34,34 +39,46 @@ export default function JugadorInfoCard({
   const promedios = calcularPromedios();
 
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.cardDefault,
+          borderColor: theme.border.secondary,
+        },
+      ]}
+    >
       {/* Sección Izquierda - Información Básica */}
       <View style={styles.leftSection}>
         <Image source={{ uri: fotoUrl }} style={styles.avatar} />
 
         <View style={styles.basicInfo}>
-          <Text style={styles.playerName}>{nombreCompleto}</Text>
-          <Text style={styles.email}>{correo}</Text>
+          <StyledText style={styles.playerName} variant='primary' size='large'>
+            {nombreCompleto}
+          </StyledText>
+          <StyledText style={styles.email} variant='secondary' size='small'>
+            {correo}
+          </StyledText>
 
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Dorsal:</Text>
-              <Text style={styles.detailValue}>#{dorsal}</Text>
+              <StyledText style={styles.detailLabel}>Dorsal:</StyledText>
+              <StyledText style={styles.detailValue}>#{dorsal}</StyledText>
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Altura:</Text>
-              <Text style={styles.detailValue}>{altura} cm</Text>
+              <StyledText style={styles.detailLabel}>Altura:</StyledText>
+              <StyledText style={styles.detailValue}>{altura} cm</StyledText>
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Peso:</Text>
-              <Text style={styles.detailValue}>{peso} kg</Text>
+              <StyledText style={styles.detailLabel}>Peso:</StyledText>
+              <StyledText style={styles.detailValue}>{peso} kg</StyledText>
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Posición:</Text>
-              <Text style={styles.detailValue}>{posicion}</Text>
+              <StyledText style={styles.detailLabel}>Posición:</StyledText>
+              <StyledText style={styles.detailValue}>{posicion}</StyledText>
             </View>
           </View>
         </View>
@@ -69,37 +86,53 @@ export default function JugadorInfoCard({
 
       {/* Sección Derecha - Estadísticas */}
       <View style={styles.rightSection}>
-        <Text style={styles.statsTitle}>Promedios por Partido</Text>
+        <StyledText style={styles.statsTitle} variant='primary' size='medium'>
+          Promedios por Partido
+        </StyledText>
 
         {promedios ? (
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{promedios.puntosPorPartido}</Text>
-              <Text style={styles.statLabel}>Puntos</Text>
+              <StyledText style={styles.statValue} variant='primary'>
+                {promedios.puntosPorPartido}
+              </StyledText>
+              <StyledText style={styles.statLabel} variant='secondary'>
+                Puntos
+              </StyledText>
             </View>
 
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+              <StyledText style={styles.statValue} variant='primary'>
                 {promedios.asistenciasPorPartido}
-              </Text>
-              <Text style={styles.statLabel}>Asistencias</Text>
+              </StyledText>
+              <StyledText style={styles.statLabel} variant='secondary'>
+                Asistencias
+              </StyledText>
             </View>
 
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>
+              <StyledText style={styles.statValue} variant='primary'>
                 {promedios.rebotesPorPartido}
-              </Text>
-              <Text style={styles.statLabel}>Rebotes</Text>
+              </StyledText>
+              <StyledText style={styles.statLabel} variant='secondary'>
+                Rebotes
+              </StyledText>
             </View>
 
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{promedios.faltasPorPartido}</Text>
-              <Text style={styles.statLabel}>Faltas</Text>
+              <StyledText style={styles.statValue} variant='primary'>
+                {promedios.faltasPorPartido}
+              </StyledText>
+              <StyledText style={styles.statLabel} variant='secondary'>
+                Faltas
+              </StyledText>
             </View>
           </View>
         ) : (
           <View style={styles.noStatsContainer}>
-            <Text style={styles.noStatsText}>Sin estadísticas disponibles</Text>
+            <StyledText style={styles.noStatsText} variant='secondary'>
+              Sin estadísticas disponibles
+            </StyledText>
           </View>
         )}
       </View>
@@ -109,21 +142,17 @@ export default function JugadorInfoCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginVertical: 8,
-
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     flexDirection: 'row',
     minHeight: 200,
+    borderWidth: 1,
   },
   leftSection: {
     flex: 1,
@@ -147,15 +176,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   playerName: {
-    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 4,
   },
   email: {
-    fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -165,23 +190,18 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: 4,
   },
   detailLabel: {
     fontSize: 14,
-    color: '#666',
     fontWeight: '500',
   },
   detailValue: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '600',
   },
   statsTitle: {
-    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -192,7 +212,7 @@ const styles = StyleSheet.create({
   },
   statItem: {
     width: '48%',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8F9FA0E',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -201,12 +221,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2563eb',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
     textAlign: 'center',
   },
   noStatsContainer: {
@@ -216,7 +234,6 @@ const styles = StyleSheet.create({
   },
   noStatsText: {
     fontSize: 14,
-    color: '#999',
     fontStyle: 'italic',
     textAlign: 'center',
   },

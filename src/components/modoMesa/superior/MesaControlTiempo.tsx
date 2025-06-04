@@ -1,6 +1,9 @@
+// src/components/mesa/MesaControlTiempo.tsx
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import StyledButton from '../../common/StyledButton';
+import StyledText from '../../common/StyledText';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface MesaControlTiempoProps {
   cuartoActual: string;
@@ -17,7 +20,7 @@ interface MesaControlTiempoProps {
   jugadorExpulsadoPendiente: boolean;
 }
 
-const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
+export default function MesaControlTiempo({
   cuartoActual,
   hayTiempoMuertoSolicitado,
   quintetosListos,
@@ -30,7 +33,8 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   onInitTiempoMuerto,
   setCuartoIniciado,
   setPartidoIniciado,
-}) => {
+}: MesaControlTiempoProps) {
+  const { theme } = useTheme();
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
@@ -41,13 +45,11 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
 
   const esDescanso = cuartoActual === 'DESCANSO';
 
-  // Refs para el cronómetro principal
   const tiempoInicialRef = useRef<number>(0);
   const startTimeRef = useRef<number | null>(null);
   const elapsedTimeRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Refs para el cronómetro de tiempo muerto
   const tiempoMuertoInicioRef = useRef<number | null>(null);
 
   const obtenerDuracionCuarto = (cuarto: string): number => {
@@ -56,7 +58,6 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
     return 1 * 60;
   };
 
-  // ✅ Corrección aquí
   useLayoutEffect(() => {
     if (pararCronometro) {
       setPararCronometro(false);
@@ -111,7 +112,6 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
     };
   }, [cronometroCuartoPausado, hayTiempoMuertoActivo]);
 
-  // Tiempo muerto
   useEffect(() => {
     if (hayTiempoMuertoActivo) {
       tiempoMuertoInicioRef.current = Date.now();
@@ -160,7 +160,6 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
       if (prev) {
         startTimeRef.current = Date.now();
         setCuartoIniciado?.(true);
-
         if (cuartoActual === 'Q1' && !partidoIniciado) {
           setPartidoIniciado(true);
         }
@@ -180,17 +179,30 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.cardDefault,
+          borderColor: theme.border.secondary,
+          borderWidth: 1,
+        },
+      ]}
+    >
       <View style={styles.header}>
-        <Text style={[styles.cuartoText, { fontSize: isTablet ? 18 : 16 }]}>
+        <StyledText
+          variant='primary'
+          size={isTablet ? 18 : 16}
+          style={styles.cuartoText}
+        >
           {cuartoActual}
-        </Text>
+        </StyledText>
         <View
           style={[
             styles.estadoIndicador,
             cronometroCuartoPausado
-              ? styles.estadoPausado
-              : styles.estadoActivo,
+              ? { backgroundColor: '#dc3545' }
+              : { backgroundColor: '#28a745' },
           ]}
         />
       </View>
@@ -198,23 +210,29 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
       <View style={styles.cronometroContainer}>
         {hayTiempoMuertoActivo ? (
           <View>
-            <Text style={styles.tiempoMuertoLabel}>TIEMPO MUERTO</Text>
-            <Text
-              style={[
-                styles.tiempoDisplay,
-                styles.tiempoMuertoDisplay,
-                { fontSize: isTablet ? 60 : 48 },
-              ]}
+            <StyledText
+              variant='error'
+              size={16}
+              style={styles.tiempoMuertoLabel}
+            >
+              TIEMPO MUERTO
+            </StyledText>
+            <StyledText
+              variant='error'
+              size={isTablet ? 60 : 48}
+              style={[styles.tiempoDisplay, styles.tiempoMuertoDisplay]}
             >
               {formatearTiempo(tiempoMuerto)}
-            </Text>
+            </StyledText>
           </View>
         ) : (
-          <Text
-            style={[styles.tiempoDisplay, { fontSize: isTablet ? 72 : 56 }]}
+          <StyledText
+            variant='primary'
+            size={isTablet ? 72 : 56}
+            style={styles.tiempoDisplay}
           >
             {formatearTiempo(tiempoCuarto)}
-          </Text>
+          </StyledText>
         )}
       </View>
 
@@ -240,12 +258,11 @@ const MesaControlTiempo: React.FC<MesaControlTiempoProps> = ({
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 20,
   },
@@ -257,7 +274,6 @@ const styles = StyleSheet.create({
   },
   cuartoText: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
     marginRight: 8,
   },
   estadoIndicador: {
@@ -265,35 +281,21 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
   },
-  estadoActivo: {
-    backgroundColor: '#28a745',
-  },
-  estadoPausado: {
-    backgroundColor: '#dc3545',
-  },
   cronometroContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   tiempoDisplay: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
     fontFamily: 'monospace',
   },
   tiempoMuertoLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FF6B35',
     marginBottom: 8,
   },
-  tiempoMuertoDisplay: {
-    color: '#FF6B35',
-  },
+  tiempoMuertoDisplay: {},
   controlesContainer: {
     alignItems: 'center',
     marginTop: 6,
     gap: 4,
   },
 });
-
-export default MesaControlTiempo;

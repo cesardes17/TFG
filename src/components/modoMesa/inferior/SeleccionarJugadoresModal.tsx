@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   Modal,
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Image,
@@ -10,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
+import StyledText from '../../common/StyledText';
 
 interface SeleccionarJugadoresModalProps {
   jugadores: EstadisticasJugador[];
@@ -18,12 +18,12 @@ interface SeleccionarJugadoresModalProps {
   onConfirmar: (jugadoresSeleccionados: string[]) => void;
 }
 
-const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
+export default function SeleccionarJugadoresModal({
   jugadores,
   jugadoresEnPistaIds,
   onCerrar,
   onConfirmar,
-}) => {
+}: SeleccionarJugadoresModalProps) {
   const [jugadoresSeleccionados, setJugadoresSeleccionados] =
     useState<string[]>(jugadoresEnPistaIds);
 
@@ -100,15 +100,21 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
         <View
           style={[
             styles.modalContainer,
-            { width: modalWidth, height: modalHeight },
+            {
+              width: modalWidth,
+              height: modalHeight,
+              backgroundColor: '#1a1a1a',
+            },
           ]}
         >
           {/* HEADER */}
           <View style={styles.header}>
-            <Text style={styles.titulo}>Seleccionar Jugadores en Pista</Text>
-            <Text style={styles.subtitulo}>
+            <StyledText variant='light' size={18} style={styles.titulo}>
+              Seleccionar Jugadores en Pista
+            </StyledText>
+            <StyledText variant='secondary' size={12} style={styles.subtitulo}>
               {jugadoresSeleccionados.length}/5 jugadores seleccionados
-            </Text>
+            </StyledText>
           </View>
 
           {/* BODY */}
@@ -127,22 +133,16 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                       style={[
                         styles.tarjetaJugador,
                         {
-                          height: '100%',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderWidth: 2,
-                          borderRadius: 8,
                           borderColor: estaSeleccionado
-                            ? '#4CAF50'
+                            ? '#3B82F6'
                             : estaExpulsado
-                            ? '#FF0000'
-                            : '#E0E0E0',
+                            ? '#DC2626'
+                            : '#444',
                           backgroundColor: estaExpulsado
-                            ? '#FFE0E0'
+                            ? '#3a1a1a'
                             : estaSeleccionado
-                            ? '#E8F5E8'
-                            : '#FFFFFF',
-                          paddingHorizontal: 8,
+                            ? '#224466'
+                            : '#222',
                         },
                       ]}
                       onPress={() => toggleJugador(jugador.jugadorId)}
@@ -158,14 +158,22 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                         }}
                       >
                         {estaSeleccionado && (
-                          <Text style={styles.jugadorSeleccionadoTexto}>
+                          <StyledText
+                            size={10}
+                            variant='light'
+                            style={styles.jugadorSeleccionadoTexto}
+                          >
                             Jugador en pista
-                          </Text>
+                          </StyledText>
                         )}
                         {estaExpulsado && (
-                          <Text style={styles.jugadorExpulsadoTexto}>
+                          <StyledText
+                            size={10}
+                            variant='error'
+                            style={styles.jugadorExpulsadoTexto}
+                          >
                             Jugador expulsado
-                          </Text>
+                          </StyledText>
                         )}
                       </View>
 
@@ -185,16 +193,37 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
                           )}
                         </View>
 
-                        <Text style={styles.dorsal}>#{jugador.dorsal}</Text>
-                        <Text style={styles.nombre} numberOfLines={1}>
+                        <StyledText
+                          size={10}
+                          variant='light'
+                          style={styles.dorsal}
+                        >
+                          #{jugador.dorsal}
+                        </StyledText>
+                        <StyledText
+                          size={9}
+                          variant='light'
+                          style={styles.nombre}
+                          numberOfLines={1}
+                        >
                           {jugador.nombre}
-                        </Text>
-                        <Text style={styles.apellidos} numberOfLines={1}>
+                        </StyledText>
+                        <StyledText
+                          size={8}
+                          variant='secondary'
+                          style={styles.apellidos}
+                          numberOfLines={1}
+                        >
                           {jugador.apellidos}
-                        </Text>
-                        <Text style={styles.faltas} numberOfLines={1}>
+                        </StyledText>
+                        <StyledText
+                          size={11}
+                          variant='error'
+                          style={styles.faltas}
+                          numberOfLines={1}
+                        >
                           Faltas: {jugador.faltasCometidas}
-                        </Text>
+                        </StyledText>
                       </View>
                     </TouchableOpacity>
                   );
@@ -206,53 +235,52 @@ const SeleccionarJugadoresModal: React.FC<SeleccionarJugadoresModalProps> = ({
           {/* FOOTER */}
           <View style={styles.footer}>
             <TouchableOpacity
-              style={[styles.boton, styles.botonCancelar]}
+              style={[styles.boton, { backgroundColor: '#444' }]}
               onPress={onCerrar}
             >
-              <Text style={styles.textoBotonCancelar}>Cancelar</Text>
+              <StyledText
+                variant='secondary'
+                size={14}
+                style={styles.textoBotonCancelar}
+              >
+                Cancelar
+              </StyledText>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.boton,
-                styles.botonConfirmar,
-                { opacity: jugadoresSeleccionados.length !== 5 ? 0.5 : 1 },
+                {
+                  backgroundColor: '#22C55E',
+                  opacity: jugadoresSeleccionados.length !== 5 ? 0.5 : 1,
+                },
               ]}
               onPress={confirmarSeleccion}
               disabled={jugadoresSeleccionados.length !== 5}
             >
-              <Text style={styles.textoBotonConfirmar}>
+              <StyledText
+                variant='light'
+                size={14}
+                style={styles.textoBotonConfirmar}
+              >
                 Confirmar selección ({jugadoresSeleccionados.length})
-              </Text>
+              </StyledText>
             </TouchableOpacity>
           </View>
         </View>
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  jugadorSeleccionadoTexto: {
-    color: '#4CAF50',
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  jugadorExpulsadoTexto: {
-    color: '#FF0000',
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
   modalContainer: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     flexDirection: 'column',
     overflow: 'hidden',
@@ -264,13 +292,10 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   titulo: {
-    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   subtitulo: {
-    fontSize: 12,
-    color: '#666',
+    marginTop: 4,
   },
   body: {
     flex: 8,
@@ -299,25 +324,23 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
   },
-  dorsal: {
-    fontSize: 10,
+  jugadorSeleccionadoTexto: {
     fontWeight: 'bold',
-    color: '#2196F3',
+  },
+  jugadorExpulsadoTexto: {
+    fontWeight: 'bold',
+  },
+  dorsal: {
+    fontWeight: 'bold',
   },
   nombre: {
-    fontSize: 9,
     fontWeight: '600',
-    color: '#333333',
     textAlign: 'center',
   },
   apellidos: {
-    fontSize: 8,
-    color: '#666666',
     textAlign: 'center',
   },
   faltas: {
-    fontSize: 11,
-    color: '#FF0000',
     textAlign: 'center',
     marginTop: 4,
   },
@@ -325,29 +348,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#333',
   },
   boton: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  botonCancelar: {
-    backgroundColor: '#f0f0f0',
-  },
-  botonConfirmar: {
-    backgroundColor: '#4CAF50',
-  },
   textoBotonCancelar: {
-    color: '#666666',
-    fontSize: 14,
     fontWeight: '600',
   },
   textoBotonConfirmar: {
-    color: '#FFFFFF',
-    fontSize: 14,
     fontWeight: '600',
   },
 });
-
-export default SeleccionarJugadoresModal;

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
-import StyledAlert from '../common/StyledAlert';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 
 type TeamCardProps = {
   nombre: string;
@@ -23,12 +24,14 @@ type TeamCardProps = {
   } | null;
 };
 
-const TeamCard: React.FC<TeamCardProps> = ({
+export default function TeamCard({
   nombre,
   escudoUrl,
   capitan,
   clasificacion,
-}) => {
+}: TeamCardProps) {
+  const { theme } = useTheme();
+
   // Calcular estadísticas por partido si hay clasificación
   const ppj = clasificacion
     ? (clasificacion.puntosFavor / clasificacion.partidosJugados).toFixed(1)
@@ -38,76 +41,169 @@ const TeamCard: React.FC<TeamCardProps> = ({
     : '0';
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.cardDefault, shadowColor: theme.text.primary },
+      ]}
+    >
       {/* Sección izquierda */}
-      <View style={styles.leftSection}>
+      <View
+        style={[
+          styles.leftSection,
+          {
+            borderRightColor: theme.border.secondary,
+            borderBottomColor: theme.border.secondary,
+          },
+        ]}
+      >
         <Image
           source={{ uri: escudoUrl }}
           style={styles.logo}
           resizeMode='contain'
         />
-        <Text style={styles.teamName}>{nombre}</Text>
+        <StyledText variant='primary' size={18} style={styles.teamName}>
+          {nombre}
+        </StyledText>
         <View style={styles.captainContainer}>
-          <Text style={styles.sectionTitle}>Capitán</Text>
-          <Text style={styles.captainName}>
+          <StyledText variant='secondary' size={16} style={styles.sectionTitle}>
+            Capitán
+          </StyledText>
+          <StyledText variant='primary' size={15} style={styles.captainName}>
             {capitan.nombre} {capitan.apellidos}
-          </Text>
-          <Text style={styles.captainEmail}>{capitan.correo}</Text>
+          </StyledText>
+          <StyledText variant='secondary' size={13} style={styles.captainEmail}>
+            {capitan.correo}
+          </StyledText>
         </View>
       </View>
 
       {/* Sección derecha */}
       <View style={styles.rightSection}>
-        <Text style={styles.sectionTitle}>Estadísticas</Text>
+        <StyledText variant='secondary' size={16} style={styles.sectionTitle}>
+          Estadísticas
+        </StyledText>
         {clasificacion?.partidosJugados !== undefined &&
         clasificacion?.partidosJugados > 0 ? (
           <View style={styles.statsContainer}>
             <View style={styles.statRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>PJ</Text>
-                <Text style={styles.statValue}>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  PJ
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
                   {clasificacion.partidosJugados}
-                </Text>
+                </StyledText>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>PF</Text>
-                <Text style={styles.statValue}>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  PF
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
                   {clasificacion.puntosFavor}
-                </Text>
+                </StyledText>
               </View>
             </View>
 
             <View style={styles.statRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>PC</Text>
-                <Text style={styles.statValue}>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  PC
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
                   {clasificacion.puntosContra}
-                </Text>
+                </StyledText>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Dif</Text>
-                <Text style={styles.statValue}>{clasificacion.diferencia}</Text>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  Dif
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
+                  {clasificacion.diferencia}
+                </StyledText>
               </View>
             </View>
 
             <View style={styles.statRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>PPJ</Text>
-                <Text style={styles.statValue}>{ppj}</Text>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  PPJ
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
+                  {ppj}
+                </StyledText>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>PCPJ</Text>
-                <Text style={styles.statValue}>{pcpj}</Text>
+                <StyledText
+                  variant='secondary'
+                  size={12}
+                  style={styles.statLabel}
+                >
+                  PCPJ
+                </StyledText>
+                <StyledText
+                  variant='primary'
+                  size={16}
+                  style={styles.statValue}
+                >
+                  {pcpj}
+                </StyledText>
               </View>
             </View>
           </View>
         ) : (
-          <Text style={styles.noStats}>Sin estadísticas disponibles</Text>
+          <StyledText
+            variant='secondary'
+            size={15}
+            style={[styles.noStats, { color: theme.text.secondary }]}
+          >
+            Sin estadísticas disponibles
+          </StyledText>
         )}
       </View>
     </View>
   );
-};
+}
 
 const { width } = Dimensions.get('window');
 const isSmallScreen = width < 375;
@@ -115,9 +211,7 @@ const isSmallScreen = width < 375;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
     borderRadius: 10,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -125,7 +219,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
-    flexWrap: 'wrap', // Para responsividad en pantallas pequeñas
+    flexWrap: 'wrap',
   },
   leftSection: {
     flex: 1,
@@ -133,9 +227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 8,
     borderRightWidth: isSmallScreen ? 0 : 1,
-    borderRightColor: '#e0e0e0',
     borderBottomWidth: isSmallScreen ? 1 : 0,
-    borderBottomColor: '#e0e0e0',
     paddingBottom: isSmallScreen ? 16 : 0,
     marginBottom: isSmallScreen ? 16 : 0,
   },
@@ -151,7 +243,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   teamName: {
-    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
     textAlign: 'center',
@@ -161,20 +252,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   sectionTitle: {
-    fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
-    color: '#555',
   },
   captainName: {
-    fontSize: 15,
     fontWeight: '500',
     marginBottom: 4,
   },
-  captainEmail: {
-    fontSize: 13,
-    color: '#666',
-  },
+  captainEmail: {},
   statsContainer: {
     width: '100%',
   },
@@ -189,20 +274,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
     marginBottom: 2,
   },
   statValue: {
-    fontSize: 16,
     fontWeight: '600',
   },
   noStats: {
-    fontSize: 15,
-    color: '#888',
     fontStyle: 'italic',
     marginTop: 20,
   },
 });
-
-export default TeamCard;

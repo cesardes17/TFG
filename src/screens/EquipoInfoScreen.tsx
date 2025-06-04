@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { useTheme } from '../contexts/ThemeContext';
 import StyledAlert from '../components/common/StyledAlert';
@@ -10,6 +10,7 @@ import { useEquipoInfo } from '../hooks/useEquipoInfo';
 import { useInscripcionesEquipo } from '../hooks/useInscripcionesEquipo';
 import useClasificacionEquipo from '../hooks/useClasificacionEquipo';
 import EstadisticasEquipo from '../components/equipo/EstadisticasEquipo';
+import StyledText from '../components/common/StyledText';
 
 interface EquipoInfoScreenProps {
   equipoId: string;
@@ -32,11 +33,7 @@ export default function EquipoInfoScreen({ equipoId }: EquipoInfoScreenProps) {
   } = useInscripcionesEquipo(temporada?.id, equipoId);
 
   const { clasificacion, isLoading: isLoadingClasificacion } =
-    useClasificacionEquipo(
-      temporada?.id || null,
-      'liga-regular', // o la competición que corresponda
-      equipoId
-    );
+    useClasificacionEquipo(temporada?.id || null, 'liga-regular', equipoId);
 
   const [vista, setVista] = useState<'estadisticas' | 'jugadores'>(
     'estadisticas'
@@ -71,44 +68,55 @@ export default function EquipoInfoScreen({ equipoId }: EquipoInfoScreenProps) {
         clasificacion={clasificacion}
       />
 
-      {/* Botonera de selección de vista */}
-      <View style={styles.selectorContainer}>
+      <View
+        style={[
+          styles.selectorContainer,
+          { borderBottomColor: theme.border.secondary },
+        ]}
+      >
         <TouchableOpacity
           style={[
             styles.selectorButton,
-            vista === 'estadisticas' && styles.selectorActivo,
+            vista === 'estadisticas' && {
+              borderBottomWidth: 3,
+              borderBottomColor: theme.text.success,
+            },
           ]}
           onPress={() => setVista('estadisticas')}
         >
-          <Text
+          <StyledText
+            variant={vista === 'estadisticas' ? 'success' : 'primary'}
             style={[
               styles.selectorTexto,
               vista === 'estadisticas' && styles.selectorTextoActivo,
             ]}
           >
             Estadísticas
-          </Text>
+          </StyledText>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[
             styles.selectorButton,
-            vista === 'jugadores' && styles.selectorActivo,
+            vista === 'jugadores' && {
+              borderBottomWidth: 3,
+              borderBottomColor: theme.text.success,
+            },
           ]}
           onPress={() => setVista('jugadores')}
         >
-          <Text
+          <StyledText
+            variant={vista === 'jugadores' ? 'success' : 'primary'}
             style={[
               styles.selectorTexto,
               vista === 'jugadores' && styles.selectorTextoActivo,
             ]}
           >
             Jugadores
-          </Text>
+          </StyledText>
         </TouchableOpacity>
       </View>
 
-      {/* Contenido según la vista seleccionada */}
       <View style={styles.contenidoContainer}>
         {vista === 'estadisticas' ? (
           <EstadisticasEquipo
@@ -125,9 +133,7 @@ export default function EquipoInfoScreen({ equipoId }: EquipoInfoScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   centeredContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -137,24 +143,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   selectorButton: {
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
   },
-  selectorActivo: {
-    borderBottomWidth: 3,
-    borderBottomColor: '#05C484',
-  },
   selectorTexto: {
-    color: '#333',
     fontWeight: '500',
   },
-  selectorTextoActivo: {
-    color: '#05C484',
-  },
+  selectorTextoActivo: {},
   contenidoContainer: {
     flex: 1,
     marginTop: 12,

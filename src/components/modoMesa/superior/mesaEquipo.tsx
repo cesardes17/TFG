@@ -1,7 +1,9 @@
+// src/components/mesa/MesaEquipo.tsx
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import StyledButton from '../../common/StyledButton';
 import StyledText from '../../common/StyledText';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface Equipo {
   id: string;
@@ -18,11 +20,11 @@ interface MesaEquipoProps {
   tipo: 'local' | 'visitante';
   cuartoActual: string;
 
-  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
+  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean;
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
 }
 
-const MesaEquipo: React.FC<MesaEquipoProps> = ({
+export default function MesaEquipo({
   equipo,
   puntos,
   faltasCometidas,
@@ -32,20 +34,25 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
   tipo,
   cuartoActual,
   onSolicitarTiempoMuerto,
-}) => {
-  const hayTiempoMuertoDisponible = puedeSolicitarTiempoMuerto(tipo);
-
+}: MesaEquipoProps) {
+  const { theme } = useTheme();
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
   const faltasRestantes = Math.max(0, 5 - faltasCometidas);
   const estaEnBonus = faltasRestantes === 0;
+  const hayTiempoMuertoDisponible = puedeSolicitarTiempoMuerto(tipo);
 
   return (
     <View
       style={[
         styles.container,
         { flexDirection: tipo === 'local' ? 'row' : 'row-reverse' },
+        {
+          backgroundColor: theme.cardDefault,
+          borderColor: theme.border.secondary,
+          borderWidth: 1,
+        },
       ]}
     >
       {/* Columna izquierda: escudo, nombre, puntos, botón */}
@@ -62,24 +69,34 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
               style={[
                 styles.escudo,
                 { width: isTablet ? 70 : 60, height: isTablet ? 70 : 60 },
+                { backgroundColor: theme.background.navigation },
               ]}
               resizeMode='contain'
             />
-            <StyledText size='small' style={styles.nombreEquipo}>
+            <StyledText
+              size='small'
+              style={styles.nombreEquipo}
+              variant='primary'
+            >
               {equipo.nombre}
             </StyledText>
           </View>
 
           <View style={styles.puntosContainer}>
-            <Text
-              style={[
-                styles.puntosTexto,
-                { fontSize: isTablet ? 28 : 24, fontWeight: 'bold' },
-              ]}
+            <StyledText
+              size={isTablet ? 28 : 24}
+              style={styles.puntosTexto}
+              variant='primary'
             >
               {puntos}
-            </Text>
-            <Text style={styles.puntosLabel}>PUNTOS</Text>
+            </StyledText>
+            <StyledText
+              size='small'
+              style={styles.puntosLabel}
+              variant='secondary'
+            >
+              PUNTOS
+            </StyledText>
           </View>
         </View>
 
@@ -108,51 +125,65 @@ const MesaEquipo: React.FC<MesaEquipoProps> = ({
 
       {/* Columna derecha: estadísticas */}
       <View style={styles.columnaDerecha}>
-        <View style={[styles.tarjeta, estaEnBonus && styles.tarjetaBonus]}>
-          <Text style={[styles.numero, { fontSize: isTablet ? 32 : 28 }]}>
+        <View
+          style={[
+            styles.tarjeta,
+            {
+              backgroundColor: '#F8F9FA0E',
+              borderColor: theme.border.secondary,
+            },
+            estaEnBonus && styles.tarjetaBonus,
+          ]}
+        >
+          <StyledText
+            size={isTablet ? 32 : 28}
+            style={styles.numero}
+            variant='primary'
+          >
             {faltasRestantes}
-          </Text>
-          <Text style={[styles.etiqueta, { fontSize: isTablet ? 14 : 12 }]}>
+          </StyledText>
+          <StyledText size='small' style={styles.etiqueta} variant='secondary'>
             FALTAS RESTANTES
-          </Text>
+          </StyledText>
         </View>
 
         <View
           style={[
             styles.tarjeta,
+            {
+              backgroundColor: '#F8F9FA0E',
+              borderColor: theme.border.secondary,
+            },
             !hayTiempoMuertoDisponible && styles.tarjetaBonus,
           ]}
         >
-          <Text style={[styles.numero, { fontSize: isTablet ? 32 : 28 }]}>
+          <StyledText
+            size={isTablet ? 32 : 28}
+            style={styles.numero}
+            variant='primary'
+          >
             {hayTiempoMuertoDisponible ? '1' : '0'}
-          </Text>
-          <Text style={[styles.etiqueta, { fontSize: isTablet ? 14 : 12 }]}>
+          </StyledText>
+          <StyledText size='small' style={styles.etiqueta} variant='secondary'>
             TIMEOUTS DISPONIBLES
-          </Text>
+          </StyledText>
         </View>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    overflow: 'hidden',
   },
   columnaIzquierda: {
     flex: 1,
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 12,
-    borderRightWidth: 1,
-    borderRightColor: '#e5e5e5',
   },
   zonaSuperior: {
     flex: 1,
@@ -164,11 +195,9 @@ const styles = StyleSheet.create({
   },
   escudo: {
     borderRadius: 8,
-    backgroundColor: '#f8f9fa',
   },
   nombreEquipo: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
     textAlign: 'center',
     marginTop: 8,
     maxWidth: 100,
@@ -179,11 +208,10 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   puntosTexto: {
-    color: '#3B82F6',
+    fontWeight: 'bold',
   },
   puntosLabel: {
-    fontSize: 12,
-    color: '#6c757d',
+    fontWeight: '600',
   },
   columnaDerecha: {
     flex: 1,
@@ -192,34 +220,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tarjeta: {
-    backgroundColor: '#f8f9fa',
     borderRadius: 8,
     paddingVertical: 12,
     marginVertical: 6,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e9ecef',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
   },
   tarjetaBonus: {
     borderColor: '#FF0000',
-    backgroundColor: '#FFEAEA',
+    backgroundColor: '#F06C6CFF',
   },
   numero: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
     marginBottom: 4,
   },
   etiqueta: {
     fontWeight: '600',
-    color: '#6c757d',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
 });
-
-export default MesaEquipo;

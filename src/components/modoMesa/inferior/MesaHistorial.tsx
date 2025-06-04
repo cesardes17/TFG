@@ -1,29 +1,22 @@
-// MesaHistorial.tsx
 import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { HistorialAccion } from '../../../screens/modoMesa/ModoMesaLayout';
-
-// Definición de tipos
+import StyledText from '../../common/StyledText';
 
 interface MesaHistorialProps {
   acciones: HistorialAccion[];
   onEliminarAccion: (id: string) => void;
 }
 
-const MesaHistorial: React.FC<MesaHistorialProps> = ({
+export default function MesaHistorial({
   acciones,
   onEliminarAccion,
-}) => {
+}: MesaHistorialProps) {
   const renderItem = ({ item }: { item: HistorialAccion }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text
+        <StyledText
+          variant='primary'
           style={[
             styles.equipo,
             item.equipo === 'local'
@@ -32,26 +25,30 @@ const MesaHistorial: React.FC<MesaHistorialProps> = ({
           ]}
         >
           {item.equipo === 'local' ? 'LOCAL' : 'VISITANTE'}
-        </Text>
-        <Text style={styles.dorsal}>#{item.dorsal}</Text>
+        </StyledText>
+        <StyledText variant='primary' style={styles.dorsal}>
+          #{item.dorsal}
+        </StyledText>
       </View>
 
-      <Text style={styles.nombre}>
+      <StyledText variant='primary' style={styles.nombre}>
         {item.nombre} {item.apellidos}
-      </Text>
+      </StyledText>
 
       <View style={styles.accionContainer}>
-        <Text style={styles.accion}>
+        <StyledText variant='secondary' style={styles.accion}>
           {item.accion.charAt(0).toUpperCase() + item.accion.slice(1)}
           {item.tipoTiro ? ` - ${item.tipoTiro.toUpperCase()}` : ''}
-        </Text>
+        </StyledText>
       </View>
 
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => onEliminarAccion(item.id)}
       >
-        <Text style={styles.deleteButtonText}>Eliminar</Text>
+        <StyledText variant='light' style={styles.deleteButtonText}>
+          Eliminar
+        </StyledText>
       </TouchableOpacity>
     </View>
   );
@@ -66,32 +63,27 @@ const MesaHistorial: React.FC<MesaHistorialProps> = ({
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 15,
+    backgroundColor: '#000000', // Modo mesa: negro
   },
   listContainer: {
     paddingBottom: 20,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: '#121212', // Más oscuro para modo mesa
     borderRadius: 8,
     padding: 8,
     marginVertical: 4,
     marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#333', // Bordes oscuros
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 2,
   },
@@ -109,20 +101,22 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   equipoLocal: {
-    backgroundColor: '#e3f2fd',
-    color: '#1565c0',
+    backgroundColor: '#1E88E5',
+    color: '#ffffff',
   },
   equipoVisitante: {
-    backgroundColor: '#ffebee',
-    color: '#c62828',
+    backgroundColor: '#C62828',
+    color: '#ffffff',
   },
   dorsal: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#ffffff',
   },
   nombre: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#ffffff',
     marginBottom: 8,
   },
   accionContainer: {
@@ -130,6 +124,7 @@ const styles = StyleSheet.create({
   },
   accion: {
     fontSize: 14,
+    color: '#cccccc',
   },
   deleteButton: {
     backgroundColor: '#f44336',
@@ -138,9 +133,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteButtonText: {
-    color: 'white',
     fontWeight: '500',
   },
 });
-
-export default MesaHistorial;

@@ -1,12 +1,5 @@
-// TarjetaPartido.tsx
 import React from 'react';
-import {
-  View,
-  Image,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 import { CalendarIcon, LocationIcon } from '../Icons';
@@ -24,11 +17,23 @@ interface Props {
 export default function TarjetaPartido({ partido }: Props) {
   const { theme } = useTheme();
 
+  const esDescansa =
+    partido.equipoLocal.nombre === 'Descansa' ||
+    partido.equipoVisitante.nombre === 'Descansa';
+
   const getEstadoStyle = (estado: string) => {
+    if (esDescansa) {
+      return {
+        backgroundColor: '#e0e0e0',
+        color: '#333',
+        text: 'Descansa',
+      };
+    }
+
     switch (estado) {
       case 'pendiente':
         return {
-          backgroundColor: theme.background.warning,
+          backgroundColor: theme.background.info,
           color: theme.text.light,
           text: 'Pendiente',
         };
@@ -40,13 +45,13 @@ export default function TarjetaPartido({ partido }: Props) {
         };
       case 'finalizado':
         return {
-          backgroundColor: theme.background.info,
+          backgroundColor: theme.text.success,
           color: theme.text.light,
           text: 'Finalizado',
         };
       default:
         return {
-          backgroundColor: theme.background.primary,
+          backgroundColor: theme.background.warning,
           color: theme.text.dark,
           text: 'Desconocido',
         };
@@ -80,16 +85,20 @@ export default function TarjetaPartido({ partido }: Props) {
       style={[styles.tarjetaContainer, { backgroundColor: theme.cardDefault }]}
     >
       <View style={styles.tarjetaHeader}>
-        <View
-          style={[
-            styles.estadoBadge,
-            { backgroundColor: estadoStyle.backgroundColor },
-          ]}
-        >
-          <StyledText style={[styles.estadoText, { color: estadoStyle.color }]}>
-            {estadoStyle.text}
-          </StyledText>
-        </View>
+        {!esDescansa && (
+          <View
+            style={[
+              styles.estadoBadge,
+              { backgroundColor: estadoStyle.backgroundColor },
+            ]}
+          >
+            <StyledText
+              style={[styles.estadoText, { color: estadoStyle.color }]}
+            >
+              {estadoStyle.text}
+            </StyledText>
+          </View>
+        )}
         {partido.fecha && (
           <StyledText variant='secondary' style={styles.fechaText}>
             <CalendarIcon color={theme.text.secondary} size={12} />{' '}
@@ -127,7 +136,11 @@ export default function TarjetaPartido({ partido }: Props) {
           </StyledText>
         </View>
         <View style={styles.resultadoContainer}>
-          {partido.resultado ? (
+          {esDescansa ? (
+            <StyledText variant='secondary' style={styles.vsText}>
+              DESCANSA
+            </StyledText>
+          ) : partido.resultado ? (
             <StyledText variant='primary' style={styles.marcadorText}>
               {partido.resultado.puntosLocal} -{' '}
               {partido.resultado.puntosVisitante}
@@ -167,7 +180,7 @@ export default function TarjetaPartido({ partido }: Props) {
         </View>
       </View>
 
-      {partido.cancha && (
+      {partido.cancha && !esDescansa && (
         <View style={styles.canchaContainer}>
           <StyledText variant='secondary' style={styles.canchaText}>
             <LocationIcon color={theme.text.secondary} size={16} />{' '}

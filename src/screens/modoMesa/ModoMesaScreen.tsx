@@ -71,7 +71,6 @@ export default function ModoMesaScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#222',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,

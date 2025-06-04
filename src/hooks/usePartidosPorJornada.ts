@@ -1,4 +1,3 @@
-// src/hooks/usePartidosPorJornada.ts
 import { useState } from 'react';
 import { Partido } from '../types/Partido';
 import { partidoService } from '../services/partidoService';
@@ -6,13 +5,10 @@ import { useTemporadaContext } from '../contexts/TemporadaContext';
 
 export function usePartidosPorJornada() {
   const { temporada } = useTemporadaContext();
-  const [partidosPorJornada, setPartidosPorJornada] = useState<
-    Record<string, Partido[]>
-  >({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Método que siempre fuerza la petición
+  // Siempre se pide a la base de datos, no se cachea en memoria
   const getPartidos = async (jornadaId: string): Promise<Partido[]> => {
     if (!temporada) return [];
 
@@ -34,19 +30,14 @@ export function usePartidosPorJornada() {
           b.equipoLocal.nombre === 'Descansa' ||
           b.equipoVisitante.nombre === 'Descansa';
 
-        // Prioridad 1: Si uno es "descansa", va al final
         if (esDescansaA && !esDescansaB) return 1;
         if (!esDescansaA && esDescansaB) return -1;
 
-        // Prioridad 2: Ordenar por fecha (si ambos tienen o ambos no tienen)
         const fechaA = a.fecha ? new Date(a.fecha).getTime() : 0;
         const fechaB = b.fecha ? new Date(b.fecha).getTime() : 0;
         return fechaA - fechaB;
       });
-      setPartidosPorJornada((prev) => ({
-        ...prev,
-        [jornadaId]: partidosOrdenados,
-      }));
+
       setLoading(false);
       return partidosOrdenados;
     } else {
@@ -56,17 +47,8 @@ export function usePartidosPorJornada() {
     }
   };
 
-  // Método que solo los obtiene si aún no están cacheados
-  const obtenerPartidosSiNoExisten = async (jornadaId: string) => {
-    if (!partidosPorJornada[jornadaId]) {
-      await getPartidos(jornadaId);
-    }
-  };
-
   return {
-    partidosPorJornada,
     getPartidos,
-    obtenerPartidosSiNoExisten,
     loading,
     error,
   };

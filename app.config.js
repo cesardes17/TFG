@@ -30,7 +30,14 @@ export default ({ config }) => ({
     requireFullScreen: true,
     infoPlist: {
       NSAppTransportSecurity: {
-        NSAllowsArbitraryLoads: true,
+        NSAllowsArbitraryLoads: false,
+        NSExceptionDomains: {
+          'firebasestorage.googleapis.com': {
+            NSExceptionAllowsInsecureHTTPLoads: false,
+            NSIncludesSubdomains: true,
+            NSTemporaryExceptionMinimumTLSVersion: 'TLSv1.2',
+          },
+        },
       },
     },
   },

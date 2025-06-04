@@ -22,7 +22,6 @@ export default function ProgressiveImage({
   imageStyle,
   ...rest
 }: ProgressiveImageProps) {
-  console.log('ProgressiveImage.tsx: uri', uri);
   const [loaded, setLoaded] = useState(false);
   const pulse = useRef(new Animated.Value(0.3)).current;
 

@@ -1,13 +1,19 @@
 // utils/modoMesa/inicializarCuarto.ts
-import { Partido } from '../../types/Partido';
+import { Partido, PartidoRT } from '../../types/Partido';
 
 export function inicializarCuarto(
-  partido: Partido,
+  partido: Omit<PartidoRT, 'minutoActual' | 'cuartoActual'>,
   cuartoActual: string
-): Partido {
+): PartidoRT {
+  // si el cuarto actual es Descanso no incializamos estadisticas
+  if (cuartoActual === 'DESCANSO') {
+    return { ...partido, minutoActual: 0, cuartoActual: cuartoActual };
+  }
   // Clonamos todo el objeto partido
-  const partidoInicializado: Partido = {
+  const partidoInicializado: PartidoRT = {
     ...partido,
+    minutoActual: 12,
+    cuartoActual: cuartoActual,
     estadisticasEquipos: {
       ...partido.estadisticasEquipos, // Clona todo lo que ya había
       porCuarto: {

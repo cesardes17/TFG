@@ -1,12 +1,13 @@
 // MesaInferior.tsx
 import { View, StyleSheet } from 'react-native';
-import { EstadisticasJugadores } from '../../../types/estadisticas/jugador';
 import {
   ActualizarEstadisticaJugadorParams,
-  HistorialAccion,
-} from '../../../screens/modoMesa/ModoMesaLayout';
+  EstadisticasJugadores,
+} from '../../../types/estadisticas/jugador';
+
 import MesaJugadores from './MesaJugadores';
 import MesaHistorial from './MesaHistorial';
+import { HistorialAccion } from '../../../types/HistorialAccion';
 
 interface Props {
   estadisticasJugadores: EstadisticasJugadores;
@@ -23,6 +24,7 @@ interface Props {
   ) => void;
   historialAcciones: HistorialAccion[];
   onEliminarAccion: (idAccion: string) => void;
+  cronometroActivo: boolean; // Agregado para el cronometro
 }
 
 export default function MesaInferior({
@@ -35,6 +37,7 @@ export default function MesaInferior({
   setJugadorExpulsadoPendiente,
   historialAcciones,
   onEliminarAccion,
+  cronometroActivo,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -48,6 +51,7 @@ export default function MesaInferior({
           setQuintetosListos={setQuintetosListos}
           cuartoActual={cuartoActual}
           setJugadorExpulsadoPendiente={setJugadorExpulsadoPendiente}
+          cronometroActivo={cronometroActivo}
         />
       </View>
 
@@ -67,6 +71,7 @@ export default function MesaInferior({
           setQuintetosListos={setQuintetosListos}
           cuartoActual={cuartoActual}
           setJugadorExpulsadoPendiente={setJugadorExpulsadoPendiente}
+          cronometroActivo={cronometroActivo}
         />
       </View>
     </View>

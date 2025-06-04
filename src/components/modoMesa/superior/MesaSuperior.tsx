@@ -27,9 +27,11 @@ interface MesaSuperiorProps {
   setTiempoMuertoIniciado: (iniciado: boolean) => void;
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
+  onCancelarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
   onFinTiempoMuerto: () => void;
   onFinCuarto: () => void;
   setCuartoIniciado: (iniciado: boolean) => void;
+  setCronometroActivo: (activo: boolean) => void;
   jugadorExpulsadoPendiente: { local: boolean; visitante: boolean };
 }
 
@@ -50,18 +52,16 @@ export default function MesaSuperior({
   setTiempoMuertoIniciado,
   puedeSolicitarTiempoMuerto,
   onSolicitarTiempoMuerto,
+  onCancelarTiempoMuerto,
   onFinTiempoMuerto,
   onFinCuarto,
   setCuartoIniciado,
+  setCronometroActivo,
 }: MesaSuperiorProps) {
-  const tiemposMuertosLocal =
-    estadisticasCuartoActual?.local.tiemposMuertos ?? 0;
   const faltasCometidasLocal =
     estadisticasCuartoActual?.local.faltasCometidas ?? 0;
   const faltasCometidasVisitante =
     estadisticasCuartoActual?.visitante.faltasCometidas ?? 0;
-  const tiemposMuertosVisitante =
-    estadisticasCuartoActual?.visitante.tiemposMuertos ?? 0;
 
   //en caso de cambiar de cuarto, los tiempos muertos solicitados se cancelan
   useEffect(() => {
@@ -87,6 +87,7 @@ export default function MesaSuperior({
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           tipo='local'
           onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          onCancelarTiempoMuerto={onCancelarTiempoMuerto}
           cuartoActual={cuartoActual}
         />
       </View>
@@ -119,6 +120,7 @@ export default function MesaSuperior({
             jugadorExpulsadoPendiente.local ||
             jugadorExpulsadoPendiente.visitante
           }
+          setCronometroActivo={setCronometroActivo}
         />
       </View>
 
@@ -132,6 +134,7 @@ export default function MesaSuperior({
           tiempoMuertoIniciado={tiempoMuertoIniciado}
           tipo='visitante'
           onSolicitarTiempoMuerto={onSolicitarTiempoMuerto}
+          onCancelarTiempoMuerto={onCancelarTiempoMuerto}
           cuartoActual={cuartoActual}
         />
       </View>

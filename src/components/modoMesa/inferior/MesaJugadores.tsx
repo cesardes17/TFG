@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
+import {
+  ActualizarEstadisticaJugadorParams,
+  EstadisticasJugador,
+} from '../../../types/estadisticas/jugador';
 import { EstadisticasTiro } from '../../../types/estadisticas/tiro';
-import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
 import RenderEstadisticaJugador from './RenderEstadisticaJugador';
 import SeleccionarJugadoresModal from './SeleccionarJugadoresModal';
 import StyledButton from '../../common/StyledButton';
@@ -22,6 +24,7 @@ interface MesaJugadoresProps {
     equipo: 'local' | 'visitante',
     pendiente: boolean
   ) => void;
+  cronometroActivo: boolean;
 }
 
 const MesaJugadores: React.FC<MesaJugadoresProps> = ({
@@ -33,12 +36,14 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   setQuintetosListos,
   cuartoActual,
   setJugadorExpulsadoPendiente,
+  cronometroActivo,
 }) => {
   const [jugadoresEnPista, setJugadoresEnPista] = useState<string[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [expulsadoAnterior, setExpulsadoAnterior] = useState(false);
 
-  const botonesDeshabilitados = !cuartoIniciado || tiempoMuertoIniciado;
+  const botonesDeshabilitados =
+    !cuartoIniciado || tiempoMuertoIniciado || !cronometroActivo;
 
   const handleActualizarEstadistica = (
     jugadorId: string,

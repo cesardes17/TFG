@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import EstadisticaBoton from './EstadisticasBoton';
 import StyledText from '../../common/StyledText';
-import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
-import { ActualizarEstadisticaJugadorParams } from '../../../screens/modoMesa/ModoMesaLayout';
+import {
+  ActualizarEstadisticaJugadorParams,
+  EstadisticasJugador,
+} from '../../../types/estadisticas/jugador';
 import { EstadisticasTiro } from '../../../types/estadisticas/tiro';
 
 interface Props {

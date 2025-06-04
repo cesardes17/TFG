@@ -30,7 +30,7 @@ export const lightTheme: Theme = {
     light: colors.gray100,
   },
   border: {
-    primary: colors.gray900,
+    primary: colors.gray500,
     secondary: colors.gray300,
     error: colors.error.border,
     success: colors.success.border,

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { HistorialAccion } from '../../../screens/modoMesa/ModoMesaLayout';
 import StyledText from '../../common/StyledText';
+import { HistorialAccion } from '../../../types/HistorialAccion';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface MesaHistorialProps {
   acciones: HistorialAccion[];
@@ -12,8 +13,9 @@ export default function MesaHistorial({
   acciones,
   onEliminarAccion,
 }: MesaHistorialProps) {
+  const { theme } = useTheme();
   const renderItem = ({ item }: { item: HistorialAccion }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: theme.background.primary }]}>
       <View style={styles.cardHeader}>
         <StyledText
           variant='primary'
@@ -68,13 +70,11 @@ export default function MesaHistorial({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // Modo mesa: negro
   },
   listContainer: {
     paddingBottom: 20,
   },
   card: {
-    backgroundColor: '#121212', // Más oscuro para modo mesa
     borderRadius: 8,
     padding: 8,
     marginVertical: 4,
@@ -111,12 +111,11 @@ const styles = StyleSheet.create({
   dorsal: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#ffffff',
   },
   nombre: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#ffffff',
+
     marginBottom: 8,
   },
   accionContainer: {
@@ -124,7 +123,6 @@ const styles = StyleSheet.create({
   },
   accion: {
     fontSize: 14,
-    color: '#cccccc',
   },
   deleteButton: {
     backgroundColor: '#f44336',

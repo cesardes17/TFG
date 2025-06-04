@@ -18,6 +18,7 @@ interface MesaControlTiempoProps {
   setPararCronometro: (parar: boolean) => void;
   pararCronometro: boolean;
   jugadorExpulsadoPendiente: boolean;
+  setCronometroActivo: (activo: boolean) => void;
 }
 
 export default function MesaControlTiempo({
@@ -33,6 +34,7 @@ export default function MesaControlTiempo({
   onInitTiempoMuerto,
   setCuartoIniciado,
   setPartidoIniciado,
+  setCronometroActivo,
 }: MesaControlTiempoProps) {
   const { theme } = useTheme();
   const { width } = Dimensions.get('window');
@@ -147,6 +149,18 @@ export default function MesaControlTiempo({
     };
   }, [hayTiempoMuertoActivo]);
 
+  // 🟡 Nuevo efecto: gestiona setCuartoIniciado y setPartidoIniciado
+  useEffect(() => {
+    if (!cronometroCuartoPausado) {
+      setCuartoIniciado?.(true);
+      if (cuartoActual === 'C1' && !partidoIniciado) {
+        setPartidoIniciado(true);
+      }
+    } else {
+      setCuartoIniciado?.(false);
+    }
+  }, [cronometroCuartoPausado]);
+
   const formatearTiempo = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = s % 60;
@@ -159,10 +173,6 @@ export default function MesaControlTiempo({
     setCronometroCuartoPausado((prev) => {
       if (prev) {
         startTimeRef.current = Date.now();
-        setCuartoIniciado?.(true);
-        if (cuartoActual === 'Q1' && !partidoIniciado) {
-          setPartidoIniciado(true);
-        }
       } else {
         if (startTimeRef.current) {
           const elapsedThisSession = Math.floor(
@@ -171,9 +181,9 @@ export default function MesaControlTiempo({
           elapsedTimeRef.current += elapsedThisSession;
           startTimeRef.current = null;
         }
-        setCuartoIniciado?.(false);
       }
       setHayTiempoMuertoActivo(hayTiempoMuertoSolicitado);
+      setCronometroActivo(prev);
       return !prev;
     });
   };

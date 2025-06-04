@@ -1,4 +1,4 @@
-import { EstadoPartido, Partido } from '../types/Partido';
+import { EstadoPartido, Partido, PartidoRT } from '../types/Partido';
 import { ResultService } from '../types/ResultService';
 import { FirestoreService, WhereClause } from './core/firestoreService';
 import { RealtimeService } from './core/realtimeService';
@@ -215,6 +215,7 @@ export const partidoService = {
       };
     }
   },
+
   // ---------------------------------------------
   // Métodos Realtime Database
   // ---------------------------------------------
@@ -276,10 +277,10 @@ export const partidoService = {
    */
   getPartidoRealtimeOnce: async (
     partidoId: string
-  ): Promise<ResultService<Partido | null>> => {
+  ): Promise<ResultService<PartidoRT | null>> => {
     try {
       const base = [...COLLECTION, partidoId];
-      return await RealtimeService.getValue<Partido>([...base, partidoId]);
+      return await RealtimeService.getValue<PartidoRT>([...base, partidoId]);
     } catch (e: any) {
       return {
         success: false,
@@ -295,10 +296,10 @@ export const partidoService = {
    */
   onPartidoRealtime: async (
     partidoId: string,
-    callback: (data: Partido | null) => void
+    callback: (data: PartidoRT | null) => void
   ): Promise<() => void> => {
     const base = [...COLLECTION, partidoId];
-    return await RealtimeService.onValue<Partido>(
+    return await RealtimeService.onValue<PartidoRT>(
       [...base, partidoId],
       callback
     );
@@ -309,10 +310,10 @@ export const partidoService = {
    * callback recibe un objeto con todos los nodos { [pId]: PartidoRT, … } o null si no hay ninguno.
    */
   onAllPartidosRealtime: async (
-    callback: (lista: Record<string, Partido> | null) => void
+    callback: (lista: Record<string, PartidoRT> | null) => void
   ): Promise<() => void> => {
     const base = [...COLLECTION];
-    return await RealtimeService.onValue<Record<string, Partido>>(
+    return await RealtimeService.onValue<Record<string, PartidoRT>>(
       base,
       callback
     );

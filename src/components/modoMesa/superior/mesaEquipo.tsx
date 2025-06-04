@@ -19,9 +19,9 @@ interface MesaEquipoProps {
   tiempoMuertoIniciado: boolean;
   tipo: 'local' | 'visitante';
   cuartoActual: string;
-
   puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean;
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
+  onCancelarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
 }
 
 export default function MesaEquipo({
@@ -34,6 +34,7 @@ export default function MesaEquipo({
   tipo,
   cuartoActual,
   onSolicitarTiempoMuerto,
+  onCancelarTiempoMuerto,
 }: MesaEquipoProps) {
   const { theme } = useTheme();
   const { width } = Dimensions.get('window');
@@ -115,7 +116,7 @@ export default function MesaEquipo({
 
         {tiempoMuertoSolicitado && (
           <StyledButton
-            onPress={() => onSolicitarTiempoMuerto(tipo)}
+            onPress={() => onCancelarTiempoMuerto(tipo)}
             variant='error-outline'
             title='Cancelar Tiempo Muerto'
             disabled={tiempoMuertoIniciado}

@@ -1,4 +1,4 @@
-import { Partido } from '../../types/Partido';
+import { Partido, PartidoRT } from '../../types/Partido';
 import { Inscripcion } from '../../types/Inscripcion';
 import { EstadisticasJugador } from '../../types/estadisticas/jugador';
 import { inicializarCuarto } from './inicializarCuarto';
@@ -11,10 +11,10 @@ import { inicializarCuarto } from './inicializarCuarto';
  * @returns El partido actualizado con estadísticas inicializadas
  */
 export function inicializarPartido(
-  partido: Partido,
+  partido: Omit<PartidoRT, 'cuartoActual' | 'minutoActual'>,
   inscripcionesLocal: Inscripcion[],
   inscripcionesVisitante: Inscripcion[]
-): Partido {
+): PartidoRT {
   // Mapea inscripciones a estadísticas iniciales
   const crearEstadisticasJugadores = (
     inscripciones: Inscripcion[]
@@ -38,6 +38,7 @@ export function inicializarPartido(
         haJugado: false,
         dorsal,
         jugadorId: id,
+        partidosJugados: 0,
       };
     });
 
@@ -51,11 +52,8 @@ export function inicializarPartido(
   };
 
   const partidoInicializado = inicializarCuarto(
-    {
-      ...partido,
-      estadisticasJugadores,
-    },
-    'Q1'
+    { ...partido, estadisticasJugadores },
+    'C1'
   );
 
   return partidoInicializado;

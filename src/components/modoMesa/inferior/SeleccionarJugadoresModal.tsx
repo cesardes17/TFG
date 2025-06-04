@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { EstadisticasJugador } from '../../../types/estadisticas/jugador';
 import StyledText from '../../common/StyledText';
+import { useTheme } from '../../../contexts/ThemeContext';
+import ProgressiveImage from '../../common/ProgressiveImage';
 
 interface SeleccionarJugadoresModalProps {
   jugadores: EstadisticasJugador[];
@@ -24,6 +26,8 @@ export default function SeleccionarJugadoresModal({
   onCerrar,
   onConfirmar,
 }: SeleccionarJugadoresModalProps) {
+  const { theme } = useTheme();
+
   const [jugadoresSeleccionados, setJugadoresSeleccionados] =
     useState<string[]>(jugadoresEnPistaIds);
 
@@ -103,7 +107,7 @@ export default function SeleccionarJugadoresModal({
             {
               width: modalWidth,
               height: modalHeight,
-              backgroundColor: '#1a1a1a',
+              backgroundColor: theme.background.primary,
             },
           ]}
         >
@@ -133,21 +137,27 @@ export default function SeleccionarJugadoresModal({
                       style={[
                         styles.tarjetaJugador,
                         {
-                          borderColor: estaSeleccionado
-                            ? '#3B82F6'
-                            : estaExpulsado
-                            ? '#DC2626'
-                            : '#444',
-                          backgroundColor: estaExpulsado
-                            ? '#3a1a1a'
-                            : estaSeleccionado
-                            ? '#224466'
-                            : '#222',
+                          // Fondo y borde
+                          borderColor:
+                            jugador.faltasCometidas >= 5
+                              ? theme.border.error // borde rojo para expulsado
+                              : estaSeleccionado
+                              ? theme.border.success // borde verde para seleccionado
+                              : theme.border.primary, // borde por defecto
+
+                          backgroundColor:
+                            jugador.faltasCometidas >= 5
+                              ? theme.background.error // fondo rojo para expulsado
+                              : estaSeleccionado
+                              ? theme.cardSelected // fondo clarito para seleccionado
+                              : theme.transparent, // sin fondo para no seleccionado
                         },
                       ]}
                       onPress={() => toggleJugador(jugador.jugadorId)}
                       activeOpacity={0.7}
-                      disabled={estaExpulsado && !estaSeleccionado}
+                      disabled={
+                        jugador.faltasCometidas >= 5 && !estaSeleccionado
+                      }
                     >
                       <View
                         style={{
@@ -176,7 +186,6 @@ export default function SeleccionarJugadoresModal({
                           </StyledText>
                         )}
                       </View>
-
                       <View
                         style={{
                           flex: 1,
@@ -186,30 +195,25 @@ export default function SeleccionarJugadoresModal({
                       >
                         <View style={styles.fotoContainer}>
                           {jugador.fotoUrl && (
-                            <Image
-                              source={{ uri: jugador.fotoUrl }}
-                              style={styles.foto}
+                            <ProgressiveImage
+                              uri={jugador.fotoUrl}
+                              containerStyle={styles.foto}
                             />
                           )}
                         </View>
 
-                        <StyledText
-                          size={10}
-                          variant='light'
-                          style={styles.dorsal}
-                        >
+                        <StyledText size='large' style={styles.dorsal}>
                           #{jugador.dorsal}
                         </StyledText>
                         <StyledText
-                          size={9}
-                          variant='light'
+                          size={'medium'}
                           style={styles.nombre}
                           numberOfLines={1}
                         >
                           {jugador.nombre}
                         </StyledText>
                         <StyledText
-                          size={8}
+                          size='small'
                           variant='secondary'
                           style={styles.apellidos}
                           numberOfLines={1}
@@ -217,7 +221,7 @@ export default function SeleccionarJugadoresModal({
                           {jugador.apellidos}
                         </StyledText>
                         <StyledText
-                          size={11}
+                          size='small'
                           variant='error'
                           style={styles.faltas}
                           numberOfLines={1}
@@ -235,7 +239,7 @@ export default function SeleccionarJugadoresModal({
           {/* FOOTER */}
           <View style={styles.footer}>
             <TouchableOpacity
-              style={[styles.boton, { backgroundColor: '#444' }]}
+              style={[styles.boton, { backgroundColor: 'transparent' }]}
               onPress={onCerrar}
             >
               <StyledText

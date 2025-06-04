@@ -1,4 +1,4 @@
-import { Partido } from '../types/Partido';
+import { EstadoPartido, Partido } from '../types/Partido';
 import { ResultService } from '../types/ResultService';
 import { FirestoreService, WhereClause } from './core/firestoreService';
 import { RealtimeService } from './core/realtimeService';
@@ -126,6 +126,41 @@ export const partidoService = {
       const partidoRes = await FirestoreService.updateDocumentByPath(path, {
         fecha,
         cancha,
+      });
+      if (!partidoRes.success) {
+        throw new Error(partidoRes.errorMessage);
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al actualizar partido',
+      };
+    }
+  },
+  iniciarPartido: async (
+    temporadaId: string,
+    competicionId: string,
+    partidoId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        COLLECTION,
+        partidoId,
+      ];
+      const estado: EstadoPartido = 'en-juego';
+      const partidoRes = await FirestoreService.updateDocumentByPath(path, {
+        estado,
       });
       if (!partidoRes.success) {
         throw new Error(partidoRes.errorMessage);

@@ -31,3 +31,8 @@ export type Partido = {
 
   estadisticasEquipos?: EstadisticasEquiposPartido | null;
 };
+
+export type PartidoRT = Partido & {
+  cuartoActual: string;
+  minutoActual: number;
+};

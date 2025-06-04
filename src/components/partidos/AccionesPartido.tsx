@@ -4,6 +4,9 @@ import { Rol } from '../../types/User';
 import StyledButton from '../common/StyledButton';
 import { router } from 'expo-router';
 import { TipoCompeticion } from '../../types/Competicion';
+import { partidoService } from '../../services/partidoService';
+import { useTemporadaContext } from '../../contexts/TemporadaContext';
+import { useToast } from '../../contexts/ToastContext';
 
 interface AccionesPartidoProps {
   partidoId: string;
@@ -15,21 +18,31 @@ export default function AccionesPartido({
   tipoCompeticion,
 }: AccionesPartidoProps) {
   const { user } = useUser();
-
+  const { temporada } = useTemporadaContext();
+  const { showToast } = useToast();
   if (user?.rol === 'arbitro') {
     return (
       <View style={styles.container}>
         <StyledButton
           title='Iniciar partido'
-          onPress={() => {
-            console.log('Iniciar partido');
-            router.push({
-              pathname: '/iniciarPartido/[id]',
-              params: {
-                id: partidoId,
-                tipoCompeticion: tipoCompeticion,
-              },
-            });
+          onPress={async () => {
+            const res = await partidoService.iniciarPartido(
+              temporada!.id,
+              tipoCompeticion,
+              partidoId
+            );
+            if (res.success) {
+              console.log('Iniciar partido');
+              router.push({
+                pathname: '/iniciarPartido/[id]',
+                params: {
+                  id: partidoId,
+                  tipoCompeticion: tipoCompeticion,
+                },
+              });
+            } else {
+              showToast('No se pudo iniciar el partido', 'error');
+            }
           }}
         />
       </View>

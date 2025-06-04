@@ -28,6 +28,11 @@ export default ({ config }) => ({
     googleServicesFile: './GoogleService-Info.plist',
     supportsTablet: true,
     requireFullScreen: true,
+    infoPlist: {
+      NSAppTransportSecurity: {
+        NSAllowsArbitraryLoads: true,
+      },
+    },
   },
   android: {
     ...config.android,

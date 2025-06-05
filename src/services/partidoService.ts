@@ -224,11 +224,11 @@ export const partidoService = {
    * Crea (o reemplaza) un partido en RTDB:
    * /temporadas/{t}/competiciones/{c}/partidos/{p} = PartidoRT
    */
-  crearRealtime: async (partido: Partido): Promise<ResultService<null>> => {
+  crearRealtime: async (partido: PartidoRT): Promise<ResultService<null>> => {
     try {
-      const base = [...COLLECTION, partido.id];
-      const payload: Partido = { ...partido };
-      return await RealtimeService.setValue([...base, partido.id], payload);
+      const base = [COLLECTION, partido.id];
+      const payload: PartidoRT = { ...partido };
+      return await RealtimeService.setValue(base, payload);
     } catch (e: any) {
       return {
         success: false,
@@ -241,13 +241,10 @@ export const partidoService = {
    * Actualiza campos parciales de un partido en RTDB:
    * sólo envía las propiedades que han cambiado.
    */
-  updateRealtime: async (
-    partidoId: string,
-    updates: Partial<Omit<Partido, 'id'>>
-  ): Promise<ResultService<null>> => {
+  updateRealtime: async (partido: PartidoRT): Promise<ResultService<null>> => {
     try {
-      const base = [...COLLECTION, partidoId];
-      return await RealtimeService.updateValue([...base, partidoId], updates);
+      const base = [COLLECTION, partido.id];
+      return await RealtimeService.updateValue(base, partido);
     } catch (e: any) {
       return {
         success: false,

@@ -177,9 +177,11 @@ export default function AdministrarUsuariosScreen() {
       return;
     }
     try {
-      const res = await UserService.updateUserProfile(selectedUser.uid, {
-        rol: selectedRol,
-      });
+      const res = await UserService.updateUserRol(
+        selectedUser.uid,
+        selectedRol,
+        selectedUser.rol
+      );
       if (!res.success) throw new Error(res.errorMessage);
 
       // **Aquí** actualizas la propiedad correcta:

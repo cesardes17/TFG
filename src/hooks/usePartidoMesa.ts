@@ -87,39 +87,67 @@ export default function usePartidoMesa(
   });
 
   useEffect(() => {
-    if (!temporada) return;
+    if (!temporada) {
+      console.log('No hay temporada, saliendo...');
+      return;
+    }
 
     const fetchPartido = async () => {
+      console.log('Comenzando fetchPartido...');
+
+      // 1️⃣ Buscar en Realtime Database
+      console.log('Buscando partido en Realtime Database...');
       const resRT = await partidoService.getPartidoRealtimeOnce(partidoId);
+      console.log('Resultado de getPartidoRealtimeOnce:', resRT);
+
       if (resRT.success && resRT.data) {
-        console.log(resRT.errorMessage);
+        console.log('Partido encontrado en Realtime Database:', resRT.data);
         setPartido(resRT.data);
+        console.log('Partido seteado desde Realtime Database. Fin.');
         return;
       }
 
-      // No hay partido en Realtime, obtenemos el partido de Firestore
+      // 2️⃣ Buscar en Firestore
+      console.log(
+        'No hay partido en Realtime Database. Buscando en Firestore...'
+      );
       const resFS = await partidoService.getPartido(
         temporada.id,
         competicionId,
         partidoId
       );
+      console.log('Resultado de getPartido:', resFS);
+
       if (!resFS.success || !resFS.data) {
-        console.log(resFS.errorMessage);
+        console.log(
+          'Error al obtener partido de Firestore:',
+          resFS.errorMessage
+        );
         return;
       }
-      const partidoFS: Partido = resFS.data;
 
-      // Obtenemos las inscripciones de los equipos
+      const partidoFS: Partido = resFS.data;
+      console.log('Partido obtenido de Firestore:', partidoFS);
+
+      // 3️⃣ Obtener inscripciones
       const equipoLocalId = partidoFS.equipoLocal.id;
       const equipoVisitanteId = partidoFS.equipoVisitante.id;
 
+      console.log('Buscando inscripciones del equipo local...');
       const resLocal = await inscripcionesService.getInscripcionesByTeam(
         temporada.id,
         equipoLocalId
       );
+      console.log('Resultado de getInscripcionesByTeam LOCAL:', resLocal);
+
+      console.log('Buscando inscripciones del equipo visitante...');
       const resVisitante = await inscripcionesService.getInscripcionesByTeam(
         temporada.id,
         equipoVisitanteId
+      );
+      console.log(
+        'Resultado de getInscripcionesByTeam VISITANTE:',
+        resVisitante
       );
 
       if (
@@ -128,26 +156,43 @@ export default function usePartidoMesa(
         !resVisitante.success ||
         !resVisitante.data
       ) {
-        console.log(resLocal.errorMessage || resVisitante.errorMessage);
+        console.log(
+          'Error al obtener inscripciones:',
+          resLocal.errorMessage || resVisitante.errorMessage
+        );
         return;
       }
 
+      // 4️⃣ Inicializar el partido
+      console.log('Inicializando partido...');
       const partidoInicializado: PartidoRT = inicializarPartido(
         partidoFS,
         resLocal.data,
         resVisitante.data
       );
+      console.log('Partido inicializado:', partidoInicializado);
 
+      // 5️⃣ Setear el partido en el estado
       setPartido(partidoInicializado);
+      console.log('Partido inicializado seteado en el estado.');
 
-      // Agregamos el partido a RealTimeDatabase
+      // 6️⃣ Guardar en Realtime Database
+      console.log('Guardando partido en Realtime Database...');
       const resRTCreacion = await partidoService.crearRealtime(
         partidoInicializado
       );
+      console.log('Resultado de crearRealtime:', resRTCreacion);
+
       if (!resRTCreacion.success) {
-        console.log(resRTCreacion.errorMessage);
+        console.log(
+          'Error al crear partido en Realtime Database:',
+          resRTCreacion.errorMessage
+        );
         return;
       }
+
+      console.log('Partido guardado en Realtime Database correctamente.');
+      console.log('fetchPartido COMPLETADO.');
     };
 
     fetchPartido();
@@ -399,6 +444,20 @@ export default function usePartidoMesa(
     }
     // Paso 7: Actualizar el estado
     setPartido(partidoCopia);
+    // Paso 8: Actualizar en Realtime Database
+    partidoService.updateRealtime(partidoCopia).then((res) => {
+      if (!res.success) {
+        console.log(
+          'Error al actualizar en Realtime Database:',
+          res.errorMessage
+        );
+      } else {
+        console.log(
+          'Partido actualizado en Realtime Database correctamente.',
+          res
+        );
+      }
+    });
   };
 
   return {

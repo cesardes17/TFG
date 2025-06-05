@@ -5,11 +5,13 @@ import type {
   User,
   PlayerUser,
   OtherUser,
+  Rol,
 } from '../types/User';
 import type { ResultService } from '../types/ResultService';
 import { AuthService } from './core/authService';
 import { FirestoreService } from './core/firestoreService';
 import { Timestamp } from '@react-native-firebase/firestore';
+import { RealtimeService } from './core/realtimeService';
 
 /**
  * Servicio de usuario: registro y lectura de perfil
@@ -192,6 +194,51 @@ export const UserService = {
       return { success: true, data: res.data };
     } catch (err: any) {
       return { success: false, errorMessage: err.message };
+    }
+  },
+
+  updateUserRol: async (
+    uid: string,
+    rolNuevo: Rol,
+    rolAntiguo: Rol
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = ['users', uid];
+      const resUpdate = await FirestoreService.updateDocumentByPath(path, {
+        rol: rolNuevo,
+      });
+
+      if (!resUpdate.success) {
+        throw new Error(
+          resUpdate.errorMessage || 'Error al actualizar usuario'
+        );
+      }
+
+      if (rolAntiguo === 'arbitro' || rolAntiguo === 'coorganizador') {
+        const path = ['usuarios', uid];
+        const resRT = await RealtimeService.removeValue(path);
+        if (!resRT.success) {
+          throw new Error(resRT.errorMessage || 'Error al actualizar usuario');
+        }
+      }
+
+      if (rolNuevo === 'arbitro' || rolNuevo === 'coorganizador') {
+        const path = ['usuarios', uid];
+        const resRT = await RealtimeService.setValue(path, { rol: rolNuevo });
+        if (!resRT.success) {
+          throw new Error(resRT.errorMessage || 'Error al actualizar usuario');
+        }
+      }
+
+      return { success: true, data: resUpdate.data };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al actualizar perfil de usuario',
+      };
     }
   },
 };

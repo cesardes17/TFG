@@ -253,6 +253,21 @@ export const partidoService = {
     }
   },
 
+  updatePartialRealtime: async (
+    partidoId: string,
+    partido: Partial<PartidoRT>
+  ): Promise<ResultService<null>> => {
+    try {
+      const base = [COLLECTION, partidoId];
+      return await RealtimeService.updateValue(base, partido);
+    } catch (e: any) {
+      return {
+        success: false,
+        errorMessage: e.message || 'RT: error al actualizar partido',
+      };
+    }
+  },
+
   /**
    * Elimina un nodo partido completo:
    * /temporadas/{t}/competiciones/{c}/partidos/{p}
@@ -276,8 +291,8 @@ export const partidoService = {
     partidoId: string
   ): Promise<ResultService<PartidoRT | null>> => {
     try {
-      const base = [...COLLECTION, partidoId];
-      return await RealtimeService.getValue<PartidoRT>([...base, partidoId]);
+      const base = [COLLECTION, partidoId];
+      return await RealtimeService.getValue<PartidoRT>(base);
     } catch (e: any) {
       return {
         success: false,
@@ -295,11 +310,8 @@ export const partidoService = {
     partidoId: string,
     callback: (data: PartidoRT | null) => void
   ): Promise<() => void> => {
-    const base = [...COLLECTION, partidoId];
-    return await RealtimeService.onValue<PartidoRT>(
-      [...base, partidoId],
-      callback
-    );
+    const base = [COLLECTION, partidoId];
+    return await RealtimeService.onValue<PartidoRT>(base, callback);
   },
 
   /**
@@ -309,7 +321,7 @@ export const partidoService = {
   onAllPartidosRealtime: async (
     callback: (lista: Record<string, PartidoRT> | null) => void
   ): Promise<() => void> => {
-    const base = [...COLLECTION];
+    const base = [COLLECTION];
     return await RealtimeService.onValue<Record<string, PartidoRT>>(
       base,
       callback

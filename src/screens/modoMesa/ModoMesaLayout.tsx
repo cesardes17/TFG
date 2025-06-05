@@ -1,4 +1,4 @@
-// src/screens/modoMesa/MesaLayout.tsx
+// src/components/mesa/MesaLayout.tsx
 import { View, StyleSheet, StatusBar, SafeAreaView } from 'react-native';
 import { TipoCompeticion } from '../../types/Competicion';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -20,13 +20,14 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     quintetosListos,
     cuartoActual,
     cronometroActivo,
+    tiempoActualCuarto,
     tiempoMuertoPendiente,
     tiempoMuertoActivo,
     modal,
     jugadorExpulsadoPendiente,
-    pararCronometro,
     cuartoIniciado,
     accionesPartido,
+    deshabilitarEstadisticas,
     puedeSolicitarTiempoMuerto,
     handlePartidoIniciado,
     handleQuintetosListos,
@@ -37,12 +38,14 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     handleInicioTiempoMuerto,
     handleFinTiempoMuerto,
     setModal,
-    handlePararCronometro,
     handleCuartoIniciado,
     handleJugadorExpulsadoPendiente,
     handleActualizarEstadisticaJugador,
     handleEliminarAccion,
+    iniciarCronometro,
+    pausarCronometro,
   } = usePartidoMesa(tipoCompeticion, idPartido);
+
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background.primary },
     superior: { flex: 1 },
@@ -54,7 +57,7 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     !partido.estadisticasEquipos ||
     !partido.estadisticasJugadores
   )
-    return;
+    return null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -64,39 +67,36 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
         translucent
       />
       <View style={styles.superior}>
-        <View style={styles.superior}>
-          <MesaSuperior
-            // 🏀 Datos de equipos y estadísticas
-            equipoLocal={partido.equipoLocal}
-            equipoVisitante={partido.equipoVisitante}
-            puntos={{
-              local: partido.estadisticasEquipos.totales.local.puntos,
-              visitante: partido.estadisticasEquipos.totales.visitante.puntos,
-            }}
-            estadisticasCuartoActual={
-              partido.estadisticasEquipos.porCuarto[cuartoActual]
-            }
-            tiempoMuertoSolicitado={tiempoMuertoPendiente}
-            tiempoMuertoIniciado={tiempoMuertoActivo}
-            onSolicitarTiempoMuerto={handleSolicitarTiempoMuerto}
-            onCancelarTiempoMuerto={handleCancelarTiempoMuerto}
-            // ⏱️ Control de tiempo
-            setCronometroActivo={setCronometroActivo}
-            cuartoActual={cuartoActual}
-            setCuartoIniciado={handleCuartoIniciado}
-            onFinTiempoMuerto={handleFinTiempoMuerto}
-            onFinCuarto={handleFinCuarto}
-            setTiempoMuertoIniciado={handleInicioTiempoMuerto}
-            pararCronometro={pararCronometro}
-            setPararCronometro={handlePararCronometro}
-            partidoIniciado={partidoIniciado}
-            setPartidoIniciado={handlePartidoIniciado}
-            quintetosListos={quintetosListos}
-            puedeSolicitarTiempoMuerto={puedeSolicitarTiempoMuerto}
-            // ⚠️ Incidencias
-            jugadorExpulsadoPendiente={jugadorExpulsadoPendiente}
-          />
-        </View>
+        <MesaSuperior
+          equipoLocal={partido.equipoLocal}
+          equipoVisitante={partido.equipoVisitante}
+          puntos={{
+            local: partido.estadisticasEquipos.totales.local.puntos,
+            visitante: partido.estadisticasEquipos.totales.visitante.puntos,
+          }}
+          estadisticasCuartoActual={
+            partido.estadisticasEquipos.porCuarto[cuartoActual]
+          }
+          tiempoMuertoSolicitado={tiempoMuertoPendiente}
+          tiempoMuertoIniciado={tiempoMuertoActivo} // 🟢 Nombre correcto para MesaSuperior
+          onSolicitarTiempoMuerto={handleSolicitarTiempoMuerto}
+          onCancelarTiempoMuerto={handleCancelarTiempoMuerto}
+          cuartoActual={cuartoActual}
+          tiempoActualCuarto={tiempoActualCuarto}
+          iniciarCronometro={iniciarCronometro}
+          pausarCronometro={pausarCronometro}
+          setCuartoIniciado={handleCuartoIniciado}
+          onFinTiempoMuerto={handleFinTiempoMuerto}
+          onFinCuarto={handleFinCuarto}
+          setTiempoMuertoIniciado={handleInicioTiempoMuerto}
+          partidoIniciado={partidoIniciado}
+          setPartidoIniciado={handlePartidoIniciado}
+          quintetosListos={quintetosListos}
+          puedeSolicitarTiempoMuerto={puedeSolicitarTiempoMuerto}
+          cronometroActivo={cronometroActivo}
+          jugadorExpulsadoPendiente={jugadorExpulsadoPendiente}
+          setCronometroActivo={setCronometroActivo} // 🟢 importante para el control final del cronómetro
+        />
       </View>
       <View style={styles.inferior}>
         <MesaInferior
@@ -109,7 +109,11 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
           setJugadorExpulsadoPendiente={handleJugadorExpulsadoPendiente}
           historialAcciones={accionesPartido}
           onEliminarAccion={handleEliminarAccion}
-          cronometroActivo={cronometroActivo}
+          jugadorExpulsadoPendiente={
+            jugadorExpulsadoPendiente.local ||
+            jugadorExpulsadoPendiente.visitante
+          }
+          deshabilitarEstadisticas={deshabilitarEstadisticas}
         />
       </View>
       <BaseConfirmationModal

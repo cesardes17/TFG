@@ -1,9 +1,10 @@
+// src/components/mesa/MesaSuperior.tsx
 import { View, StyleSheet } from 'react-native';
 import { EstadisticasEquipo } from '../../../types/estadisticas/equipo';
 import { EquipoPartido } from '../../../types/Equipo';
 import MesaEquipo from './MesaEquipo';
 import MesaControlTiempo from './MesaControlTiempo';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 interface MesaSuperiorProps {
   equipoLocal: EquipoPartido;
@@ -17,15 +18,14 @@ interface MesaSuperiorProps {
     visitante: number;
   };
   cuartoActual: string;
+  tiempoActualCuarto: number;
   tiempoMuertoSolicitado: { local: boolean; visitante: boolean };
-  tiempoMuertoIniciado: boolean;
+  tiempoMuertoIniciado: boolean; // 🟢 importante: ahora lo usaremos como "hayTiempoMuertoActivo"
   quintetosListos: { local: boolean; visitante: boolean };
   partidoIniciado: boolean;
-  pararCronometro: boolean;
-  setPararCronometro: (parar: boolean) => void;
   setPartidoIniciado: (iniciado: boolean) => void;
   setTiempoMuertoIniciado: (iniciado: boolean) => void;
-  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean; // 👈 Nueva prop
+  puedeSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => boolean;
   onSolicitarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
   onCancelarTiempoMuerto: (equipo: 'local' | 'visitante') => void;
   onFinTiempoMuerto: () => void;
@@ -33,6 +33,9 @@ interface MesaSuperiorProps {
   setCuartoIniciado: (iniciado: boolean) => void;
   setCronometroActivo: (activo: boolean) => void;
   jugadorExpulsadoPendiente: { local: boolean; visitante: boolean };
+  cronometroActivo: boolean;
+  iniciarCronometro: (tiempoInicial: number) => void;
+  pausarCronometro: () => void;
 }
 
 export default function MesaSuperior({
@@ -40,14 +43,14 @@ export default function MesaSuperior({
   equipoVisitante,
   estadisticasCuartoActual,
   cuartoActual,
+  tiempoActualCuarto,
   tiempoMuertoSolicitado,
   puntos,
   tiempoMuertoIniciado,
   quintetosListos,
   partidoIniciado,
-  pararCronometro,
   jugadorExpulsadoPendiente,
-  setPararCronometro,
+  cronometroActivo,
   setPartidoIniciado,
   setTiempoMuertoIniciado,
   puedeSolicitarTiempoMuerto,
@@ -57,13 +60,14 @@ export default function MesaSuperior({
   onFinCuarto,
   setCuartoIniciado,
   setCronometroActivo,
+  iniciarCronometro,
+  pausarCronometro,
 }: MesaSuperiorProps) {
   const faltasCometidasLocal =
     estadisticasCuartoActual?.local.faltasCometidas ?? 0;
   const faltasCometidasVisitante =
     estadisticasCuartoActual?.visitante.faltasCometidas ?? 0;
 
-  //en caso de cambiar de cuarto, los tiempos muertos solicitados se cancelan
   useEffect(() => {
     if (tiempoMuertoSolicitado.local) {
       console.log('Cancelando tiempo muerto solicitado, local');
@@ -94,12 +98,12 @@ export default function MesaSuperior({
 
       <View style={styles.tercio}>
         <MesaControlTiempo
-          setPararCronometro={setPararCronometro}
-          pararCronometro={pararCronometro}
+          cronometroActivo={cronometroActivo}
+          tiempoActualCuarto={tiempoActualCuarto}
+          iniciarCronometro={iniciarCronometro}
+          pausarCronometro={pausarCronometro}
           cuartoActual={cuartoActual}
-          hayTiempoMuertoSolicitado={
-            tiempoMuertoSolicitado.local || tiempoMuertoSolicitado.visitante
-          }
+          hayTiempoMuertoActivo={tiempoMuertoIniciado} // 🟢 ahora es la prop correcta
           onFinTiempoMuerto={() => {
             console.log('Fin tiempo muerto');
             setTiempoMuertoIniciado(false);

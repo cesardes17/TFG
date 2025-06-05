@@ -149,7 +149,7 @@ export default function SeleccionarJugadoresModal({
                             jugador.faltasCometidas >= 5
                               ? theme.background.error // fondo rojo para expulsado
                               : estaSeleccionado
-                              ? theme.cardSelected // fondo clarito para seleccionado
+                              ? theme.icon.active + '20' // fondo clarito para seleccionado
                               : theme.transparent, // sin fondo para no seleccionado
                         },
                       ]}

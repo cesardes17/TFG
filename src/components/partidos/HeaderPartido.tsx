@@ -1,251 +1,325 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Touchable } from 'react-native';
-import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
-import { useTheme } from '../../contexts/ThemeContext';
-
+import { View, StyleSheet } from 'react-native';
 import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
-import { CalendarIcon, LocationIcon } from '../Icons';
-import { router } from 'expo-router';
+import { EstadisticasEquiposPartido } from '../../types/estadisticas/equipo';
+import { useTheme } from '../../contexts/ThemeContext';
 
-type Equipo = {
+interface Equipo {
+  id: string;
   nombre: string;
   escudoUrl: string;
-  id: string;
-};
+}
 
-type Resultado = {
+interface Resultado {
   puntosLocal: number;
   puntosVisitante: number;
-} | null;
+}
 
-type Props = {
+interface HeaderPartidoProps {
   equipoLocal: Equipo;
   equipoVisitante: Equipo;
-  resultado?: Resultado;
   estado: 'pendiente' | 'en-juego' | 'finalizado';
-  fecha?: Date;
+  resultado: Resultado | null;
+  fecha: Date | null;
   cancha?: string;
-};
+  cuartoActual?: string | null;
+  minutoActual?: number | null;
+  estadisticasEquipo: EstadisticasEquiposPartido | null;
+}
 
-const HeaderPartido: React.FC<Props> = ({
+const HeaderPartido: React.FC<HeaderPartidoProps> = ({
   equipoLocal,
   equipoVisitante,
-  resultado,
   estado,
+  resultado,
   fecha,
   cancha,
+  cuartoActual,
+  minutoActual,
+  estadisticasEquipo,
 }) => {
-  const { layoutType, isDesktop } = useResponsiveLayout();
   const { theme } = useTheme();
-  console.log(fecha, cancha);
-  const formatearFecha = (fecha: Date): string => {
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const anio = fecha.getFullYear();
-    const horas = fecha.getHours().toString().padStart(2, '0');
-    const minutos = fecha.getMinutes().toString().padStart(2, '0');
-    return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
-  };
 
-  const getBadgeColor = () => {
+  const puntosLocal =
+    estado === 'en-juego'
+      ? estadisticasEquipo?.totales.local.puntos
+      : resultado?.puntosLocal ?? '';
+  const puntosVisitante =
+    estado === 'en-juego'
+      ? estadisticasEquipo?.totales.visitante.puntos
+      : resultado?.puntosVisitante ?? '';
+
+  const getEstadoBadgeStyle = () => {
     switch (estado) {
       case 'pendiente':
-        return theme.background.info;
+        return {
+          backgroundColor: theme.background.info,
+          color: theme.text.light,
+        };
       case 'en-juego':
-        return theme.background.error;
+        return {
+          backgroundColor: theme.background.success,
+          color: theme.text.light,
+        };
       case 'finalizado':
-        return theme.text.success;
+        return {
+          backgroundColor: theme.background.warning,
+          color: theme.text.light,
+        };
       default:
-        return theme.background.warning;
+        return {
+          backgroundColor: theme.background.warning,
+          color: theme.text.light,
+        };
     }
   };
 
-  const getEstadoTexto = () => {
-    switch (estado) {
-      case 'pendiente':
-        return 'Pendiente';
-      case 'en-juego':
-        return 'En Juego';
-      case 'finalizado':
-        return 'Finalizado';
-      default:
-        return 'Pendiente';
-    }
+  const formatearFecha = (fecha: Date) => {
+    return fecha.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  const styles = createStyles(layoutType, theme);
+  const badgeStyle = getEstadoBadgeStyle();
 
   return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.badgeContainer,
-          { backgroundColor: getBadgeColor() }, // ✅ Uso correcto del color dinámico
-        ]}
-      >
-        <StyledText style={styles.badgeText}>{getEstadoTexto()}</StyledText>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.cardDefault, shadowColor: theme.text.primary },
+      ]}
+    >
+      {/* Zona Superior */}
+      <View style={styles.zonaEstado}>
+        <View
+          style={[
+            styles.estadoBadge,
+            { backgroundColor: badgeStyle.backgroundColor },
+          ]}
+        >
+          <StyledText style={[styles.estadoTexto, { color: badgeStyle.color }]}>
+            {estado.toUpperCase()}
+          </StyledText>
+        </View>
+
+        {estado === 'en-juego' && cuartoActual && minutoActual !== null && (
+          <View style={styles.tiempoInfo}>
+            <StyledText
+              style={[styles.cuartoTexto, { color: theme.text.primary }]}
+            >
+              {cuartoActual}
+            </StyledText>
+            <StyledText
+              style={[styles.minutoTexto, { color: theme.text.secondary }]}
+            >
+              {minutoActual}'
+            </StyledText>
+          </View>
+        )}
       </View>
 
-      <View style={styles.contenidoPrincipal}>
+      {/* Zona Media */}
+      <View style={styles.zonaMarcador}>
         {/* Equipo Local */}
-        <TouchableOpacity
-          style={styles.equipoContainer}
-          onPress={() => {
-            router.push({
-              pathname: '/equipo/[id]',
-              params: {
-                id: equipoLocal.id,
-              },
-            });
-          }}
-        >
+        <View style={styles.equipoContainer}>
           <ProgressiveImage
             uri={equipoLocal.escudoUrl}
             containerStyle={styles.escudo}
           />
           <StyledText
-            style={styles.nombreEquipo}
-            numberOfLines={isDesktop ? 1 : 2}
+            style={[styles.nombreEquipo, { color: theme.text.primary }]}
+            numberOfLines={2}
           >
             {equipoLocal.nombre}
           </StyledText>
-        </TouchableOpacity>
+        </View>
 
-        {/* Resultado */}
-        <View style={styles.resultadoContainer}>
-          <StyledText style={styles.resultadoTexto}>
-            {resultado
-              ? `${resultado.puntosLocal} - ${resultado.puntosVisitante}`
-              : 'VS'}
-          </StyledText>
-
-          {fecha && (
-            <>
-              <CalendarIcon color={theme.text.secondary} size={16} />
-              <StyledText style={styles.fechaTexto}>
-                {formatearFecha(fecha)}
-              </StyledText>
-            </>
-          )}
-
-          {cancha && (
-            <>
-              <LocationIcon color={theme.text.secondary} size={16} />
-              <StyledText style={styles.canchaTexto}>{cancha}</StyledText>
-            </>
-          )}
+        {/* Marcador */}
+        <View style={styles.marcadorContainer}>
+          <View
+            style={[
+              styles.marcador,
+              { backgroundColor: theme.background.primary },
+            ]}
+          >
+            <StyledText style={[styles.puntos, { color: theme.text.primary }]}>
+              {puntosLocal}
+            </StyledText>
+            <StyledText
+              style={[
+                styles.separadorMarcador,
+                { color: theme.text.secondary },
+              ]}
+            >
+              :
+            </StyledText>
+            <StyledText style={[styles.puntos, { color: theme.text.primary }]}>
+              {puntosVisitante}
+            </StyledText>
+          </View>
         </View>
 
         {/* Equipo Visitante */}
-        <TouchableOpacity
-          style={styles.equipoContainer}
-          onPress={() => {
-            router.push({
-              pathname: '/equipo/[id]',
-              params: {
-                id: equipoVisitante.id,
-              },
-            });
-          }}
-        >
+        <View style={styles.equipoContainer}>
           <ProgressiveImage
             uri={equipoVisitante.escudoUrl}
             containerStyle={styles.escudo}
+            resizeMode='contain'
           />
           <StyledText
-            style={styles.nombreEquipo}
-            numberOfLines={isDesktop ? 1 : 2}
+            style={[styles.nombreEquipo, { color: theme.text.primary }]}
+            numberOfLines={2}
           >
             {equipoVisitante.nombre}
           </StyledText>
-        </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Zona Inferior */}
+      <View style={[styles.zonaInfo, { borderTopColor: theme.border.primary }]}>
+        <View style={styles.infoItem}>
+          <StyledText style={styles.iconoTexto}>📅</StyledText>
+          <StyledText
+            style={[styles.infoTexto, { color: theme.text.secondary }]}
+          >
+            {fecha && formatearFecha(fecha)}
+          </StyledText>
+        </View>
+
+        <View style={styles.infoItem}>
+          <StyledText style={styles.iconoTexto}>📍</StyledText>
+          <StyledText
+            style={[styles.infoTexto, { color: theme.text.secondary }]}
+          >
+            {cancha || '-'}
+          </StyledText>
+        </View>
       </View>
     </View>
   );
 };
 
-// 🎯 Solo diseño, no colores (los colores van con ThemeContext y getBadgeColor)
-const createStyles = (
-  layoutType: 'mobile' | 'tablet' | 'desktop' | 'largeDesktop',
-  theme: any
-) => {
-  const config = {
-    mobile: { padding: 12, escudo: 50, font: 12, result: 20 },
-    tablet: { padding: 16, escudo: 70, font: 14, result: 28 },
-    desktop: { padding: 20, escudo: 80, font: 16, result: 32 },
-    largeDesktop: { padding: 24, escudo: 90, font: 18, result: 36 },
-  }[layoutType];
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
 
-  return StyleSheet.create({
-    container: {
-      backgroundColor: theme.cardDefault,
-      borderRadius: 12,
-      padding: config.padding,
-      margin: config.padding / 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    badgeContainer: {
-      alignSelf: 'center',
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 20,
-      marginBottom: 10,
-    },
-    badgeText: {
-      color: theme.text.light,
-      fontWeight: 'bold',
-      fontSize: config.font,
-    },
-    contenidoPrincipal: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    equipoContainer: {
-      flex: 2,
-      alignItems: 'center',
-      padding: 6,
-    },
-    escudo: {
-      width: config.escudo,
-      height: config.escudo,
-      marginBottom: 8,
-    },
-    nombreEquipo: {
-      fontSize: config.font,
-      color: theme.text.primary,
-      fontWeight: '600',
-      textAlign: 'center',
-    },
-    resultadoContainer: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 6,
-      gap: 4,
-    },
-    resultadoTexto: {
-      fontSize: config.result,
-      fontWeight: 'bold',
-      color: theme.text.primary,
-    },
-    fechaTexto: {
-      fontSize: config.font,
-      color: theme.text.secondary,
-      textAlign: 'center',
-    },
-    canchaTexto: {
-      fontSize: config.font,
-      color: theme.text.secondary,
-      fontStyle: 'italic',
-      textAlign: 'center',
-    },
-  });
-};
+  // Zona Superior
+  zonaEstado: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  estadoBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  estadoTexto: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  tiempoInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  cuartoTexto: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  minutoTexto: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
+  // Zona Media
+  zonaMarcador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+    minHeight: 80,
+  },
+  equipoContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  escudo: {
+    width: 40,
+    height: 40,
+    marginBottom: 8,
+  },
+  nombreEquipo: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  marcadorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  marcador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: '100%',
+  },
+  puntos: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    minWidth: 30,
+    textAlign: 'center',
+  },
+  separadorMarcador: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
+  },
+
+  // Zona Inferior
+  zonaInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconoTexto: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  infoTexto: {
+    fontSize: 12,
+    fontWeight: '400',
+    flex: 1,
+  },
+});
 
 export default HeaderPartido;

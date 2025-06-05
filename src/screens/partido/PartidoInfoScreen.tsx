@@ -4,7 +4,8 @@ import HeaderPartido from '../../components/partidos/HeaderPartido';
 import BodyPartido from '../../components/partidos/BodyPartido';
 import AccionesPartido from '../../components/partidos/AccionesPartido';
 import { TipoCompeticion } from '../../types/Competicion';
-import usePartido from '../../hooks/usePartido';
+import usePartidoInfo from '../../hooks/usePartidoInfo';
+import { Partido, PartidoRT } from '../../types/Partido';
 
 export default function PartidoInfoScreen({
   idPartido,
@@ -13,38 +14,39 @@ export default function PartidoInfoScreen({
   idPartido: string;
   tipoCompeticion: TipoCompeticion;
 }) {
-  const { error, isLoading, partido } = usePartido(idPartido, tipoCompeticion);
+  const { partido, cuartoActual, minutoActual, isLoading, error } =
+    usePartidoInfo(idPartido, tipoCompeticion);
 
-  if (!partido) {
-    return null; // Manejo de caso en el que estadisticasEquipos o estadisticasJugadores son undefined o null
-  }
+  // Si el partido no existe aún o está cargando
+  if (isLoading || !partido) return null;
 
-  console.log('partido', partido);
+  // El partido puede ser de tipo Partido o PartidoRT
+  const partidoRender: Partido | PartidoRT = partido;
 
   return (
     <View style={{ paddingVertical: 16 }}>
       <HeaderPartido
-        equipoLocal={partido.equipoLocal}
-        equipoVisitante={partido.equipoVisitante}
-        resultado={partido.resultado}
-        estado={partido.estado}
-        fecha={partido.fecha}
-        cancha={partido.cancha}
+        equipoLocal={partidoRender.equipoLocal}
+        equipoVisitante={partidoRender.equipoVisitante}
+        resultado={partido.resultado ?? null}
+        estado={partidoRender.estado}
+        fecha={partidoRender.fecha ?? null}
+        cancha={partidoRender.cancha}
+        cuartoActual={cuartoActual}
+        minutoActual={minutoActual}
+        estadisticasEquipo={partidoRender.estadisticasEquipos || null}
       />
-      {partido.estado !== 'finalizado' && (
+      {partidoRender.estado !== 'finalizado' && (
         <AccionesPartido
           partidoId={idPartido}
           tipoCompeticion={tipoCompeticion}
         />
       )}
       <BodyPartido
-        estadisticasEquipos={
-          partido.estadisticasEquipos ? partido.estadisticasEquipos : null
-        }
-        estadisticasJugadores={
-          partido.estadisticasJugadores ? partido.estadisticasJugadores : null
-        }
-        estado={partido.estado}
+        estadisticasEquipos={partidoRender.estadisticasEquipos || null}
+        estadisticasJugadores={partidoRender.estadisticasJugadores || null}
+        estado={partidoRender.estado}
+        // aquí también podrías pasar `cuartoActual` y `minutoActual` si lo necesitas en el Body
       />
     </View>
   );

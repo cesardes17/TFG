@@ -1,165 +1,62 @@
 // src/components/mesa/MesaControlTiempo.tsx
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import StyledButton from '../../common/StyledButton';
 import StyledText from '../../common/StyledText';
 import { useTheme } from '../../../contexts/ThemeContext';
 
 interface MesaControlTiempoProps {
+  tiempoActualCuarto: number;
   cuartoActual: string;
   onFinCuarto: () => void;
   onFinTiempoMuerto: () => void;
   onInitTiempoMuerto: () => void;
-  hayTiempoMuertoSolicitado: boolean;
+  hayTiempoMuertoActivo: boolean; // 🟢 NUEVO: viene de fuera
   setCuartoIniciado: (iniciado: boolean) => void;
   quintetosListos: boolean;
   partidoIniciado: boolean;
   setPartidoIniciado: (iniciado: boolean) => void;
-  setPararCronometro: (parar: boolean) => void;
-  pararCronometro: boolean;
   jugadorExpulsadoPendiente: boolean;
   setCronometroActivo: (activo: boolean) => void;
+  cronometroActivo: boolean;
+  iniciarCronometro: (tiempoInicial: number) => void;
+  pausarCronometro: () => void;
 }
 
 export default function MesaControlTiempo({
+  tiempoActualCuarto,
   cuartoActual,
-  hayTiempoMuertoSolicitado,
+  hayTiempoMuertoActivo, // 🟢 Prop inyectada
   quintetosListos,
   partidoIniciado,
-  pararCronometro,
   jugadorExpulsadoPendiente,
-  setPararCronometro,
+  cronometroActivo,
   onFinCuarto,
   onFinTiempoMuerto,
   onInitTiempoMuerto,
   setCuartoIniciado,
   setPartidoIniciado,
   setCronometroActivo,
+  iniciarCronometro,
+  pausarCronometro,
 }: MesaControlTiempoProps) {
   const { theme } = useTheme();
   const { width } = Dimensions.get('window');
   const isTablet = width > 768;
 
-  const [cronometroCuartoPausado, setCronometroCuartoPausado] = useState(true);
-  const [hayTiempoMuertoActivo, setHayTiempoMuertoActivo] = useState(false);
-  const [tiempoCuarto, setTiempoCuarto] = useState(0);
   const [tiempoMuerto, setTiempoMuerto] = useState(10);
-
   const esDescanso = cuartoActual === 'DESCANSO';
 
-  const tiempoInicialRef = useRef<number>(0);
-  const startTimeRef = useRef<number | null>(null);
-  const elapsedTimeRef = useRef<number>(0);
-  const animFrameRef = useRef<number | null>(null);
-
-  const tiempoMuertoInicioRef = useRef<number | null>(null);
-
-  const obtenerDuracionCuarto = (cuarto: string): number => {
-    if (cuarto.startsWith('DES')) return 0.5 * 60;
-    if (cuarto.startsWith('PR')) return 0.5 * 60;
-    return 1 * 60;
-  };
-
-  useLayoutEffect(() => {
-    if (pararCronometro) {
-      setPararCronometro(false);
-      setTimeout(() => {
-        toggleCronometro();
-      }, 0);
-    }
-  }, [pararCronometro]);
-
   useEffect(() => {
-    const duracion = obtenerDuracionCuarto(cuartoActual);
-    setTiempoCuarto(duracion);
-    tiempoInicialRef.current = duracion;
-    elapsedTimeRef.current = 0;
-    startTimeRef.current = null;
-    setCronometroCuartoPausado(true);
-  }, [cuartoActual]);
-
-  const tick = () => {
-    if (!startTimeRef.current) return;
-
-    const now = Date.now();
-    const elapsedSinceStart = Math.floor((now - startTimeRef.current) / 1000);
-    const totalElapsed = elapsedTimeRef.current + elapsedSinceStart;
-    const restante = Math.max(tiempoInicialRef.current - totalElapsed, 0);
-
-    setTiempoCuarto(restante);
-
-    if (restante === 0) {
-      setCronometroCuartoPausado(true);
-      onFinCuarto();
-      return;
-    }
-
-    animFrameRef.current = requestAnimationFrame(tick);
-  };
-
-  useEffect(() => {
-    if (!cronometroCuartoPausado && !hayTiempoMuertoActivo) {
-      if (!startTimeRef.current) {
-        startTimeRef.current = Date.now();
-      }
-      animFrameRef.current = requestAnimationFrame(tick);
-    } else if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-    }
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [cronometroCuartoPausado, hayTiempoMuertoActivo]);
-
-  useEffect(() => {
-    if (hayTiempoMuertoActivo) {
-      tiempoMuertoInicioRef.current = Date.now();
-      setTiempoMuerto(10);
-      onInitTiempoMuerto();
-
-      const tmTick = () => {
-        if (!tiempoMuertoInicioRef.current) return;
-        const now = Date.now();
-        const elapsed = Math.floor(
-          (now - tiempoMuertoInicioRef.current) / 1000
-        );
-        const restante = Math.max(10 - elapsed, 0);
-        setTiempoMuerto(restante);
-
-        if (restante === 0) {
-          setHayTiempoMuertoActivo(false);
-          onFinTiempoMuerto();
-          return;
-        }
-        animFrameRef.current = requestAnimationFrame(tmTick);
-      };
-
-      animFrameRef.current = requestAnimationFrame(tmTick);
-    } else if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-    }
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [hayTiempoMuertoActivo]);
-
-  // 🟡 Nuevo efecto: gestiona setCuartoIniciado y setPartidoIniciado
-  useEffect(() => {
-    if (!cronometroCuartoPausado) {
-      setCuartoIniciado?.(true);
+    if (cronometroActivo) {
+      setCuartoIniciado(true);
       if (cuartoActual === 'C1' && !partidoIniciado) {
         setPartidoIniciado(true);
       }
     } else {
-      setCuartoIniciado?.(false);
+      setCuartoIniciado(false);
     }
-  }, [cronometroCuartoPausado]);
+  }, [cronometroActivo]);
 
   const formatearTiempo = (s: number) => {
     const m = Math.floor(s / 60);
@@ -169,24 +66,46 @@ export default function MesaControlTiempo({
       .padStart(2, '0')}`;
   };
 
-  const toggleCronometro = () => {
-    setCronometroCuartoPausado((prev) => {
-      if (prev) {
-        startTimeRef.current = Date.now();
-      } else {
-        if (startTimeRef.current) {
-          const elapsedThisSession = Math.floor(
-            (Date.now() - startTimeRef.current) / 1000
-          );
-          elapsedTimeRef.current += elapsedThisSession;
-          startTimeRef.current = null;
-        }
-      }
-      setHayTiempoMuertoActivo(hayTiempoMuertoSolicitado);
-      setCronometroActivo(prev);
-      return !prev;
-    });
+  const handleReanudar = () => {
+    iniciarCronometro(tiempoActualCuarto);
+    setCronometroActivo(true);
   };
+
+  const handlePausar = () => {
+    pausarCronometro();
+    setCronometroActivo(false);
+  };
+
+  // 🔥 Lógica del tiempo muerto (controlada por prop externa)
+  useEffect(() => {
+    let animFrameRef: number | null = null;
+
+    if (hayTiempoMuertoActivo) {
+      const inicio = Date.now();
+      setTiempoMuerto(10);
+      onInitTiempoMuerto();
+
+      const tmTick = () => {
+        const elapsed = Math.floor((Date.now() - inicio) / 1000);
+        const restante = Math.max(10 - elapsed, 0);
+        setTiempoMuerto(restante);
+
+        if (restante === 0) {
+          onFinTiempoMuerto();
+          return;
+        }
+        animFrameRef = requestAnimationFrame(tmTick);
+      };
+
+      animFrameRef = requestAnimationFrame(tmTick);
+    }
+
+    return () => {
+      if (animFrameRef) {
+        cancelAnimationFrame(animFrameRef);
+      }
+    };
+  }, [hayTiempoMuertoActivo]);
 
   return (
     <View
@@ -210,9 +129,9 @@ export default function MesaControlTiempo({
         <View
           style={[
             styles.estadoIndicador,
-            cronometroCuartoPausado
-              ? { backgroundColor: '#dc3545' }
-              : { backgroundColor: '#28a745' },
+            cronometroActivo
+              ? { backgroundColor: '#28a745' }
+              : { backgroundColor: '#dc3545' },
           ]}
         />
       </View>
@@ -241,22 +160,28 @@ export default function MesaControlTiempo({
             size={isTablet ? 72 : 56}
             style={styles.tiempoDisplay}
           >
-            {formatearTiempo(tiempoCuarto)}
+            {formatearTiempo(tiempoActualCuarto)}
           </StyledText>
         )}
       </View>
 
       <View style={styles.controlesContainer}>
         {!hayTiempoMuertoActivo && (
-          <StyledButton
-            title={cronometroCuartoPausado ? 'Reanudar' : 'Pausar'}
-            onPress={toggleCronometro}
-            disabled={
-              tiempoCuarto === 0 ||
-              (!partidoIniciado && !quintetosListos) ||
-              jugadorExpulsadoPendiente
-            }
-          />
+          <>
+            {cronometroActivo ? (
+              <StyledButton title='Pausar' onPress={handlePausar} />
+            ) : (
+              <StyledButton
+                title='Reanudar'
+                onPress={handleReanudar}
+                disabled={
+                  tiempoActualCuarto === 0 ||
+                  !quintetosListos ||
+                  jugadorExpulsadoPendiente
+                }
+              />
+            )}
+          </>
         )}
         {esDescanso && (
           <StyledButton

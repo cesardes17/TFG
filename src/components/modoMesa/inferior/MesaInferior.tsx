@@ -24,7 +24,8 @@ interface Props {
   ) => void;
   historialAcciones: HistorialAccion[];
   onEliminarAccion: (idAccion: string) => void;
-  cronometroActivo: boolean; // Agregado para el cronometro
+  jugadorExpulsadoPendiente: boolean; // Agregado para el cronometro
+  deshabilitarEstadisticas: boolean;
 }
 
 export default function MesaInferior({
@@ -37,7 +38,8 @@ export default function MesaInferior({
   setJugadorExpulsadoPendiente,
   historialAcciones,
   onEliminarAccion,
-  cronometroActivo,
+  jugadorExpulsadoPendiente,
+  deshabilitarEstadisticas,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -51,7 +53,8 @@ export default function MesaInferior({
           setQuintetosListos={setQuintetosListos}
           cuartoActual={cuartoActual}
           setJugadorExpulsadoPendiente={setJugadorExpulsadoPendiente}
-          cronometroActivo={cronometroActivo}
+          jugadorExpulsadoPendiente={jugadorExpulsadoPendiente}
+          deshabilitarEstadisticas={deshabilitarEstadisticas}
         />
       </View>
 
@@ -71,7 +74,8 @@ export default function MesaInferior({
           setQuintetosListos={setQuintetosListos}
           cuartoActual={cuartoActual}
           setJugadorExpulsadoPendiente={setJugadorExpulsadoPendiente}
-          cronometroActivo={cronometroActivo}
+          jugadorExpulsadoPendiente={jugadorExpulsadoPendiente}
+          deshabilitarEstadisticas={deshabilitarEstadisticas}
         />
       </View>
     </View>

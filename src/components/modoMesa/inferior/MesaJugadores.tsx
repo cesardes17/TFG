@@ -24,7 +24,8 @@ interface MesaJugadoresProps {
     equipo: 'local' | 'visitante',
     pendiente: boolean
   ) => void;
-  cronometroActivo: boolean;
+  jugadorExpulsadoPendiente: boolean;
+  deshabilitarEstadisticas: boolean;
 }
 
 const MesaJugadores: React.FC<MesaJugadoresProps> = ({
@@ -36,15 +37,14 @@ const MesaJugadores: React.FC<MesaJugadoresProps> = ({
   setQuintetosListos,
   cuartoActual,
   setJugadorExpulsadoPendiente,
-  cronometroActivo,
+  jugadorExpulsadoPendiente,
+  deshabilitarEstadisticas,
 }) => {
   const [jugadoresEnPista, setJugadoresEnPista] = useState<string[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [expulsadoAnterior, setExpulsadoAnterior] = useState(false);
 
-  const botonesDeshabilitados =
-    !cuartoIniciado || tiempoMuertoIniciado || !cronometroActivo;
-
+  const botonesDeshabilitados = deshabilitarEstadisticas;
   const handleActualizarEstadistica = (
     jugadorId: string,
     accion: ActualizarEstadisticaJugadorParams['accion'],

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { partidoService } from '../services/partidoService';
 import { inscripcionesService } from '../services/inscripcionesService';
@@ -10,47 +10,43 @@ import { getRandomUID } from '../utils/getRandomUID';
 import { ActualizarEstadisticaJugadorParams } from '../types/estadisticas/jugador';
 import { inicializarCuarto } from '../utils/modoMesa/inicializarCuarto';
 
-interface PartidoMesaProps {
-  competicionId: string;
-  partidoId: string;
-}
 export default function usePartidoMesa(
   competicionId: string,
   partidoId: string
 ) {
   const { temporada } = useTemporadaContext();
 
-  //partido
   const [partido, setPartido] = useState<PartidoRT | null>(null);
   const [partidoIniciado, setPartidoIniciado] = useState<boolean>(false);
   const [accionesPartido, setAccionesPartido] = useState<HistorialAccion[]>([]);
-  // Quintetos listos
   const [quintetosListos, setQuintetosListos] = useState<{
     local: boolean;
     visitante: boolean;
   }>({ local: false, visitante: false });
 
-  //Jugador Expulsado Pendiente de salir del quinteto
   const [jugadorExpulsadoPendiente, setJugadorExpulsadoPendiente] = useState<{
     local: boolean;
     visitante: boolean;
   }>({ local: false, visitante: false });
 
-  //cuarto actual
   const [cuartoActual, setCuartoActual] = useState<string>('C1');
   const [cuartoIniciado, setCuartoIniciado] = useState<boolean>(false);
-  //Control Cronometro
+  const [deshabilitarEstadisticas, setDeshabilitarEstadisticas] =
+    useState<boolean>(true);
+  const [tiempoActualCuarto, setTiempoActualCuarto] = useState<number>(0);
   const [pararCronometro, setPararCronometro] = useState<boolean>(false);
   const [cronometroActivo, setCronometroActivo] = useState<boolean>(false);
 
-  //tiempos Muertos
-  //tiempo Muerto Pendiente
+  const startTimeRef = useRef<number | null>(null);
+  const elapsedTimeRef = useRef<number>(0);
+  const tiempoInicialRef = useRef<number>(12 * 60); // 🟢 tiempo inicial de cada cuarto
+  const animFrameRef = useRef<number | null>(null);
+
   const [tiempoMuertoPendiente, setTiempoMuertoPendiente] = useState<{
     local: boolean;
     visitante: boolean;
   }>({ local: false, visitante: false });
 
-  //tiempo Muerto Activo
   const [tiempoMuertoActivo, setTiempoMuertoActivo] = useState<boolean>(false);
   const [tiemposMuertosUsados, setTiemposMuertosUsados] = useState<{
     local: {
@@ -75,7 +71,7 @@ export default function usePartidoMesa(
       prorroga: false,
     },
   });
-  //modal
+
   const [modal, setModal] = useState<{
     title: string;
     message: string;
@@ -104,6 +100,7 @@ export default function usePartidoMesa(
         console.log('Partido encontrado en Realtime Database:', resRT.data);
         setPartido(resRT.data);
         console.log('Partido seteado desde Realtime Database. Fin.');
+        setTiempoActualCuarto(resRT.data.minutoActual * 60);
         return;
       }
 
@@ -171,7 +168,7 @@ export default function usePartidoMesa(
         resVisitante.data
       );
       console.log('Partido inicializado:', partidoInicializado);
-
+      setTiempoActualCuarto(obtenerDuracionCuarto('C1'));
       // 5️⃣ Setear el partido en el estado
       setPartido(partidoInicializado);
       console.log('Partido inicializado seteado en el estado.');
@@ -203,9 +200,45 @@ export default function usePartidoMesa(
     const partidoActualizado = inicializarCuarto(partido!, cuartoActual);
     setPartido(partidoActualizado);
     console.log(JSON.stringify(partidoActualizado, null, 2));
+    setTiempoActualCuarto(obtenerDuracionCuarto(cuartoActual));
   }, [cuartoActual]);
 
-  //quintetos listos
+  const minutoAnteriorRef = useRef<number>(Math.floor(tiempoActualCuarto / 60));
+
+  useEffect(() => {
+    const minutoActual = Math.floor(tiempoActualCuarto / 60);
+    if (minutoActual !== minutoAnteriorRef.current) {
+      minutoAnteriorRef.current = minutoActual;
+
+      // 💾 Actualiza la base de datos (Realtime Database)
+      if (partido) {
+        const partidoActualizado = {
+          ...partido,
+          minutoActual: minutoActual + 1,
+        };
+        partidoService.updateRealtime(partidoActualizado).then((res) => {
+          if (!res.success) {
+            console.log(
+              'Error al actualizar minuto actual en Realtime Database:',
+              res.errorMessage
+            );
+          } else {
+            console.log(
+              'Minuto actual actualizado en Realtime Database:',
+              minutoActual
+            );
+          }
+        });
+      }
+    }
+  }, [tiempoActualCuarto]);
+
+  const obtenerDuracionCuarto = (cuarto: string): number => {
+    if (cuarto === 'DESCANSO') return 0.5 * 60;
+    if (cuarto.startsWith('PR')) return 0.5 * 60;
+    return 1 * 60;
+  };
+
   const handleQuintetosListos = (equipo: 'local' | 'visitante') => {
     setQuintetosListos((prev) => ({
       ...prev,
@@ -217,7 +250,6 @@ export default function usePartidoMesa(
     setPartidoIniciado(true);
   };
 
-  //finalizamos cuarto
   const handleFinCuarto = () => {
     const puntosLocal = partido!.estadisticasEquipos!.totales.local.puntos;
     const puntosVisitante =
@@ -232,6 +264,10 @@ export default function usePartidoMesa(
       ...prev,
       [equipo]: true,
     }));
+
+    if (!cronometroActivo) {
+      handleInicioTiempoMuerto();
+    }
   };
 
   const handleCancelarTiempoMuerto = (equipo: 'local' | 'visitante') => {
@@ -268,10 +304,6 @@ export default function usePartidoMesa(
   const puedeSolicitarTiempoMuerto = (equipo: 'local' | 'visitante') => {
     const mitad = obtenerMitadActual(cuartoActual);
     return !tiemposMuertosUsados[equipo][mitad];
-  };
-
-  const handlePararCronometro = (parar: boolean) => {
-    setPararCronometro(parar);
   };
 
   const handleCuartoIniciado = (iniciado: boolean) => {
@@ -354,10 +386,11 @@ export default function usePartidoMesa(
         }
       }
     }
+
     if (jugadorStats.faltasCometidas >= 5) {
-      setPararCronometro(true);
+      pausarCronometro(); // 🔥 Pausa directa sin depender de setPararCronometro
       setModal({
-        title: 'JugadorExpulsado!',
+        title: 'Jugador expulsado!',
         message: 'El jugador ha cometido 5 faltas.',
         visible: true,
       });
@@ -460,12 +493,73 @@ export default function usePartidoMesa(
     });
   };
 
+  const iniciarCronometro = () => {
+    if (obtenerDuracionCuarto(cuartoActual) === tiempoActualCuarto) {
+      iniciarNuevoCuarto();
+    }
+
+    if (!startTimeRef.current) {
+      startTimeRef.current = Date.now(); // Solo reinicia el tiempo base
+      animFrameRef.current = requestAnimationFrame(tick);
+      setDeshabilitarEstadisticas(false);
+      setCronometroActivo(true);
+    }
+  };
+
+  const pausarCronometro = () => {
+    if (startTimeRef.current) {
+      const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      elapsedTimeRef.current += elapsed; // Acumula el tiempo
+      startTimeRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+    }
+
+    // Si hay tiempo muerto pendiente, activarlo
+    if (tiempoMuertoPendiente.local || tiempoMuertoPendiente.visitante) {
+      handleInicioTiempoMuerto();
+    }
+
+    setCronometroActivo(false);
+    setDeshabilitarEstadisticas(true);
+  };
+
+  const tick = () => {
+    if (!startTimeRef.current) return;
+
+    const now = Date.now();
+    const elapsed = Math.floor((now - startTimeRef.current) / 1000);
+    const totalElapsed = elapsedTimeRef.current + elapsed;
+    const tiempoRestante = Math.max(tiempoInicialRef.current - totalElapsed, 0);
+
+    setTiempoActualCuarto(tiempoRestante);
+
+    if (tiempoRestante === 0) {
+      pausarCronometro();
+      handleFinCuarto();
+      return;
+    }
+
+    animFrameRef.current = requestAnimationFrame(tick);
+  };
+
+  const iniciarNuevoCuarto = () => {
+    elapsedTimeRef.current = 0;
+    tiempoInicialRef.current = obtenerDuracionCuarto(cuartoActual);
+    startTimeRef.current = Date.now();
+    animFrameRef.current = requestAnimationFrame(tick);
+    setDeshabilitarEstadisticas(false);
+    setCronometroActivo(true);
+  };
+
   return {
     partido,
     quintetosListos,
     partidoIniciado,
     cuartoActual,
     cronometroActivo,
+    tiempoActualCuarto,
     tiempoMuertoPendiente,
     tiempoMuertoActivo,
     modal,
@@ -473,8 +567,8 @@ export default function usePartidoMesa(
     pararCronometro,
     cuartoIniciado,
     accionesPartido,
-    //funciones
-
+    deshabilitarEstadisticas,
+    // funciones
     handleQuintetosListos,
     handlePartidoIniciado,
     handleFinCuarto,
@@ -484,11 +578,12 @@ export default function usePartidoMesa(
     handleInicioTiempoMuerto,
     handleFinTiempoMuerto,
     setModal,
-    handlePararCronometro,
     handleCuartoIniciado,
     handleJugadorExpulsadoPendiente,
     handleEliminarAccion,
-    handleActualizarEstadisticaJugador,
     puedeSolicitarTiempoMuerto,
+    iniciarCronometro,
+    pausarCronometro,
+    handleActualizarEstadisticaJugador,
   };
 }

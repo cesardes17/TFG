@@ -9,12 +9,17 @@ import { HistorialAccion } from '../types/HistorialAccion';
 import { getRandomUID } from '../utils/getRandomUID';
 import { ActualizarEstadisticaJugadorParams } from '../types/estadisticas/jugador';
 import { inicializarCuarto } from '../utils/modoMesa/inicializarCuarto';
+import { FormatearYGuardarPartido } from '../utils/modoMesa/FormatearYGurardarPartido';
+import { router } from 'expo-router';
 
 export default function usePartidoMesa(
   competicionId: string,
   partidoId: string
 ) {
   const { temporada } = useTemporadaContext();
+
+  const [isGuardando, setIsGuardando] = useState<boolean>(false);
+  const [guardandoTexto, setGuardandoTexto] = useState<string>('');
 
   const [partido, setPartido] = useState<PartidoRT | null>(null);
   const [partidoIniciado, setPartidoIniciado] = useState<boolean>(false);
@@ -100,7 +105,7 @@ export default function usePartidoMesa(
         console.log('Partido encontrado en Realtime Database:', resRT.data);
         setPartido(resRT.data);
         console.log('Partido seteado desde Realtime Database. Fin.');
-        setTiempoActualCuarto(resRT.data.minutoActual * 60);
+        setTiempoActualCuarto(Math.min(resRT.data.minutoActual, 12) * 60);
         return;
       }
 
@@ -168,16 +173,18 @@ export default function usePartidoMesa(
         resVisitante.data
       );
       console.log('Partido inicializado:', partidoInicializado);
-      setTiempoActualCuarto(obtenerDuracionCuarto('C1'));
+      const tiempoCuarto = obtenerDuracionCuarto('C1');
+      setTiempoActualCuarto(tiempoCuarto);
       // 5️⃣ Setear el partido en el estado
-      setPartido(partidoInicializado);
+      setPartido({ ...partidoInicializado, minutoActual: tiempoCuarto / 60 });
       console.log('Partido inicializado seteado en el estado.');
 
       // 6️⃣ Guardar en Realtime Database
       console.log('Guardando partido en Realtime Database...');
-      const resRTCreacion = await partidoService.crearRealtime(
-        partidoInicializado
-      );
+      const resRTCreacion = await partidoService.crearRealtime({
+        ...partidoInicializado,
+        minutoActual: tiempoCuarto / 60,
+      });
       console.log('Resultado de crearRealtime:', resRTCreacion);
 
       if (!resRTCreacion.success) {
@@ -196,25 +203,62 @@ export default function usePartidoMesa(
   }, [temporada, competicionId, partidoId]);
 
   useEffect(() => {
-    if (cuartoActual === 'C1') return;
-    const partidoActualizado = inicializarCuarto(partido!, cuartoActual);
-    setPartido(partidoActualizado);
-    console.log(JSON.stringify(partidoActualizado, null, 2));
-    setTiempoActualCuarto(obtenerDuracionCuarto(cuartoActual));
-  }, [cuartoActual]);
+    const manejarCambioDeCuarto = async () => {
+      if (cuartoActual === 'C1') return;
 
+      if (cuartoActual === 'FINALIZADO') {
+        try {
+          setIsGuardando(true);
+          setGuardandoTexto('Guardando partido...');
+
+          await FormatearYGuardarPartido(
+            temporada!.id,
+            partido!,
+            setIsGuardando,
+            setGuardandoTexto
+          );
+
+          // Guardado exitoso: volvemos a la pantalla anterior
+          router.back();
+        } catch (error) {
+          console.error('Error al guardar el partido:', error);
+
+          setModal({
+            title: 'Error',
+            message:
+              'Hubo un error al guardar el partido. Realice una captura de pantalla y reinicie la app cerrandola y volviendola a abrir.',
+            visible: true,
+          });
+          // No hacemos router.back() para que el árbitro pueda ver la info en pantalla y hacer la captura
+        } finally {
+          setIsGuardando(false);
+        }
+      } else {
+        // Para otros cuartos, actualizamos el estado local
+        const partidoActualizado = inicializarCuarto(partido!, cuartoActual);
+        setPartido(partidoActualizado);
+        console.log(JSON.stringify(partidoActualizado, null, 2));
+        setTiempoActualCuarto(obtenerDuracionCuarto(cuartoActual));
+      }
+    };
+
+    manejarCambioDeCuarto();
+  }, [cuartoActual]);
   const minutoAnteriorRef = useRef<number>(Math.floor(tiempoActualCuarto / 60));
 
   useEffect(() => {
     const minutoActual = Math.floor(tiempoActualCuarto / 60);
     if (minutoActual !== minutoAnteriorRef.current) {
       minutoAnteriorRef.current = minutoActual;
-
+      const minActual =
+        minutoActual >= obtenerDuracionCuarto(cuartoActual) - 60
+          ? minutoActual
+          : minutoActual + 1;
       // 💾 Actualiza la base de datos (Realtime Database)
       if (partido) {
         const partidoActualizado = {
           ...partido,
-          minutoActual: minutoActual + 1,
+          minutoActual: minActual,
         };
         partidoService.updateRealtime(partidoActualizado).then((res) => {
           if (!res.success) {
@@ -568,6 +612,8 @@ export default function usePartidoMesa(
     cuartoIniciado,
     accionesPartido,
     deshabilitarEstadisticas,
+    isGuardando,
+    guardandoTexto,
     // funciones
     handleQuintetosListos,
     handlePartidoIniciado,

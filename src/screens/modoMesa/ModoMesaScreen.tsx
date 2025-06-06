@@ -8,6 +8,7 @@ import ModoMesaLayout from './ModoMesaLayout';
 import StyledText from '../../components/common/StyledText';
 import StyledButton from '../../components/common/StyledButton';
 import { TipoCompeticion } from '../../types/Competicion';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function ModoMesaScreen({
   idPartido,
@@ -18,6 +19,7 @@ export default function ModoMesaScreen({
 }) {
   const { width, height } = useWindowDimensions();
   const router = useRouter();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const lockOrientation = async () => {
@@ -41,7 +43,12 @@ export default function ModoMesaScreen({
   // Validación de tamaño mínimo (ejemplo: 768 px)
   if (height < 768) {
     return (
-      <View style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.background.primary },
+        ]}
+      >
         <StyledText variant='error' style={styles.errorText}>
           La pantalla es demasiado pequeña. Usa una tablet o dispositivo más
           grande.

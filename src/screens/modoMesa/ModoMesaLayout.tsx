@@ -6,6 +6,7 @@ import MesaSuperior from '../../components/modoMesa/superior/MesaSuperior';
 import MesaInferior from '../../components/modoMesa/inferior/MesaInferior';
 import BaseConfirmationModal from '../../components/common/BaseConfirmationModal';
 import usePartidoMesa from '../../hooks/usePartidoMesa';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
 
 interface Props {
   idPartido: string;
@@ -28,6 +29,8 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     cuartoIniciado,
     accionesPartido,
     deshabilitarEstadisticas,
+    isGuardando,
+    guardandoTexto,
     puedeSolicitarTiempoMuerto,
     handlePartidoIniciado,
     handleQuintetosListos,
@@ -58,6 +61,14 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
     !partido.estadisticasJugadores
   )
     return null;
+
+  if (isGuardando) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <LoadingIndicator text={guardandoTexto} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

@@ -4,6 +4,7 @@ import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
 import { EstadisticasEquiposPartido } from '../../types/estadisticas/equipo';
 import { useTheme } from '../../contexts/ThemeContext';
+import { CalendarIcon } from '../Icons';
 
 interface Equipo {
   id: string;
@@ -156,7 +157,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
                 { color: theme.text.secondary },
               ]}
             >
-              :
+              -
             </StyledText>
             <StyledText style={[styles.puntos, { color: theme.text.primary }]}>
               {puntosVisitante}
@@ -183,7 +184,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
       {/* Zona Inferior */}
       <View style={[styles.zonaInfo, { borderTopColor: theme.border.primary }]}>
         <View style={styles.infoItem}>
-          <StyledText style={styles.iconoTexto}>📅</StyledText>
+          <CalendarIcon color={theme.text.primary} />
           <StyledText
             style={[styles.infoTexto, { color: theme.text.secondary }]}
           >

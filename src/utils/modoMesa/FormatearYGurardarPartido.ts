@@ -97,7 +97,20 @@ export async function FormatearYGuardarPartido(
       }
     }
 
+    // Paso 6: Eliminar partido de RT
+
+    setGuardandoTexto('Actualizando estado partido...');
+    const resDeleteRT = await partidoService.deleteRealtime(
+      partidoFinalizado.id
+    );
+
+    if (!resDeleteRT.success) {
+      throw new Error('Error al eliminar partido de RT');
+    }
+    setGuardandoTexto('');
+
     setIsGuardando(false);
+
     return { message: 'Partido guardado correctamente', type: 'success' };
   } catch (error) {
     setGuardandoTexto('');

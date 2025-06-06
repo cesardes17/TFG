@@ -188,6 +188,7 @@ export default function MesaControlTiempo({
             variant='outline'
             onPress={onFinCuarto}
             title='Finalizar Descanso'
+            disabled={cronometroActivo}
           />
         )}
       </View>

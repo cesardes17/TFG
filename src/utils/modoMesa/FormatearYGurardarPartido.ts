@@ -5,6 +5,7 @@ import { partidoService } from '../../services/partidoService';
 import { jugadorEstadisticasService } from '../../services/jugadorEstadisticasService';
 import { equipoService } from '../../services/equipoService';
 import { Partido } from '../../types/Partido';
+import { jornadaService } from '../../services/jornadaService';
 
 export async function FormatearYGuardarPartido(
   temporadaId: string,
@@ -98,7 +99,6 @@ export async function FormatearYGuardarPartido(
     }
 
     // Paso 6: Eliminar partido de RT
-
     setGuardandoTexto('Actualizando estado partido...');
     const resDeleteRT = await partidoService.deleteRealtime(
       partidoFinalizado.id
@@ -108,6 +108,18 @@ export async function FormatearYGuardarPartido(
       throw new Error('Error al eliminar partido de RT');
     }
     setGuardandoTexto('');
+
+    // Paso 7: Comprobar si se debe finalizar la jornada
+    setGuardandoTexto('Verificando estado de la jornada...');
+    const resCJ = await jornadaService.finalizarJornadaSiEsNecesario(
+      temporadaId,
+      partidoFinalizado.tipoCompeticion,
+      partidoFinalizado.jornadaId!
+    );
+
+    if (!resCJ.success) {
+      throw new Error('Error al verificar estado de la jornada');
+    }
 
     setIsGuardando(false);
 

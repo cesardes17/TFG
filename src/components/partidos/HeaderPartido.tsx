@@ -4,7 +4,7 @@ import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
 import { EstadisticasEquiposPartido } from '../../types/estadisticas/equipo';
 import { useTheme } from '../../contexts/ThemeContext';
-import { CalendarIcon } from '../Icons';
+import { CalendarIcon, LocationIcon } from '../Icons';
 
 interface Equipo {
   id: string;
@@ -60,12 +60,12 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
         };
       case 'en-juego':
         return {
-          backgroundColor: theme.background.success,
+          backgroundColor: theme.background.error,
           color: theme.text.light,
         };
       case 'finalizado':
         return {
-          backgroundColor: theme.background.warning,
+          backgroundColor: theme.background.success,
           color: theme.text.light,
         };
       default:
@@ -193,7 +193,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
         </View>
 
         <View style={styles.infoItem}>
-          <StyledText style={styles.iconoTexto}>📍</StyledText>
+          <LocationIcon color={theme.text.primary} />
           <StyledText
             style={[styles.infoTexto, { color: theme.text.secondary }]}
           >

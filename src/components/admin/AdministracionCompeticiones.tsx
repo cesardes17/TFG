@@ -1,15 +1,14 @@
 import { View } from 'react-native';
 import { useCompeticiones } from '../../hooks/useCompeticiones';
-import LoadingIndicator from '../common/LoadingIndicator';
 import StyledButton from '../common/StyledButton';
 import { useState } from 'react';
 import { Competicion } from '../../types/Competicion';
 import { getRandomUID } from '../../utils/getRandomUID';
 import BaseConfirmationModal from '../common/BaseConfirmationModal';
 import { useEquiposConEstado } from '../../hooks/useEquiposConEstado';
-
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { ligaService } from '../../services/competicionService/ligaService';
+import StyledAlert from '../common/StyledAlert';
 
 interface Props {
   setLoading: (loading: boolean) => void;
@@ -33,15 +32,18 @@ export default function AdministracionCompeticiones({
   } = useEquiposConEstado();
 
   if (!temporada) {
-    return;
+    return null;
   }
 
-  const crearLiga = async () => {
+  console.log('competiciones', competiciones);
+  // 🔍 Buscar la liga regular en las competiciones
+  const ligaRegular = competiciones.find((c) => c.tipo === 'liga-regular');
+
+  const handleCrearLiga = async () => {
     setShowModal(false);
     setLoading(true);
     setLoadingText('Creando Liga...');
-    console.log('equiposIncompletos: ', equiposIncompletos);
-    console.log('equipos: ', equipos);
+
     const liga: Competicion = {
       id: getRandomUID(),
       nombre: 'Liga',
@@ -58,6 +60,7 @@ export default function AdministracionCompeticiones({
         nombre: e.nombre,
         escudoUrl: e.escudoUrl,
       }));
+
     await ligaService.crear(
       temporada.id,
       liga,
@@ -66,19 +69,14 @@ export default function AdministracionCompeticiones({
       setLoadingText
     );
 
-    console.log('Crear Liga');
     setLoading(false);
     setLoadingText('');
   };
 
-  const handleModal = () => {
-    console.log('equiposIncompletos: ', equiposIncompletos);
-
+  const handleModalCrearLiga = () => {
     let descripcion = '';
-
     if (equiposIncompletos.length > 0) {
       const nombres = equiposIncompletos.map((e) => e.nombre);
-
       const listado =
         nombres.length === 1
           ? nombres[0]
@@ -87,37 +85,63 @@ export default function AdministracionCompeticiones({
           : `${nombres.slice(0, -1).join(', ')} y ${
               nombres[nombres.length - 1]
             }`;
-
       descripcion = `Los equipos ${listado} están incompletos. Si continúas, serán disueltos y sus jugadores pasarán a la agencia libre. ¿Deseas continuar?`;
     } else {
       descripcion = '¿Estás seguro de que deseas crear una liga?';
     }
-
     setDescriptionModal(descripcion);
     setShowModal(true);
   };
 
-  if (competiciones.length === 0) {
-    return (
-      <View style={{ marginTop: 12 }}>
-        <StyledButton
-          title='Crear Liga'
-          disabled={loadingEquipos || loadingCompetciones}
-          onPress={handleModal}
-        />
-        <BaseConfirmationModal
-          visible={showModal}
-          title='Crear Liga'
-          description={descriptionModal}
-          onConfirm={crearLiga}
-          onCancel={() => setShowModal(false)}
-          type='create'
-          confirmLabel='Crear'
-          cancelLabel='Cancelar'
-        ></BaseConfirmationModal>
-      </View>
-    );
-  }
+  const handleCrearCopa = async () => {
+    console.log('Crear Copa');
+  };
 
-  return null;
+  const handleCrearPlayOffs = async () => {
+    console.log('Crear Playoffs');
+  };
+
+  return (
+    <View style={{ marginTop: 12 }}>
+      {competiciones.length === 0 && (
+        <>
+          <StyledButton
+            title='Crear Liga'
+            disabled={loadingEquipos || loadingCompetciones}
+            onPress={handleModalCrearLiga}
+          />
+          <BaseConfirmationModal
+            visible={showModal}
+            title='Crear Liga'
+            description={descriptionModal}
+            onConfirm={handleCrearLiga}
+            onCancel={() => setShowModal(false)}
+            type='create'
+            confirmLabel='Crear'
+            cancelLabel='Cancelar'
+          />
+        </>
+      )}
+
+      {/* 🏆 Botón de Crear Copa si la liga regular existe y está finalizada */}
+      {ligaRegular && (
+        <StyledButton
+          title='Crear Copa'
+          onPress={handleCrearCopa}
+          disabled={loadingCompetciones}
+        />
+      )}
+
+      {/* 📊  */}
+      {ligaRegular && ligaRegular.estado === 'finalizada' && (
+        <StyledButton
+          title='Crear PlayOffs'
+          onPress={handleCrearPlayOffs}
+          disabled={loadingCompetciones}
+        />
+      )}
+      {/* ⚠️ Mensaje de error si hay problemas */}
+      {error && <StyledAlert variant='error' message={error} />}
+    </View>
+  );
 }

@@ -1,6 +1,4 @@
-// src/components/partidos/CarruselJornadas.tsx
-
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -31,6 +29,20 @@ export default function CarruselJornadas({
   onSeleccionarJornada,
 }: CarruselJornadasProps) {
   const { theme } = useTheme();
+  const flatListRef = useRef<FlatList>(null);
+
+  // Centrar la jornada seleccionada
+  useEffect(() => {
+    const index = jornadas.findIndex((j) => j.id === jornadaSeleccionada);
+    if (index !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5, // centra el elemento
+      });
+    }
+  }, [jornadaSeleccionada, jornadas]);
+
   const renderJornada = ({ item }: { item: Jornada }) => {
     const isSelected = jornadaSeleccionada === item.id;
 
@@ -70,6 +82,7 @@ export default function CarruselJornadas({
       style={[styles.carruselContainer, { borderColor: theme.border.primary }]}
     >
       <FlatList
+        ref={flatListRef}
         data={jornadas}
         renderItem={renderJornada}
         keyExtractor={(item) => item.id}
@@ -77,6 +90,11 @@ export default function CarruselJornadas({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.carruselContent}
         ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+        getItemLayout={(_, index) => ({
+          length: isTablet ? 70 : 60, // ajusta según tamaño real
+          offset: (isTablet ? 70 : 60 + 8) * index,
+          index,
+        })}
       />
     </View>
   );
@@ -95,7 +113,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
-
   jornadaButtonText: {
     fontSize: isTablet ? 16 : 14,
     fontWeight: '500',

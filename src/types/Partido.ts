@@ -25,7 +25,6 @@ export type Partido = {
   estado: EstadoPartido;
   fecha?: Date;
   cancha?: string;
-  idEliminatoria?: string;
 
   estadisticasJugadores?: EstadisticasJugadores | null;
 

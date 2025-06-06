@@ -1,4 +1,5 @@
-import { ScrollView, View } from 'react-native';
+//src/screens/admin/PanelControlScreen.tsx
+import { View } from 'react-native';
 import StyledAlert from '../../components/common/StyledAlert';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { temporadaService } from '../../services/temporadaService';

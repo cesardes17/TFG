@@ -194,9 +194,14 @@ export const partidoService = {
         COLLECTION,
         partido.id,
       ];
+
+      const payload: Partido = {
+        ...partido,
+        estado: 'finalizado',
+      };
       const partidoRes = await FirestoreService.updateDocumentByPath(
         path,
-        partido
+        payload
       );
       if (!partidoRes.success) {
         throw new Error(partidoRes.errorMessage);

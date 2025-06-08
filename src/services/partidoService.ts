@@ -180,6 +180,45 @@ export const partidoService = {
     }
   },
 
+  actualizarPartido: async (
+    temporadaId: string,
+    competicionId: string,
+    partido: Partido
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        COLLECTION,
+        partido.id,
+      ];
+      const payload: Partido = {
+        ...partido,
+      };
+      const partidoRes = await FirestoreService.updateDocumentByPath(
+        path,
+        payload
+      );
+      if (!partidoRes.success) {
+        throw new Error(partidoRes.errorMessage);
+      }
+      return {
+        success: true,
+        data: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al actualizar partido',
+      };
+    }
+  },
+
   finalizarPartido: async (
     temporadaId: string,
     competicionId: string,

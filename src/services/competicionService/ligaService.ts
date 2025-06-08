@@ -15,7 +15,6 @@ const ID_LIGA_REGULAR = 'liga-regular';
 export const ligaService = {
   crear: async (
     temporadaId: string,
-    data: Competicion,
     equiposIncompletos: string[],
     equiposCompletos: { id: string; nombre: string; escudoUrl: string }[],
     onProgress?: (text: string) => void
@@ -27,10 +26,18 @@ export const ligaService = {
           await disolverEquipo(temporadaId, equipoId, onProgress);
         });
       }
+      const liga: Competicion = {
+        id: ID_LIGA_REGULAR,
+        nombre: 'Liga Regular',
+        tipo: 'liga-regular',
+        estado: 'en-curso',
+        fechaInicio: new Date(),
+      };
+
       const resCompeticion = await competitionBaseService.crearCompeticion(
         temporadaId,
         ID_LIGA_REGULAR,
-        data
+        liga
       );
       if (!resCompeticion.success) {
         return {

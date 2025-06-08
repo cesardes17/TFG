@@ -29,6 +29,8 @@ export type Partido = {
   estadisticasJugadores?: EstadisticasJugadores | null;
 
   estadisticasEquipos?: EstadisticasEquiposPartido | null;
+
+  siguientePartidoId?: string; // id del partido al que avanza el ganador solo en partidos copa
 };
 
 export type PartidoRT = Partido & {

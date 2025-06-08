@@ -64,7 +64,14 @@ export default function MesaLayout({ idPartido, tipoCompeticion }: Props) {
 
   if (isGuardando) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.background.primary,
+        }}
+      >
         <LoadingIndicator text={guardandoTexto} />
       </View>
     );

@@ -18,13 +18,8 @@ export function useClasificacion() {
 
     const res = await clasificacionService.get(temporada.id, 'liga-regular');
 
-    if (res.success) {
-      const ordenado = res.data!.sort((a, b) => {
-        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-        if (b.diferencia !== a.diferencia) return b.diferencia - a.diferencia;
-        return a.equipo.nombre.localeCompare(b.equipo.nombre);
-      });
-      setClasificacion(ordenado);
+    if (res.success && res.data) {
+      setClasificacion(res.data);
     } else {
       setError(res.errorMessage ?? 'Error al obtener la clasificación');
     }

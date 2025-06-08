@@ -158,4 +158,45 @@ export const jornadaService = {
       };
     }
   },
+
+  // src/services/jornadaService.ts
+
+  getLastJornada: async (
+    temporadaId: string,
+    competicionId: string
+  ): Promise<ResultService<Jornada>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'jornadas',
+      ];
+
+      // Orden descendente por número y limit 1
+      const res = await FirestoreService.getCollectionByPath<Jornada>(
+        path,
+        [], // andFilters
+        [], // orFilters
+        [['numero', 'desc']], // 🔥 ordenar por número DESC para la última jornada
+        1 // 🔥 solo la primera (la última en orden)
+      );
+
+      if (!res.success || !res.data || res.data.length === 0) {
+        throw new Error('No se encontró la última jornada');
+      }
+
+      return {
+        success: true,
+        data: res.data[0],
+      };
+    } catch (error: any) {
+      console.error('Error al obtener la última jornada:', error);
+      return {
+        success: false,
+        errorMessage: error.message || 'Error al obtener la última jornada',
+      };
+    }
+  },
 };

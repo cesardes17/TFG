@@ -12,13 +12,13 @@ import { useTheme } from '../../contexts/ThemeContext';
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
-export type Jornada = {
+export type JornadaSelectable = {
   id: string;
   label: string;
 };
 
 interface CarruselJornadasProps {
-  jornadas: Jornada[];
+  jornadas: JornadaSelectable[];
   jornadaSeleccionada: string;
   onSeleccionarJornada: (id: string) => void;
 }
@@ -43,7 +43,7 @@ export default function CarruselJornadas({
     }
   }, [jornadaSeleccionada, jornadas]);
 
-  const renderJornada = ({ item }: { item: Jornada }) => {
+  const renderJornada = ({ item }: { item: JornadaSelectable }) => {
     const isSelected = jornadaSeleccionada === item.id;
 
     return (

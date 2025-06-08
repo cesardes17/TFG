@@ -79,7 +79,15 @@ export const clasificacionService = {
       if (!res.success) {
         throw new Error(res.errorMessage);
       }
-      return res;
+      const ordenado = res.data!.sort((a, b) => {
+        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+        if (b.diferencia !== a.diferencia) return b.diferencia - a.diferencia;
+        return a.equipo.nombre.localeCompare(b.equipo.nombre);
+      });
+      return {
+        success: true,
+        data: ordenado,
+      };
     } catch (error) {
       return {
         success: false,

@@ -6,6 +6,8 @@ import { jugadorEstadisticasService } from '../../services/jugadorEstadisticasSe
 import { equipoService } from '../../services/equipoService';
 import { Partido } from '../../types/Partido';
 import { jornadaService } from '../../services/jornadaService';
+import { copaService } from '../../services/competicionService/copaService';
+import { competitionBaseService } from '../../services/competicionService/baseService';
 
 export async function FormatearYGuardarPartido(
   temporadaId: string,
@@ -86,7 +88,7 @@ export async function FormatearYGuardarPartido(
       partido.estadisticasEquipos!.totales.visitante
     );
 
-    // Paso 5: Actualizar clasificación
+    // Paso 5: Actualizar clasificación o cuadro
     if (partidoFinalizado.tipoCompeticion === 'liga-regular') {
       setGuardandoTexto('Actualizando clasificación...');
       const resultado = await ligaService.onFinalizarPartido(
@@ -95,6 +97,15 @@ export async function FormatearYGuardarPartido(
       );
       if (!resultado.success) {
         throw new Error('Error al actualizar clasificación');
+      }
+    } else if (partidoFinalizado.tipoCompeticion === 'copa') {
+      setGuardandoTexto('Actualizando cuadro de Copa...');
+      const resultado = await copaService.onFinalizarPartido(
+        temporadaId,
+        partidoFinalizado
+      );
+      if (!resultado.success) {
+        throw new Error('Error al actualizar cuadro de Copa');
       }
     }
 
@@ -119,6 +130,18 @@ export async function FormatearYGuardarPartido(
 
     if (!resCJ.success) {
       throw new Error('Error al verificar estado de la jornada');
+    }
+
+    // Paso 8: Comprobar si se debe finalizar la competición
+    setGuardandoTexto('Verificando estado de la competición...');
+    const resCC =
+      await competitionBaseService.finalizarCompeticionSiEsNecesario(
+        temporadaId,
+        partidoFinalizado.tipoCompeticion
+      );
+
+    if (!resCC.success) {
+      throw new Error('Error al verificar estado de la competición');
     }
 
     setIsGuardando(false);

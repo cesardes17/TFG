@@ -56,13 +56,13 @@ export async function generarCalendarioLiga(
     for (let i = 0; i < partidosPorJornada; i++) {
       const local = esIda ? equiposLocales[i] : equiposVisitantes[i];
       const visitante = esIda ? equiposVisitantes[i] : equiposLocales[i];
-
+      const esDescansa = local.id === 'descansa' || visitante.id === 'descansa';
       const partido: Partido = {
         id: getRandomUID(),
         jornadaId,
         equipoLocal: local,
         equipoVisitante: visitante,
-        estado: 'pendiente',
+        estado: esDescansa ? 'finalizado' : 'pendiente',
         tipoCompeticion: 'liga-regular',
       };
 

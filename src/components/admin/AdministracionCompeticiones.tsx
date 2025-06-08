@@ -56,14 +56,6 @@ export default function AdministracionCompeticiones({
     setLoading(true);
     setLoadingText('Creando Liga...');
 
-    const liga: Competicion = {
-      id: getRandomUID(),
-      nombre: 'Liga',
-      tipo: 'liga-regular',
-      estado: 'en-curso',
-      fechaInicio: new Date(),
-    };
-
     const idsEquiposIncompletos = equiposIncompletos.map((e) => e.id);
     const equiposCompletos = equipos
       .filter((e) => e.cumple)
@@ -75,7 +67,6 @@ export default function AdministracionCompeticiones({
 
     await ligaService.crear(
       temporada.id,
-      liga,
       idsEquiposIncompletos,
       equiposCompletos,
       setLoadingText

@@ -109,7 +109,9 @@ export default function TarjetaPartido({ partido }: Props) {
 
       <View style={styles.partidoContent}>
         <View style={styles.equipoContainer}>
-          {partido.equipoLocal.nombre === 'Descansa' ? (
+          {partido.equipoLocal.nombre.toLowerCase() === 'descansa' ||
+          partido.equipoLocal.nombre.toLowerCase() === 'bye' ||
+          partido.equipoLocal.nombre.toLowerCase() === '' ? (
             <View
               style={[
                 styles.escudoDescansa,
@@ -159,7 +161,9 @@ export default function TarjetaPartido({ partido }: Props) {
           >
             {partido.equipoVisitante.nombre}
           </StyledText>
-          {partido.equipoVisitante.nombre === 'Descansa' ? (
+          {partido.equipoVisitante.nombre.toLowerCase() === 'descansa' ||
+          partido.equipoVisitante.nombre.toLowerCase() === 'bye' ||
+          partido.equipoVisitante.nombre.toLowerCase() === '' ? (
             <View
               style={[
                 styles.escudoDescansa,

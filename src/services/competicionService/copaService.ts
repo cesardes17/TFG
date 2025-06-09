@@ -116,6 +116,18 @@ export const copaService = {
         };
       }
 
+      // 6️⃣ Borrar el partido de RT
+      const resDelete = await partidoService.deleteRealtime(
+        partidoFinalizado.id
+      );
+
+      if (!resDelete.success) {
+        return {
+          success: false,
+          errorMessage: 'Error al eliminar el partido de RT',
+        };
+      }
+
       return { success: true };
     } catch (error: any) {
       console.error(error);

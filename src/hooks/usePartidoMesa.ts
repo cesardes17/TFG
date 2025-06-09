@@ -211,6 +211,12 @@ export default function usePartidoMesa(
           setIsGuardando(true);
           setGuardandoTexto('Guardando partido...');
 
+          const partidoActualizado: PartidoRT = {
+            ...(partido as PartidoRT),
+            estado: 'finalizado',
+          };
+
+          await partidoService.updateRealtime(partidoActualizado);
           await FormatearYGuardarPartido(
             temporada!.id,
             partido!,
@@ -527,11 +533,6 @@ export default function usePartidoMesa(
         console.log(
           'Error al actualizar en Realtime Database:',
           res.errorMessage
-        );
-      } else {
-        console.log(
-          'Partido actualizado en Realtime Database correctamente.',
-          res
         );
       }
     });

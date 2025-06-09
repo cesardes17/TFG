@@ -318,7 +318,7 @@ export const partidoService = {
    */
   deleteRealtime: async (partidoId: string): Promise<ResultService<null>> => {
     try {
-      return await RealtimeService.removeValue([...COLLECTION, partidoId]);
+      return await RealtimeService.removeValue([COLLECTION, partidoId]);
     } catch (e: any) {
       return {
         success: false,

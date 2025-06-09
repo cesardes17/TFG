@@ -20,9 +20,10 @@ export default function ModoMesaScreen({
   const { width, height } = useWindowDimensions();
   const router = useRouter();
   const { theme } = useTheme();
-
+  const [isLoading, setIsLoading] = React.useState(true);
   useEffect(() => {
     const lockOrientation = async () => {
+      setIsLoading(true);
       console.log('Forzando landscape...');
       try {
         await ScreenOrientation.lockAsync(
@@ -31,6 +32,7 @@ export default function ModoMesaScreen({
       } catch (error) {
         console.error('Error al bloquear orientación:', error);
       }
+      setIsLoading(false);
     };
 
     lockOrientation();
@@ -67,6 +69,10 @@ export default function ModoMesaScreen({
         </View>
       </View>
     );
+  }
+
+  if (isLoading) {
+    return null;
   }
 
   // Aquí la UI normal del modo mesa

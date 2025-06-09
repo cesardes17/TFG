@@ -1,5 +1,3 @@
-// src/utils/generarCalendarioLiga.ts
-
 import { jornadaService } from '../../services/jornadaService';
 import { partidoService } from '../../services/partidoService';
 import { EstadoJornada, Jornada } from '../../types/Jornada';
@@ -10,52 +8,44 @@ const ligaId = 'liga-regular';
 
 export async function generarCalendarioLiga(
   temporadaId: string,
-  equipos: { id: string; nombre: string; escudoUrl: string }[],
+  equiposOriginales: { id: string; nombre: string; escudoUrl: string }[],
   onProgress?: (text: string) => void
 ): Promise<{
   jornadas: Jornada[];
   partidosPorJornada: Record<string, Partido[]>;
 }> {
-  const numEquipos = equipos.length;
-  const esImpar = numEquipos % 2 !== 0;
-
-  const equiposCopia = [...equipos];
-  if (esImpar) {
-    equiposCopia.push({ id: 'descansa', nombre: 'Descansa', escudoUrl: '' });
+  // Copiamos equipos y añadimos "descansa" si es impar
+  const equipos = [...equiposOriginales];
+  if (equipos.length % 2 !== 0) {
+    equipos.push({ id: 'descansa', nombre: 'Descansa', escudoUrl: '' });
   }
 
-  const totalEquipos = equiposCopia.length; // ahora siempre par
-  const totalJornadas = totalEquipos - 1;
-  const partidosPorJornada = totalEquipos / 2;
+  const n = equipos.length; // total equipos (ya par)
+  const rondas = n - 1; // jornadas ida
+  const mitad = n / 2; // partidos por jornada
 
   const jornadas: Jornada[] = [];
   const partidosPorJornadaMap: Record<string, Partido[]> = {};
 
-  let equiposLocales = equiposCopia.slice(0, partidosPorJornada);
-  let equiposVisitantes = equiposCopia.slice(partidosPorJornada).reverse();
-
-  for (let ronda = 0; ronda < totalJornadas * 2; ronda++) {
-    const numeroJornada = ronda + 1;
+  // ➤ Generar CALENDARIO IDA
+  for (let r = 0; r < rondas; r++) {
+    const jornadaNum = r + 1;
     const jornadaId = getRandomUID();
-    const nombre = `Jornada ${numeroJornada}`;
-
-    onProgress?.(`Generando jornada ${numeroJornada}`);
+    onProgress?.(`Generando ida: Jornada ${jornadaNum}`);
 
     const jornada: Jornada = {
       id: jornadaId,
-      nombre,
-      numero: numeroJornada,
+      nombre: `Jornada ${jornadaNum}`,
+      numero: jornadaNum,
       estado: 'pendiente' as EstadoJornada,
     };
-
     jornadas.push(jornada);
     partidosPorJornadaMap[jornadaId] = [];
 
-    const esIda = ronda < totalJornadas;
-
-    for (let i = 0; i < partidosPorJornada; i++) {
-      const local = esIda ? equiposLocales[i] : equiposVisitantes[i];
-      const visitante = esIda ? equiposVisitantes[i] : equiposLocales[i];
+    // Emparejamientos
+    for (let i = 0; i < mitad; i++) {
+      const local = equipos[i];
+      const visitante = equipos[n - 1 - i];
       const esDescansa = local.id === 'descansa' || visitante.id === 'descansa';
       const partido: Partido = {
         id: getRandomUID(),
@@ -63,36 +53,59 @@ export async function generarCalendarioLiga(
         equipoLocal: local,
         equipoVisitante: visitante,
         estado: esDescansa ? 'finalizado' : 'pendiente',
-        tipoCompeticion: 'liga-regular',
+        tipoCompeticion: ligaId,
       };
-
       partidosPorJornadaMap[jornadaId].push(partido);
     }
 
-    // Guardar jornada
+    // Guardar en BD
     await jornadaService.crear(temporadaId, ligaId, jornada);
-
-    // Guardar partidos
-    for (const partido of partidosPorJornadaMap[jornadaId]) {
-      await partidoService.crear(temporadaId, ligaId, partido);
+    for (const p of partidosPorJornadaMap[jornadaId]) {
+      await partidoService.crear(temporadaId, ligaId, p);
     }
 
-    // Rotar equipos
-    if (ronda + 1 !== totalJornadas * 2) {
-      const fijo = equiposLocales[0];
-      const rotar = [...equiposLocales.slice(1), ...equiposVisitantes];
+    // Rotación: fija posición 0, mueve último equipo a índice 1
+    const ultimo = equipos.pop()!;
+    equipos.splice(1, 0, ultimo);
+  }
 
-      equiposLocales = [fijo];
-      equiposVisitantes = [];
+  // ➤ Generar CALENDARIO VUELTA (invertir local/visitante)
+  for (let r = 0; r < rondas; r++) {
+    const jornadaNum = rondas + r + 1;
+    const jornadaId = getRandomUID();
+    onProgress?.(`Generando vuelta: Jornada ${jornadaNum}`);
 
-      for (let i = 0; i < partidosPorJornada - 1; i++) {
-        equiposLocales.push(rotar[i]);
-      }
-      for (let i = partidosPorJornada - 1; i < rotar.length; i++) {
-        equiposVisitantes.push(rotar[i]);
-      }
+    const jornada: Jornada = {
+      id: jornadaId,
+      nombre: `Jornada ${jornadaNum}`,
+      numero: jornadaNum,
+      estado: 'pendiente' as EstadoJornada,
+    };
+    jornadas.push(jornada);
+    partidosPorJornadaMap[jornadaId] = [];
 
-      equiposVisitantes.reverse();
+    // Tomar partidos de la ida y voltear
+    const idaJornadaId = jornadas[r].id;
+    const partidosIda = partidosPorJornadaMap[idaJornadaId];
+    for (const pIda of partidosIda) {
+      const esDescansa =
+        pIda.equipoLocal.id === 'descansa' ||
+        pIda.equipoVisitante.id === 'descansa';
+      const partido: Partido = {
+        id: getRandomUID(),
+        jornadaId,
+        equipoLocal: pIda.equipoVisitante,
+        equipoVisitante: pIda.equipoLocal,
+        estado: esDescansa ? 'finalizado' : 'pendiente',
+        tipoCompeticion: ligaId,
+      };
+      partidosPorJornadaMap[jornadaId].push(partido);
+    }
+
+    // Guardar en BD
+    await jornadaService.crear(temporadaId, ligaId, jornada);
+    for (const p of partidosPorJornadaMap[jornadaId]) {
+      await partidoService.crear(temporadaId, ligaId, p);
     }
   }
 

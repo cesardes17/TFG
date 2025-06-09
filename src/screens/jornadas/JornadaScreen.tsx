@@ -35,8 +35,8 @@ export default function JornadasScreen() {
       </View>
     );
   }
-
-  if (!competiciones) {
+  console.log('competiciones', competiciones);
+  if (!competiciones || competiciones.length === 0) {
     return (
       <View style={styles.container}>
         <StyledAlert

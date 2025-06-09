@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import ProgressiveImage from '../common/ProgressiveImage';
 import StyledText from '../common/StyledText';
 import { EstadisticasEquiposPartido } from '../../types/estadisticas/equipo';
 import { useTheme } from '../../contexts/ThemeContext';
 import { CalendarIcon, LocationIcon } from '../Icons';
+import { router } from 'expo-router';
 
 interface Equipo {
   id: string;
@@ -127,7 +128,17 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
       {/* Zona Media */}
       <View style={styles.zonaMarcador}>
         {/* Equipo Local */}
-        <View style={styles.equipoContainer}>
+        <TouchableOpacity
+          style={styles.equipoContainer}
+          onPress={() => {
+            router.push({
+              pathname: 'equipo/[id]',
+              params: {
+                id: equipoLocal.id,
+              },
+            });
+          }}
+        >
           <ProgressiveImage
             uri={equipoLocal.escudoUrl}
             containerStyle={styles.escudo}
@@ -138,7 +149,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
           >
             {equipoLocal.nombre}
           </StyledText>
-        </View>
+        </TouchableOpacity>
 
         {/* Marcador */}
         <View style={styles.marcadorContainer}>
@@ -166,7 +177,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
         </View>
 
         {/* Equipo Visitante */}
-        <View style={styles.equipoContainer}>
+        <TouchableOpacity style={styles.equipoContainer}>
           <ProgressiveImage
             uri={equipoVisitante.escudoUrl}
             containerStyle={styles.escudo}
@@ -178,7 +189,7 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
           >
             {equipoVisitante.nombre}
           </StyledText>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Zona Inferior */}

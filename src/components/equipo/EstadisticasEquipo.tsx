@@ -108,10 +108,7 @@ export default function EstadisticasEquipo({
         ]}
         onPress={() => setCompeticionSeleccionada(comp.tipo)}
       >
-        <StyledText
-          variant={competicionSeleccionada === comp.tipo ? 'light' : 'primary'}
-          style={styles.textoBoton}
-        >
+        <StyledText variant='light' style={styles.textoBoton}>
           {comp.tipo}
         </StyledText>
       </TouchableOpacity>
@@ -130,12 +127,7 @@ export default function EstadisticasEquipo({
           ]}
           onPress={() => setCompeticionSeleccionada('Totales')}
         >
-          <StyledText
-            variant={
-              competicionSeleccionada === 'Totales' ? 'light' : 'primary'
-            }
-            style={styles.textoBoton}
-          >
+          <StyledText variant='light' style={styles.textoBoton}>
             Totales
           </StyledText>
         </TouchableOpacity>

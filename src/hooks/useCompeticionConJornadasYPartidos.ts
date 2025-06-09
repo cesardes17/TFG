@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { competitionBaseService } from '../services/competicionService/baseService';
 import { Competicion } from '../types/Competicion';
@@ -6,6 +6,7 @@ import { jornadaService } from '../services/jornadaService';
 import { Jornada } from '../types/Jornada';
 import { partidoService } from '../services/partidoService';
 import { Partido } from '../types/Partido';
+import { useFocusEffect } from 'expo-router';
 
 export default function useCompeticionConJornadasYPartidos() {
   const { temporada } = useTemporadaContext();
@@ -23,7 +24,7 @@ export default function useCompeticionConJornadasYPartidos() {
   const [loadingPartidos, setLoadingPartidos] = useState(true);
   const [partidos, setPartidos] = useState<Partido[]>([]);
 
-  //obtenemos las competiciones
+  // 👉 Obtener competiciones inicialmente
   useEffect(() => {
     if (!temporada) return;
     const fecthCompeticiones = async () => {
@@ -48,7 +49,7 @@ export default function useCompeticionConJornadasYPartidos() {
     fecthCompeticiones();
   }, []);
 
-  //cuando cambia la competicion seleccionada, obtenemos las jornadas
+  // 👉 Obtener jornadas cuando cambia la competición
   useEffect(() => {
     if (!competicionSeleccionada) return;
 
@@ -76,26 +77,34 @@ export default function useCompeticionConJornadasYPartidos() {
     fetchJornadas();
   }, [competicionSeleccionada]);
 
-  //cuando cambia la jornada seleccionada, obtenemos los partidos
-  useEffect(() => {
-    if (!jornadaSeleccionada) return;
-    const fetchPartidos = async () => {
-      setLoadingPartidos(true);
-      const res = await partidoService.getAllByJornada(
-        temporada!.id,
-        competicionSeleccionada!.id,
-        jornadaSeleccionada.id
-      );
-      if (!res.success || !res.data) {
-        setLoadingPartidos(false);
-        setPartidos([]);
-        return;
-      }
+  // 👉 Obtener partidos (reutilizable)
+  const fetchPartidos = useCallback(async () => {
+    if (!jornadaSeleccionada || !competicionSeleccionada || !temporada) return;
+    setLoadingPartidos(true);
+    const res = await partidoService.getAllByJornada(
+      temporada.id,
+      competicionSeleccionada.id,
+      jornadaSeleccionada.id
+    );
+    if (!res.success || !res.data) {
+      setPartidos([]);
+    } else {
       setPartidos(res.data);
-      setLoadingPartidos(false);
-    };
+    }
+    setLoadingPartidos(false);
+  }, [jornadaSeleccionada, competicionSeleccionada, temporada]);
+
+  // 👉 Llamar a fetchPartidos cuando cambia la jornada
+  useEffect(() => {
     fetchPartidos();
-  }, [jornadaSeleccionada]);
+  }, [fetchPartidos]);
+
+  // 👉 Llamar a fetchPartidos cuando se recupera el foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchPartidos();
+    }, [fetchPartidos])
+  );
 
   const handleSeleccionarCompeticion = (id: string) => {
     const competicion = competiciones?.find((c) => c.id === id);
@@ -118,5 +127,6 @@ export default function useCompeticionConJornadasYPartidos() {
     partidos,
     handleSeleccionarCompeticion,
     handleSeleccionarJornada,
+    refetchPartidos: fetchPartidos, // extra si lo necesitas en la UI
   };
 }

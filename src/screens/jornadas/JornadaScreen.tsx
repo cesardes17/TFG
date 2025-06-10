@@ -7,6 +7,7 @@ import { useCompeticiones } from '../../hooks/useCompeticiones';
 import BodyJornadas from '../../components/jornadas/BodyJornadas';
 import { Competicion } from '../../types/Competicion';
 import StyledAlert from '../../components/common/StyledAlert';
+import { Stack } from 'expo-router';
 
 export default function JornadasScreen() {
   const { competiciones, competicionesEstado, error, loadingCompeticiones } =
@@ -74,9 +75,14 @@ export default function JornadasScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerTitle: competicionSeleccionada.nombre,
+        }}
+      />
       {Platform.OS === 'ios' && (
         <StyledButton
-          title='Seleccionar Competición'
+          title={showSelectable ? 'Cerrar Selector' : 'Seleccionar Competición'}
           onPress={() => {
             setShowSelectable((prev) => {
               return !prev;

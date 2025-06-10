@@ -1,8 +1,8 @@
 // src/screens/modoMesa/ModoMesaScreen.tsx
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useWindowDimensions } from 'react-native';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import ModoMesaLayout from './ModoMesaLayout';
 import StyledText from '../../components/common/StyledText';
@@ -10,39 +10,35 @@ import StyledButton from '../../components/common/StyledButton';
 import { TipoCompeticion } from '../../types/Competicion';
 import { useTheme } from '../../contexts/ThemeContext';
 
+interface ModoMesaScreenProps {
+  idPartido: string;
+  tipoCompeticion: TipoCompeticion;
+}
+
 export default function ModoMesaScreen({
   idPartido,
   tipoCompeticion,
-}: {
-  idPartido: string;
-  tipoCompeticion: TipoCompeticion;
-}) {
-  const { width, height } = useWindowDimensions();
+}: ModoMesaScreenProps) {
+  const { height } = useWindowDimensions();
   const router = useRouter();
   const { theme } = useTheme();
-  const [isLoading, setIsLoading] = React.useState(true);
-  useEffect(() => {
-    const lockOrientation = async () => {
-      setIsLoading(true);
-      console.log('Forzando landscape...');
-      try {
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE
+
+  // Bloquear/desbloquear orientación al enfocar/desenfocar pantalla
+  useFocusEffect(
+    useCallback(() => {
+      ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE
+      ).catch((error) => console.error('Error locking orientation:', error));
+
+      return () => {
+        ScreenOrientation.unlockAsync().catch((error) =>
+          console.error('Error unlocking orientation:', error)
         );
-      } catch (error) {
-        console.error('Error al bloquear orientación:', error);
-      }
-      setIsLoading(false);
-    };
+      };
+    }, [])
+  );
 
-    lockOrientation();
-
-    return () => {
-      ScreenOrientation.unlockAsync();
-    };
-  }, []);
-
-  // Validación de tamaño mínimo (ejemplo: 768 px)
+  // Validación de altura mínima para la UI de mesa
   if (height < 768) {
     return (
       <View
@@ -55,15 +51,20 @@ export default function ModoMesaScreen({
           La pantalla es demasiado pequeña. Usa una tablet o dispositivo más
           grande.
         </StyledText>
-        <View style={{ marginTop: 20 }}>
+        <View style={styles.buttonWrapper}>
           <StyledButton
-            title='Voler a Atrás'
+            title='Volver atrás'
             onPress={async () => {
-              await ScreenOrientation.unlockAsync();
-              if (router.canGoBack()) {
-                return router.back();
+              try {
+                await ScreenOrientation.unlockAsync();
+              } catch (error) {
+                console.error('Error unlocking orientation on back:', error);
               }
-              return router.push('/');
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.push('/');
+              }
             }}
           />
         </View>
@@ -71,11 +72,7 @@ export default function ModoMesaScreen({
     );
   }
 
-  if (isLoading) {
-    return null;
-  }
-
-  // Aquí la UI normal del modo mesa
+  // UI principal de Modo Mesa
   return (
     <ModoMesaLayout idPartido={idPartido} tipoCompeticion={tipoCompeticion} />
   );
@@ -92,14 +89,7 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
   },
-  title: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    color: 'white',
-    marginTop: 12,
-    fontSize: 16,
+  buttonWrapper: {
+    marginTop: 20,
   },
 });

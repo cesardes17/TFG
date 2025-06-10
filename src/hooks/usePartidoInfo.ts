@@ -1,26 +1,36 @@
+// src/hooks/usePartidoInfo.ts
 import { useCallback, useEffect, useState } from 'react';
 import { Partido, PartidoRT } from '../types/Partido';
 import { partidoService } from '../services/partidoService';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { useFocusEffect } from 'expo-router';
 
+/**
+ * Hook para obtener información de un partido y sus actualizaciones en tiempo real.
+ * Cuando el partido deja de estar "en-juego", realiza un fetch final para obtener datos actualizados.
+ */
 export default function usePartidoInfo(
   partidoId: string,
   tipoCompeticion: string
 ) {
+  const { temporada } = useTemporadaContext();
   const [partido, setPartido] = useState<Partido | PartidoRT | null>(null);
   const [cuartoActual, setCuartoActual] = useState<string | null>(null);
   const [minutoActual, setMinutoActual] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { temporada } = useTemporadaContext();
 
+  // Función para cargar datos del partido desde Firestore
   const fetchPartido = useCallback(async () => {
-    let unsubscribe: (() => void) | null | undefined = null; // 👈 corregido aquí
+    let unsubscribe: (() => void) | null = null;
     setIsLoading(true);
     setError(null);
 
-    if (!temporada) return;
+    if (!temporada) {
+      setError('Temporada no definida');
+      setIsLoading(false);
+      return;
+    }
 
     const resFirestore = await partidoService.getPartido(
       temporada.id,
@@ -34,55 +44,55 @@ export default function usePartidoInfo(
       return;
     }
 
-    const partidoFirestore = resFirestore.data;
-    setPartido(partidoFirestore);
+    const data = resFirestore.data;
+    setPartido(data);
+    setCuartoActual(null);
+    setMinutoActual(null);
 
-    if (partidoFirestore.estado === 'en-juego') {
+    // Suscripción en tiempo real sólo si está en juego
+    if (data.estado === 'en-juego') {
       unsubscribe = await partidoService.onPartidoRealtime(
         partidoId,
-        (partidoEnVivo) => {
-          if (partidoEnVivo) {
-            setPartido(partidoEnVivo);
-            setCuartoActual(partidoEnVivo.cuartoActual || null);
-            setMinutoActual(partidoEnVivo.minutoActual || null);
-            console.log('Partido en vivo:', partidoEnVivo);
+        (realTimeData) => {
+          if (realTimeData) {
+            setPartido(realTimeData);
+            setCuartoActual(realTimeData.cuartoActual || null);
+            setMinutoActual(realTimeData.minutoActual || null);
+
+            // Si el partido ya no está en juego, finalizamos la suscripción y hacemos un fetch final
+            if (realTimeData.estado !== 'en-juego') {
+              if (unsubscribe) unsubscribe();
+              fetchPartido();
+            }
           }
         }
       );
-    } else {
-      setCuartoActual(null);
-      setMinutoActual(null);
     }
 
     setIsLoading(false);
-
     return unsubscribe;
   }, [temporada, tipoCompeticion, partidoId]);
 
+  // Efecto para carga inicial y limpieza
   useEffect(() => {
     let unsubscribe: (() => void) | null | undefined = null;
 
-    const load = async () => {
+    (async () => {
       unsubscribe = await fetchPartido();
-    };
-
-    load();
+    })();
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, [fetchPartido]);
 
+  // Refetch al enfocar pantalla
   useFocusEffect(
     useCallback(() => {
       let unsubscribe: (() => void) | null | undefined = null;
-
-      const loadOnFocus = async () => {
+      (async () => {
         unsubscribe = await fetchPartido();
-      };
-
-      loadOnFocus();
-
+      })();
       return () => {
         if (unsubscribe) unsubscribe();
       };

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { partidoService } from '../services/partidoService';
 import { Partido } from '../types/Partido';
 import { Competicion } from '../types/Competicion';
 import { Jornada } from '../types/Jornada';
+import { useFocusEffect } from 'expo-router';
 
 export function usePartidos(
   jornada: Jornada | null,
@@ -32,9 +33,11 @@ export function usePartidos(
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetch();
-  }, [temporada, jornada, competicion]);
+  useFocusEffect(
+    useCallback(() => {
+      fetch();
+    }, [temporada, jornada, competicion])
+  );
 
   return { partidos, loading, error, fetch };
 }

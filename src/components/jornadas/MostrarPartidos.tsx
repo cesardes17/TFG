@@ -5,6 +5,8 @@ import { Jornada } from '../../types/Jornada';
 import LoadingIndicator from '../common/LoadingIndicator';
 import StyledAlert from '../common/StyledAlert';
 import TarjetaPartido from './TarjetaPartido';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 interface MostrarPartidoProps {
   jornada: Jornada;

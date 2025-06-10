@@ -1,128 +1,106 @@
-import { StyleSheet, View, Button, Platform } from 'react-native';
-import { useState } from 'react';
-import StyledAlert from '../../components/common/StyledAlert';
+import { View, Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
-import CarruselJornadas, {
-  JornadaSelectable,
-} from '../../components/jornadas/CarruselJornadas';
-import TarjetaPartido from '../../components/jornadas/TarjetaPartido';
 import Selectable, { SelectableItem } from '../../components/common/Selectable';
-import useCompeticionConJornadasYPartidos from '../../hooks/useCompeticionConJornadasYPartidos';
 import StyledButton from '../../components/common/StyledButton';
+import { useCompeticiones } from '../../hooks/useCompeticiones';
+import BodyJornadas from '../../components/jornadas/BodyJornadas';
+import { Competicion } from '../../types/Competicion';
+import StyledAlert from '../../components/common/StyledAlert';
 
 export default function JornadasScreen() {
-  const {
-    competiciones,
-    loadingCompeticiones,
-    competicionSeleccionada,
-    jornadas,
-    loadingJornadas,
-    jornadaSeleccionada,
-    partidos,
-    loadingPartidos,
-    handleSeleccionarCompeticion,
-    handleSeleccionarJornada,
-    refetchPartidos,
-  } = useCompeticionConJornadasYPartidos();
+  const { competiciones, competicionesEstado, error, loadingCompeticiones } =
+    useCompeticiones();
+  const [competicionSeleccionada, setcompeticionSeleccionada] =
+    useState<Competicion>();
 
   const [showSelectable, setShowSelectable] = useState(false);
 
-  const toggleSelectable = () => setShowSelectable(!showSelectable);
+  useEffect(() => {
+    if (!competiciones || !competicionesEstado) return;
 
+    // Seleccionar la competición por prioridad:
+    // 1️⃣ Si la copa está creada y no finalizada, selecciona la copa
+    if (
+      competicionesEstado.copa.created &&
+      !competicionesEstado.copa.finalized
+    ) {
+      setcompeticionSeleccionada(competicionesEstado.copa.data);
+      return;
+    }
+
+    // 2️⃣ Si no hay copa activa, selecciona la liga regular
+    if (competicionesEstado.liga.created) {
+      // ⚠️ Si la liga está finalizada, comprobar si existen playoffs creados
+      if (
+        competicionesEstado.liga.finalized &&
+        competicionesEstado.playoffs.created
+      ) {
+        // 3️⃣ Liga finalizada y hay playoffs → selecciona playoffs
+        setcompeticionSeleccionada(competicionesEstado.playoffs.data);
+        return;
+      }
+      // Liga no finalizada o no hay playoffs → selecciona liga
+      setcompeticionSeleccionada(competicionesEstado.liga.data);
+      return;
+    }
+
+    // 4️⃣ Si no hay liga creada pero hay playoffs creados, selecciona playoffs
+    if (competicionesEstado.playoffs.created) {
+      setcompeticionSeleccionada(competicionesEstado.playoffs.data);
+      return;
+    }
+
+    // 5️⃣ Si no hay ninguna activa, no selecciona nada
+    setcompeticionSeleccionada(undefined);
+  }, [competiciones, competicionesEstado]);
   if (loadingCompeticiones) {
-    return (
-      <View style={styles.container}>
-        <LoadingIndicator text='Obteniendo Competiciones' />
-      </View>
-    );
-  }
-  console.log('competiciones', competiciones);
-  if (!competiciones || competiciones.length === 0) {
-    return (
-      <View style={styles.container}>
-        <StyledAlert
-          variant='error'
-          message='No se pudieron obtener las competiciones'
-        />
-      </View>
-    );
+    return <LoadingIndicator />;
   }
 
-  const competicionesSelectable: SelectableItem[] = competiciones.map(
-    (competicion) => ({
-      id: competicion.id,
-      nombre: competicion.nombre,
-    })
-  );
-
-  const jornadasSelectable: JornadaSelectable[] = jornadas?.map((jornada) => ({
-    id: jornada.id,
-    label: jornada.nombre,
-  }));
+  if (!competicionSeleccionada) {
+    return (
+      <StyledAlert
+        variant='error'
+        message='No se hay ninguna competición activa'
+      />
+    );
+  }
 
   return (
-    <View>
-      {/* Solo mostrar el botón en iOS */}
+    <View style={styles.container}>
       {Platform.OS === 'ios' && (
-        <View style={{ margin: 8 }}>
-          <StyledButton
-            title={
-              showSelectable ? 'Ocultar Selector' : 'Seleccionar Competición'
-            }
-            onPress={toggleSelectable}
-          />
-        </View>
-      )}
-
-      {/* Mostrar Selectable: 
-        - En iOS solo si showSelectable está activado
-        - En Android/Web siempre visible
-      */}
-      {(Platform.OS !== 'ios' || showSelectable) && (
-        <Selectable
-          items={competicionesSelectable}
-          onSelect={handleSeleccionarCompeticion}
-          selectedId={competicionSeleccionada?.id || ''}
+        <StyledButton
+          title='Seleccionar Competición'
+          onPress={() => {
+            setShowSelectable((prev) => {
+              return !prev;
+            });
+          }}
         />
       )}
 
-      {loadingJornadas && <LoadingIndicator text='Obteniendo Jornadas' />}
-      {!loadingJornadas && jornadas && (
-        <>
-          <CarruselJornadas
-            jornadas={jornadasSelectable}
-            onSeleccionarJornada={handleSeleccionarJornada}
-            jornadaSeleccionada={jornadaSeleccionada?.id || ''}
-          />
-          {loadingPartidos && <LoadingIndicator text='Obteniendo Partidos' />}
-          {!loadingPartidos && partidos && (
-            <>
-              {partidos.length > 0 ? (
-                partidos.map((partido) => (
-                  <TarjetaPartido
-                    key={partido.id}
-                    partido={partido}
-                    reftechPartidos={refetchPartidos}
-                  />
-                ))
-              ) : (
-                <StyledAlert
-                  message='No hay partidos para esta jornada'
-                  variant='info'
-                />
-              )}
-            </>
-          )}
-        </>
+      {(Platform.OS !== 'ios' || showSelectable) && (
+        <Selectable
+          items={competiciones}
+          selectedId={competicionSeleccionada?.id || ''}
+          onSelect={(id) => {
+            const competicion = competiciones.find(
+              (competicion) => competicion.id === id
+            );
+            setcompeticionSeleccionada(competicion);
+          }}
+        />
       )}
+
+      <BodyJornadas competicion={competicionSeleccionada} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 5,
   },
 });

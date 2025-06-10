@@ -31,7 +31,7 @@ export function useCompeticiones() {
     });
   const [loadingCompeticiones, setLoadingCompeticiones] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [competiciones, setCompeticiones] = useState<Competicion[]>([]);
   useEffect(() => {
     const cargarCompeticiones = async () => {
       if (!temporada) return;
@@ -66,6 +66,7 @@ export function useCompeticiones() {
             data: playoffs,
           },
         });
+        setCompeticiones(res.data);
       } else {
         setError(res.errorMessage || 'Error al obtener las competiciones');
       }
@@ -76,5 +77,5 @@ export function useCompeticiones() {
     cargarCompeticiones();
   }, [temporada?.id]);
 
-  return { competicionesEstado, loadingCompeticiones, error };
+  return { competiciones, competicionesEstado, loadingCompeticiones, error };
 }

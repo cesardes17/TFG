@@ -3,32 +3,28 @@ import { useEffect, useState } from 'react';
 import { Jornada } from '../types/Jornada';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { jornadaService } from '../services/jornadaService';
+import { Competicion } from '../types/Competicion';
 
-export function useJornadas() {
+export function useJornadas(competicion: Competicion) {
   const { temporada } = useTemporadaContext();
   const [jornadas, setJornadas] = useState<Jornada[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchJornadas = async () => {
-      if (!temporada) return;
+    if (!temporada || !competicion) return;
+    const fetch = async () => {
       setLoading(true);
-      setError(null);
-
-      const res = await jornadaService.getAll(temporada.id, 'liga-regular');
+      const res = await jornadaService.getAll(temporada.id, competicion.id);
       if (res.success && res.data) {
-        const ordenadas = res.data.sort((a, b) => a.numero - b.numero);
-        setJornadas(ordenadas);
+        setJornadas(res.data.sort((a, b) => a.numero - b.numero));
       } else {
-        setError(res.errorMessage ?? 'Error al obtener jornadas');
+        setError(res.errorMessage || 'Error al obtener jornadas');
       }
-
       setLoading(false);
     };
-
-    fetchJornadas();
-  }, [temporada]);
+    fetch();
+  }, [temporada?.id, competicion]);
 
   return { jornadas, loading, error };
 }

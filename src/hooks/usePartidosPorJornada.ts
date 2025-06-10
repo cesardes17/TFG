@@ -1,55 +1,37 @@
-import { useState } from 'react';
-import { Partido } from '../types/Partido';
-import { partidoService } from '../services/partidoService';
+import { useEffect, useState } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
+import { partidoService } from '../services/partidoService';
+import { Partido } from '../types/Partido';
+import { Competicion } from '../types/Competicion';
+import { Jornada } from '../types/Jornada';
 
-export function usePartidosPorJornada() {
+export function usePartidos(jornada: Jornada, competicion: Competicion) {
   const { temporada } = useTemporadaContext();
-  const [loading, setLoading] = useState(false);
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Siempre se pide a la base de datos, no se cachea en memoria
-  const getPartidos = async (jornadaId: string): Promise<Partido[]> => {
-    if (!temporada) return [];
+  const jornadaId = jornada.id;
+  const competicionId = competicion.id;
 
-    setLoading(true);
-    setError(null);
-
-    const res = await partidoService.getAllByJornada(
-      temporada.id,
-      'liga-regular',
-      jornadaId
-    );
-
-    if (res.success && res.data) {
-      const partidosOrdenados = [...res.data!].sort((a, b) => {
-        const esDescansaA =
-          a.equipoLocal.nombre === 'Descansa' ||
-          a.equipoVisitante.nombre === 'Descansa';
-        const esDescansaB =
-          b.equipoLocal.nombre === 'Descansa' ||
-          b.equipoVisitante.nombre === 'Descansa';
-
-        if (esDescansaA && !esDescansaB) return 1;
-        if (!esDescansaA && esDescansaB) return -1;
-
-        const fechaA = a.fecha ? new Date(a.fecha).getTime() : 0;
-        const fechaB = b.fecha ? new Date(b.fecha).getTime() : 0;
-        return fechaA - fechaB;
-      });
-
+  useEffect(() => {
+    if (!temporada || !jornadaId || !competicionId) return;
+    const fetch = async () => {
+      setLoading(true);
+      const res = await partidoService.getAllByJornada(
+        temporada.id,
+        competicionId,
+        jornadaId
+      );
+      if (res.success && res.data) {
+        setPartidos(res.data);
+      } else {
+        setError(res.errorMessage || 'Error al obtener partidos');
+      }
       setLoading(false);
-      return partidosOrdenados;
-    } else {
-      setError(res.errorMessage ?? 'Error al obtener partidos');
-      setLoading(false);
-      return [];
-    }
-  };
+    };
+    fetch();
+  }, [temporada?.id, jornadaId, competicionId]);
 
-  return {
-    getPartidos,
-    loading,
-    error,
-  };
+  return { partidos, loading, error, refetch: () => fetch };
 }

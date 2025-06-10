@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
@@ -6,20 +6,37 @@ import { CalendarIcon, LocationIcon } from '../Icons';
 import ProgressiveImage from '../common/ProgressiveImage';
 import { router } from 'expo-router';
 import { Partido } from '../../types/Partido';
+import usePartidoEnVivo from '../../hooks/usePartidoEnVivo';
+import { partidoService } from '../../services/partidoService';
+import { useTemporadaContext } from '../../contexts/TemporadaContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
 interface Props {
   partido: Partido;
+  reftechPartidos: () => void;
 }
 
-export default function TarjetaPartido({ partido }: Props) {
+export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
   const { theme } = useTheme();
+  const { temporada } = useTemporadaContext();
 
+  if (!temporada) {
+    return;
+  }
+
+  // 👉 Usamos el hook con callback
+  const partidoEnVivo = usePartidoEnVivo(
+    partido.id,
+    partido.estado === 'en-juego',
+    reftechPartidos // 🔥 callback para recargar
+  );
+
+  const partidoAMostrar = partidoEnVivo || partido;
   const esDescansa =
-    partido.equipoLocal.nombre === 'Descansa' ||
-    partido.equipoVisitante.nombre === 'Descansa';
+    partidoAMostrar.equipoLocal.nombre === 'Descansa' ||
+    partidoAMostrar.equipoVisitante.nombre === 'Descansa';
 
   const getEstadoStyle = (estado: string) => {
     if (esDescansa) {
@@ -69,7 +86,7 @@ export default function TarjetaPartido({ partido }: Props) {
     });
   };
 
-  const estadoStyle = getEstadoStyle(partido.estado);
+  const estadoStyle = getEstadoStyle(partidoAMostrar.estado);
 
   return (
     <TouchableOpacity
@@ -77,8 +94,8 @@ export default function TarjetaPartido({ partido }: Props) {
         router.push({
           pathname: '/partido/[id]',
           params: {
-            id: partido.id,
-            tipoCompeticion: partido.tipoCompeticion,
+            id: partidoAMostrar.id,
+            tipoCompeticion: partidoAMostrar.tipoCompeticion,
           },
         });
       }}
@@ -86,32 +103,49 @@ export default function TarjetaPartido({ partido }: Props) {
     >
       <View style={styles.tarjetaHeader}>
         {!esDescansa && (
-          <View
-            style={[
-              styles.estadoBadge,
-              { backgroundColor: estadoStyle.backgroundColor },
-            ]}
-          >
-            <StyledText
-              style={[styles.estadoText, { color: estadoStyle.color }]}
+          <>
+            <View
+              style={[
+                styles.estadoBadge,
+                { backgroundColor: estadoStyle.backgroundColor },
+              ]}
             >
-              {estadoStyle.text}
-            </StyledText>
-          </View>
+              <StyledText
+                style={[styles.estadoText, { color: estadoStyle.color }]}
+              >
+                {estadoStyle.text}
+              </StyledText>
+            </View>
+            <View>
+              {partidoAMostrar.estado === 'en-juego' && partidoEnVivo && (
+                <StyledText
+                  variant='secondary'
+                  style={{ fontSize: 10, marginTop: 4 }}
+                >
+                  {partidoEnVivo.cuartoActual
+                    ? `${partidoEnVivo.cuartoActual}`
+                    : ''}{' '}
+                  {partidoEnVivo.minutoActual !== null
+                    ? `${partidoEnVivo.minutoActual}'`
+                    : ''}
+                </StyledText>
+              )}
+            </View>
+          </>
         )}
-        {partido.fecha && (
+        {partidoAMostrar.fecha && (
           <StyledText variant='secondary' style={styles.fechaText}>
             <CalendarIcon color={theme.text.secondary} size={12} />{' '}
-            {formatearFecha(partido.fecha)}
+            {formatearFecha(partidoAMostrar.fecha)}
           </StyledText>
         )}
       </View>
 
       <View style={styles.partidoContent}>
         <View style={styles.equipoContainer}>
-          {partido.equipoLocal.nombre.toLowerCase() === 'descansa' ||
-          partido.equipoLocal.nombre.toLowerCase() === 'bye' ||
-          partido.equipoLocal.nombre.toLowerCase() === '' ? (
+          {partidoAMostrar.equipoLocal.nombre.toLowerCase() === 'descansa' ||
+          partidoAMostrar.equipoLocal.nombre.toLowerCase() === 'bye' ||
+          partidoAMostrar.equipoLocal.nombre.toLowerCase() === '' ? (
             <View
               style={[
                 styles.escudoDescansa,
@@ -122,7 +156,7 @@ export default function TarjetaPartido({ partido }: Props) {
             </View>
           ) : (
             <ProgressiveImage
-              uri={partido.equipoLocal.escudoUrl}
+              uri={partidoAMostrar.equipoLocal.escudoUrl}
               containerStyle={[
                 styles.escudoImage,
                 { backgroundColor: theme.background.primary },
@@ -134,18 +168,25 @@ export default function TarjetaPartido({ partido }: Props) {
             style={styles.equipoNombre}
             numberOfLines={2}
           >
-            {partido.equipoLocal.nombre}
+            {partidoAMostrar.equipoLocal.nombre}
           </StyledText>
         </View>
+
         <View style={styles.resultadoContainer}>
           {esDescansa ? (
             <StyledText variant='secondary' style={styles.vsText}>
               DESCANSA
             </StyledText>
-          ) : partido.resultado ? (
+          ) : partidoAMostrar.estado === 'en-juego' &&
+            partidoAMostrar.estadisticasEquipos?.totales ? (
             <StyledText variant='primary' style={styles.marcadorText}>
-              {partido.resultado.puntosLocal} -{' '}
-              {partido.resultado.puntosVisitante}
+              {partidoAMostrar.estadisticasEquipos.totales.local.puntos} -{' '}
+              {partidoAMostrar.estadisticasEquipos.totales.visitante.puntos}
+            </StyledText>
+          ) : partidoAMostrar.resultado ? (
+            <StyledText variant='primary' style={styles.marcadorText}>
+              {partidoAMostrar.resultado.puntosLocal} -{' '}
+              {partidoAMostrar.resultado.puntosVisitante}
             </StyledText>
           ) : (
             <StyledText variant='secondary' style={styles.vsText}>
@@ -159,11 +200,12 @@ export default function TarjetaPartido({ partido }: Props) {
             style={[styles.equipoNombre, styles.equipoNombreVisitante]}
             numberOfLines={2}
           >
-            {partido.equipoVisitante.nombre}
+            {partidoAMostrar.equipoVisitante.nombre}
           </StyledText>
-          {partido.equipoVisitante.nombre.toLowerCase() === 'descansa' ||
-          partido.equipoVisitante.nombre.toLowerCase() === 'bye' ||
-          partido.equipoVisitante.nombre.toLowerCase() === '' ? (
+          {partidoAMostrar.equipoVisitante.nombre.toLowerCase() ===
+            'descansa' ||
+          partidoAMostrar.equipoVisitante.nombre.toLowerCase() === 'bye' ||
+          partidoAMostrar.equipoVisitante.nombre.toLowerCase() === '' ? (
             <View
               style={[
                 styles.escudoDescansa,
@@ -174,7 +216,7 @@ export default function TarjetaPartido({ partido }: Props) {
             </View>
           ) : (
             <ProgressiveImage
-              uri={partido.equipoVisitante.escudoUrl}
+              uri={partidoAMostrar.equipoVisitante.escudoUrl}
               containerStyle={[
                 styles.escudoImage,
                 { backgroundColor: theme.background.primary },
@@ -184,11 +226,11 @@ export default function TarjetaPartido({ partido }: Props) {
         </View>
       </View>
 
-      {partido.cancha && !esDescansa && (
+      {partidoAMostrar.cancha && !esDescansa && (
         <View style={styles.canchaContainer}>
           <StyledText variant='secondary' style={styles.canchaText}>
             <LocationIcon color={theme.text.secondary} size={16} />{' '}
-            {partido.cancha}
+            {partidoAMostrar.cancha}
           </StyledText>
         </View>
       )}
@@ -196,6 +238,7 @@ export default function TarjetaPartido({ partido }: Props) {
   );
 }
 
+// 👇 Estilos iguales que tenías
 const styles = StyleSheet.create({
   tarjetaContainer: {
     borderRadius: 12,

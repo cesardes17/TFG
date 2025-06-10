@@ -211,12 +211,6 @@ export default function usePartidoMesa(
           setIsGuardando(true);
           setGuardandoTexto('Guardando partido...');
 
-          const partidoActualizado: PartidoRT = {
-            ...(partido as PartidoRT),
-            estado: 'finalizado',
-          };
-
-          await partidoService.updateRealtime(partidoActualizado);
           await FormatearYGuardarPartido(
             temporada!.id,
             partido!,

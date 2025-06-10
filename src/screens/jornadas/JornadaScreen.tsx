@@ -22,6 +22,7 @@ export default function JornadasScreen() {
     loadingPartidos,
     handleSeleccionarCompeticion,
     handleSeleccionarJornada,
+    refetchPartidos,
   } = useCompeticionConJornadasYPartidos();
 
   const [showSelectable, setShowSelectable] = useState(false);
@@ -98,7 +99,11 @@ export default function JornadasScreen() {
             <>
               {partidos.length > 0 ? (
                 partidos.map((partido) => (
-                  <TarjetaPartido key={partido.id} partido={partido} />
+                  <TarjetaPartido
+                    key={partido.id}
+                    partido={partido}
+                    reftechPartidos={refetchPartidos}
+                  />
                 ))
               ) : (
                 <StyledAlert

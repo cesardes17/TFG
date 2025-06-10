@@ -12,7 +12,7 @@ export default function JornadasScreen() {
   const { competiciones, competicionesEstado, error, loadingCompeticiones } =
     useCompeticiones();
   const [competicionSeleccionada, setcompeticionSeleccionada] =
-    useState<Competicion>();
+    useState<Competicion | null>(null);
 
   const [showSelectable, setShowSelectable] = useState(false);
 
@@ -23,18 +23,20 @@ export default function JornadasScreen() {
     // 1️⃣ Si la copa está creada y no finalizada, selecciona la copa
     if (
       competicionesEstado.copa.created &&
-      !competicionesEstado.copa.finalized
+      !competicionesEstado.copa.finalized &&
+      competicionesEstado.copa.data
     ) {
       setcompeticionSeleccionada(competicionesEstado.copa.data);
       return;
     }
 
     // 2️⃣ Si no hay copa activa, selecciona la liga regular
-    if (competicionesEstado.liga.created) {
+    if (competicionesEstado.liga.created && competicionesEstado.liga.data) {
       // ⚠️ Si la liga está finalizada, comprobar si existen playoffs creados
       if (
         competicionesEstado.liga.finalized &&
-        competicionesEstado.playoffs.created
+        competicionesEstado.playoffs.created &&
+        competicionesEstado.playoffs.data
       ) {
         // 3️⃣ Liga finalizada y hay playoffs → selecciona playoffs
         setcompeticionSeleccionada(competicionesEstado.playoffs.data);
@@ -46,13 +48,16 @@ export default function JornadasScreen() {
     }
 
     // 4️⃣ Si no hay liga creada pero hay playoffs creados, selecciona playoffs
-    if (competicionesEstado.playoffs.created) {
+    if (
+      competicionesEstado.playoffs.created &&
+      competicionesEstado.playoffs.data
+    ) {
       setcompeticionSeleccionada(competicionesEstado.playoffs.data);
       return;
     }
 
     // 5️⃣ Si no hay ninguna activa, no selecciona nada
-    setcompeticionSeleccionada(undefined);
+    setcompeticionSeleccionada(null);
   }, [competiciones, competicionesEstado]);
   if (loadingCompeticiones) {
     return <LoadingIndicator />;
@@ -79,7 +84,6 @@ export default function JornadasScreen() {
           }}
         />
       )}
-
       {(Platform.OS !== 'ios' || showSelectable) && (
         <Selectable
           items={competiciones}
@@ -88,12 +92,13 @@ export default function JornadasScreen() {
             const competicion = competiciones.find(
               (competicion) => competicion.id === id
             );
-            setcompeticionSeleccionada(competicion);
+            setcompeticionSeleccionada(competicion || null);
           }}
         />
       )}
-
-      <BodyJornadas competicion={competicionSeleccionada} />
+      {competiciones?.length > 0 && competicionSeleccionada && (
+        <BodyJornadas competicion={competicionSeleccionada} />
+      )}
     </View>
   );
 }

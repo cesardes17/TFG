@@ -1,21 +1,21 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
+  FlatList,
   StyleSheet,
   Dimensions,
+  ListRenderItem,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 
-const { width: screenWidth } = Dimensions.get('window');
-const isTablet = screenWidth > 768;
-
-export type JornadaSelectable = {
+// Tipos
+export interface JornadaSelectable {
   id: string;
   label: string;
-};
+}
 
 interface CarruselJornadasProps {
   jornadas: JornadaSelectable[];
@@ -23,28 +23,61 @@ interface CarruselJornadasProps {
   onSeleccionarJornada: (id: string) => void;
 }
 
-export default function CarruselJornadas({
+const { width: screenWidth } = Dimensions.get('window');
+const ITEM_WIDTH = 120; // Ancho aproximado de cada item
+const ITEM_MARGIN = 8; // Margen entre items
+
+const CarruselJornadas: React.FC<CarruselJornadasProps> = ({
   jornadas,
   jornadaSeleccionada,
   onSeleccionarJornada,
-}: CarruselJornadasProps) {
+}) => {
   const { theme } = useTheme();
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<JornadaSelectable>>(null);
+  const [hasScrolledInitially, setHasScrolledInitially] = useState(false);
 
-  // Centrar la jornada seleccionada
+  // Función para obtener el layout de cada item
+  const getItemLayout = (data: any, index: number) => ({
+    length: ITEM_WIDTH + ITEM_MARGIN * 2,
+    offset: (ITEM_WIDTH + ITEM_MARGIN * 2) * index,
+    index,
+  });
+
+  // Scroll inicial a la jornada seleccionada
   useEffect(() => {
-    const index = jornadas.findIndex((j) => j.id === jornadaSeleccionada);
-    if (index !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({
-        index,
-        animated: true,
-        viewPosition: 0.5, // centra el elemento
-      });
-    }
-  }, [jornadaSeleccionada, jornadas]);
+    if (!hasScrolledInitially && jornadas.length > 0 && jornadaSeleccionada) {
+      const selectedIndex = jornadas.findIndex(
+        (jornada) => jornada.id === jornadaSeleccionada
+      );
 
-  const renderJornada = ({ item }: { item: JornadaSelectable }) => {
-    const isSelected = jornadaSeleccionada === item.id;
+      if (selectedIndex !== -1 && flatListRef.current) {
+        // Pequeño delay para asegurar que el FlatList esté completamente montado
+        setTimeout(() => {
+          try {
+            flatListRef.current?.scrollToIndex({
+              index: selectedIndex,
+              animated: true,
+              viewPosition: 0.5, // Centrar el item
+            });
+            setHasScrolledInitially(true);
+          } catch (error) {
+            console.warn('Error al hacer scroll inicial:', error);
+            // Fallback: scroll por offset
+            const offset = selectedIndex * (ITEM_WIDTH + ITEM_MARGIN * 2);
+            flatListRef.current?.scrollToOffset({
+              offset: Math.max(0, offset - screenWidth / 2),
+              animated: true,
+            });
+            setHasScrolledInitially(true);
+          }
+        }, 100);
+      }
+    }
+  }, [jornadas, jornadaSeleccionada, hasScrolledInitially]);
+
+  // Renderizar cada item del carrusel
+  const renderJornada: ListRenderItem<JornadaSelectable> = ({ item }) => {
+    const isSelected = item.id === jornadaSeleccionada;
 
     return (
       <TouchableOpacity
@@ -55,32 +88,50 @@ export default function CarruselJornadas({
               ? theme.button.primary.background
               : 'transparent',
             borderColor: isSelected
-              ? theme.button.primary.border
+              ? theme.border.primary
               : theme.border.secondary,
           },
         ]}
         onPress={() => onSeleccionarJornada(item.id)}
+        activeOpacity={0.7}
       >
-        <Text
-          style={[
-            styles.jornadaButtonText,
-            {
-              color: isSelected
-                ? theme.button.primary.text
-                : theme.text.secondary,
-            },
-          ]}
+        <StyledText
+          variant={isSelected ? 'light' : 'primary'}
+          style={[styles.jornadaText]}
+          numberOfLines={2}
         >
           {item.label}
-        </Text>
+        </StyledText>
       </TouchableOpacity>
     );
   };
 
+  // Manejar errores de scroll
+  const handleScrollToIndexFailed = (info: any) => {
+    console.warn('ScrollToIndex failed:', info);
+    // Fallback: scroll por offset
+    const offset = info.index * (ITEM_WIDTH + ITEM_MARGIN * 2);
+    flatListRef.current?.scrollToOffset({
+      offset: Math.max(0, offset - screenWidth / 2),
+      animated: true,
+    });
+  };
+
+  // Validación de props
+  if (!jornadas || jornadas.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No hay jornadas disponibles</Text>
+      </View>
+    );
+  }
+
+  // Calcular si necesita scroll horizontal
+  const totalWidth = jornadas.length * (ITEM_WIDTH + ITEM_MARGIN * 2);
+  const needsScroll = totalWidth > screenWidth;
+
   return (
-    <View
-      style={[styles.carruselContainer, { borderColor: theme.border.primary }]}
-    >
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={jornadas}
@@ -88,33 +139,72 @@ export default function CarruselJornadas({
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.carruselContent}
-        ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-        getItemLayout={(_, index) => ({
-          length: isTablet ? 70 : 60, // ajusta según tamaño real
-          offset: (isTablet ? 70 : 60 + 8) * index,
-          index,
-        })}
+        getItemLayout={getItemLayout}
+        onScrollToIndexFailed={handleScrollToIndexFailed}
+        contentContainerStyle={[
+          styles.flatListContent,
+          !needsScroll && styles.flatListContentNoScroll,
+        ]}
+        // Optimizaciones de rendimiento
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        initialNumToRender={5}
+        // Configuración de scroll
+        decelerationRate='fast'
+        snapToInterval={needsScroll ? ITEM_WIDTH + ITEM_MARGIN * 2 : undefined}
+        snapToAlignment='start'
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  carruselContainer: {
-    margin: 16,
+  container: {
+    height: 60,
   },
-  carruselContent: {
+  flatListContent: {
     paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  flatListContentNoScroll: {
+    justifyContent: 'flex-start',
+    flexGrow: 0,
   },
   jornadaButton: {
-    paddingHorizontal: isTablet ? 20 : 16,
-    paddingVertical: isTablet ? 12 : 10,
-    borderRadius: 8,
+    width: ITEM_WIDTH,
+    height: 44,
+    marginHorizontal: ITEM_MARGIN,
+    paddingHorizontal: 12,
+    borderRadius: 22,
     borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  jornadaButtonText: {
-    fontSize: isTablet ? 16 : 14,
+  jornadaText: {
+    fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#6c757d',
+    fontStyle: 'italic',
   },
 });
+
+export default CarruselJornadas;

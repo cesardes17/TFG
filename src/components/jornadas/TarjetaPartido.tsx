@@ -7,7 +7,7 @@ import ProgressiveImage from '../common/ProgressiveImage';
 import { router } from 'expo-router';
 import { Partido } from '../../types/Partido';
 import usePartidoEnVivo from '../../hooks/usePartidoEnVivo';
-import { partidoService } from '../../services/partidoService';
+
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 
 const { width: screenWidth } = Dimensions.get('window');

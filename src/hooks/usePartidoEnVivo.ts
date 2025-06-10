@@ -6,11 +6,12 @@ import { PartidoRT } from '../types/Partido';
 export default function usePartidoEnVivo(
   partidoId: string,
   esEnJuego: boolean,
-  onFinalizado?: () => void // 👈 callback opcional
+  onFinalizado: () => void
 ) {
   const [partidoEnVivo, setPartidoEnVivo] = useState<PartidoRT | null>(null);
 
   useEffect(() => {
+    // Si ya no está “en juego”, reseteamos y salimos
     if (!esEnJuego) {
       setPartidoEnVivo(null);
       return;
@@ -21,11 +22,22 @@ export default function usePartidoEnVivo(
       unsubscribe = await partidoService.onPartidoRealtime(
         partidoId,
         (partido) => {
-          setPartidoEnVivo(partido);
-          // 🔥 Detectamos si el partido "desapareció" (finalizó en RTDB)
-          if (!partido && onFinalizado) {
-            onFinalizado();
+          // 1) Si el nodo desaparece
+          if (!partido) {
+            setPartidoEnVivo(null);
+            return;
           }
+
+          // 2) Si el partido acaba de pasar a “finalizado”
+          if (partido.estado === 'finalizado') {
+            // opcional: guarda la última info final antes de desmontar
+            setPartidoEnVivo(partido);
+            onFinalizado();
+            return;
+          }
+
+          // 3) Estado normal “en-juego”
+          setPartidoEnVivo(partido);
         }
       );
     };

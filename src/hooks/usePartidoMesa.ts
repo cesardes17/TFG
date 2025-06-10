@@ -211,6 +211,11 @@ export default function usePartidoMesa(
           setIsGuardando(true);
           setGuardandoTexto('Guardando partido...');
 
+          await partidoService.updateRealtime({
+            ...partido!,
+            estado: 'finalizado',
+          });
+
           await FormatearYGuardarPartido(
             temporada!.id,
             partido!,

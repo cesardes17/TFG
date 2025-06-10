@@ -5,33 +5,36 @@ import { Partido } from '../types/Partido';
 import { Competicion } from '../types/Competicion';
 import { Jornada } from '../types/Jornada';
 
-export function usePartidos(jornada: Jornada, competicion: Competicion) {
+export function usePartidos(
+  jornada: Jornada | null,
+  competicion: Competicion | null
+) {
   const { temporada } = useTemporadaContext();
-  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [partidos, setPartidos] = useState<Partido[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const jornadaId = jornada.id;
-  const competicionId = competicion.id;
+  const fetch = async () => {
+    if (!temporada || !jornada?.id || !competicion?.id) return;
+
+    setLoading(true);
+    const res = await partidoService.getAllByJornada(
+      temporada.id,
+      competicion.id,
+      jornada.id
+    );
+    if (res.success && res.data) {
+      setPartidos(res.data);
+    } else {
+      setError(res.errorMessage || 'Error al obtener partidos');
+      setPartidos(null);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!temporada || !jornadaId || !competicionId) return;
-    const fetch = async () => {
-      setLoading(true);
-      const res = await partidoService.getAllByJornada(
-        temporada.id,
-        competicionId,
-        jornadaId
-      );
-      if (res.success && res.data) {
-        setPartidos(res.data);
-      } else {
-        setError(res.errorMessage || 'Error al obtener partidos');
-      }
-      setLoading(false);
-    };
     fetch();
-  }, [temporada?.id, jornadaId, competicionId]);
+  }, [temporada, jornada, competicion]);
 
-  return { partidos, loading, error, refetch: () => fetch };
+  return { partidos, loading, error, fetch };
 }

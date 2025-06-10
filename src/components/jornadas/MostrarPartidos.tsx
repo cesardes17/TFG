@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Button, View } from 'react-native';
 import { usePartidos } from '../../hooks/usePartidosPorJornada';
 import { Competicion } from '../../types/Competicion';
 import { Jornada } from '../../types/Jornada';
@@ -14,11 +14,14 @@ export default function MostrarPartidos({
   jornada,
   competicion,
 }: MostrarPartidoProps) {
-  const { error, loading, partidos, refetch } = usePartidos(
-    jornada,
-    competicion
-  );
+  const {
+    error,
+    loading,
+    partidos,
+    fetch: refetch,
+  } = usePartidos(jornada, competicion);
 
+  if (!partidos || !competicion) return;
   if (loading) {
     return (
       <View>
@@ -45,15 +48,13 @@ export default function MostrarPartidos({
           message='No hay partidos para esta jornada ...'
         />
       ) : (
-        partidos.map((partido) => {
-          return (
-            <TarjetaPartido
-              key={partido.id}
-              partido={partido}
-              reftechPartidos={refetch}
-            />
-          );
-        })
+        partidos.map((partido) => (
+          <TarjetaPartido
+            key={partido.id}
+            partido={partido}
+            reftechPartidos={refetch}
+          />
+        ))
       )}
     </View>
   );

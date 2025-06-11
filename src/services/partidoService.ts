@@ -170,7 +170,8 @@ export const partidoService = {
   actualizarPartido: async (
     temporadaId: string,
     competicionId: string,
-    partido: Partido
+    partidoId: string,
+    partido: Partial<Partido>
   ): Promise<ResultService<null>> => {
     try {
       const path = [
@@ -179,7 +180,7 @@ export const partidoService = {
         'competiciones',
         competicionId,
         COLLECTION,
-        partido.id,
+        partidoId,
       ];
       const res = await FirestoreService.updateDocumentByPath(path, partido);
       if (!res.success) throw new Error(res.errorMessage);

@@ -8,6 +8,7 @@ import { Partido } from '../../types/Partido';
 import { jornadaService } from '../../services/jornadaService';
 import { copaService } from '../../services/competicionService/copaService';
 import { competitionBaseService } from '../../services/competicionService/baseService';
+import { playoffService } from '../../services/competicionService/playoffService';
 
 export async function FormatearYGuardarPartido(
   temporadaId: string,
@@ -106,6 +107,15 @@ export async function FormatearYGuardarPartido(
       );
       if (!resultado.success) {
         throw new Error('Error al actualizar cuadro de Copa');
+      }
+    } else if (partidoFinalizado.tipoCompeticion === 'playoffs') {
+      setGuardandoTexto('Actualizando Serie...');
+      const resultado = await playoffService.onPartidoFinalizado(
+        temporadaId,
+        partidoFinalizado
+      );
+      if (!resultado.success) {
+        throw new Error('Error al actualizar Serie');
       }
     }
 

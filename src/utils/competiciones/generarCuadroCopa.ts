@@ -151,6 +151,7 @@ export async function generarCuadroCopa(
       await partidoService.actualizarPartido(
         temporadaId,
         competicionId,
+        partidoSemi.id,
         partidoSemi
       );
     }

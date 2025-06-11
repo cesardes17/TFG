@@ -26,10 +26,12 @@ export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
     return;
   }
 
+  const esEnVivo = partido.estado === 'en-juego';
+  console.log('es en vivo: ', esEnVivo);
   // 👉 Usamos el hook con callback
   const partidoEnVivo = usePartidoEnVivo(
     partido.id,
-    partido.estado === 'en-juego',
+    esEnVivo,
     reftechPartidos // 🔥 callback para recargar
   );
 
@@ -143,9 +145,7 @@ export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
 
       <View style={styles.partidoContent}>
         <View style={styles.equipoContainer}>
-          {partidoAMostrar.equipoLocal.nombre.toLowerCase() === 'descansa' ||
-          partidoAMostrar.equipoLocal.nombre.toLowerCase() === 'bye' ||
-          partidoAMostrar.equipoLocal.nombre.toLowerCase() === '' ? (
+          {partidoAMostrar.equipoLocal.escudoUrl === '' ? (
             <View
               style={[
                 styles.escudoDescansa,
@@ -202,10 +202,7 @@ export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
           >
             {partidoAMostrar.equipoVisitante.nombre}
           </StyledText>
-          {partidoAMostrar.equipoVisitante.nombre.toLowerCase() ===
-            'descansa' ||
-          partidoAMostrar.equipoVisitante.nombre.toLowerCase() === 'bye' ||
-          partidoAMostrar.equipoVisitante.nombre.toLowerCase() === '' ? (
+          {partidoAMostrar.equipoVisitante.escudoUrl === '' ? (
             <View
               style={[
                 styles.escudoDescansa,

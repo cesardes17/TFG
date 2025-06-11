@@ -107,6 +107,7 @@ export const copaService = {
       const resUpdate = await partidoService.actualizarPartido(
         temporadaId,
         'copa',
+        partidoSiguiente.id,
         partidoSiguiente
       );
       if (!resUpdate.success) {

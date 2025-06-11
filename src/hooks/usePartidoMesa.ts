@@ -44,7 +44,7 @@ export default function usePartidoMesa(
 
   const startTimeRef = useRef<number | null>(null);
   const elapsedTimeRef = useRef<number>(0);
-  const tiempoInicialRef = useRef<number>(12 * 60); // 🟢 tiempo inicial de cada cuarto
+  const tiempoInicialRef = useRef<number>(1 * 60); // 🟢 tiempo inicial de cada cuarto
   const animFrameRef = useRef<number | null>(null);
 
   const [tiempoMuertoPendiente, setTiempoMuertoPendiente] = useState<{

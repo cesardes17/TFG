@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Serie } from '../../types/Serie';
-import StyledText from '../common/StyledText';
-import ProgressiveImage from '../common/ProgressiveImage';
 import { useTheme } from '../../contexts/ThemeContext';
+import StyledText from '../common/StyledText';
 import { capitalizeFirst } from '../../utils/capitalizeString';
+import ProgressiveImage from '../common/ProgressiveImage';
 
 interface TarjetaSerieProps {
   serie: Serie;
@@ -15,6 +15,7 @@ interface TarjetaSerieProps {
 export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
   const router = useRouter();
   const { theme } = useTheme();
+
   const handlePress = () => {
     router.push(`/serie/${serie.id}`);
   };
@@ -50,14 +51,14 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
 
   return (
     <TouchableOpacity
-      style={[
-        styles.tarjetaContainer,
-        {
-          backgroundColor: theme.cardDefault,
-        },
-      ]}
+      style={[styles.tarjetaContainer, { backgroundColor: theme.cardDefault }]}
       onPress={handlePress}
     >
+      {/* Badge EN VIVO (posición absoluta) */}
+      {/* <View style={styles.badgeEnVivo}>
+        <StyledText style={styles.badgeText}>EN VIVO</StyledText>
+      </View> */}
+
       <View style={styles.contenidoContainer}>
         {/* Equipo Local */}
         <View style={styles.equipoContainer}>
@@ -66,13 +67,14 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
               style={[
                 styles.escudo,
                 {
-                  backgroundColor: theme.border.secondary,
-                  alignItems: 'center',
+                  backgroundColor: '#FFFFFF4A',
+                  borderRadius: 100,
                   justifyContent: 'center',
+                  alignItems: 'center',
                 },
               ]}
             >
-              <StyledText style={styles.nombreEquipo}>D</StyledText>
+              <StyledText>D</StyledText>
             </View>
           ) : (
             <ProgressiveImage
@@ -100,13 +102,14 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
               style={[
                 styles.escudo,
                 {
-                  backgroundColor: theme.border.secondary,
-                  alignItems: 'center',
+                  backgroundColor: '#FFFFFF4A',
+                  borderRadius: 100,
                   justifyContent: 'center',
+                  alignItems: 'center',
                 },
               ]}
             >
-              <StyledText style={styles.nombreEquipo}>D</StyledText>
+              <StyledText>D</StyledText>
             </View>
           ) : (
             <ProgressiveImage
@@ -121,14 +124,9 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
         </View>
       </View>
 
-      {/* Badges */}
-      <View style={styles.badgesContainer}>
-        <View
-          style={[
-            getEstadoStyle(serie.estado),
-            { padding: 6, borderRadius: 100 },
-          ]}
-        >
+      {/* Badges de estado */}
+      <View style={styles.estadoBadgesContainer}>
+        <View style={[styles.badge, getEstadoStyle(serie.estado)]}>
           <StyledText style={styles.badgeText}>
             {capitalizeFirst(serie.estado)}
           </StyledText>
@@ -141,37 +139,40 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
 const styles = StyleSheet.create({
   tarjetaContainer: {
     borderRadius: 12,
-    padding: 12,
+    padding: 16,
     marginVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    position: 'relative', // Para posicionar el badge absoluto
   },
   contenidoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center', // Centrar todo el contenido
+    width: '100%',
   },
   equipoContainer: {
-    flex: 2,
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 8,
   },
   escudo: {
     width: 40,
     height: 40,
     marginBottom: 4,
-    borderRadius: 100,
   },
   nombreEquipo: {
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
+    maxWidth: '100%', // Asegurar que el texto no se desborde
   },
   marcadorContainer: {
-    flex: 1,
+    paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -179,21 +180,27 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  badgesContainer: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 100,
+  estadoBadgesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 8,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+    marginRight: 8,
   },
   badgeEnVivo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     backgroundColor: '#FF3B30',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderTopLeftRadius: 12,
+    borderBottomRightRadius: 8,
+    zIndex: 10,
   },
   badgeFinalizado: {
     backgroundColor: '#8E8E93',

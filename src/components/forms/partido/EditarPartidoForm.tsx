@@ -76,8 +76,6 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
     setError(null);
     try {
       if (!temporada) return;
-      // await PartidoService.actualizarPartido(partido.id, valores);
-      // router.back();
       const cancha = pabellonesDisponibles.find(
         (pab) => pab.value === valores.cancha
       )?.label;

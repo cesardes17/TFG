@@ -8,6 +8,8 @@ import {
 } from './core/firestoreService';
 import { partidoService } from './partidoService';
 import { Partido } from '../types/Partido';
+import { getRandomUID } from '../utils/getRandomUID';
+import { TipoCompeticion } from '../types/Competicion';
 
 const BASE_PATH = (temporadaId: string, competicionId: string): string[] => [
   'temporadas',
@@ -209,69 +211,159 @@ export const serieService = {
     }
   },
 
-  async finalizarSerieYAvanzar(
+  /**
+   * Finaliza la serie dada, cuenta victorias, borra pendientes,
+   * avanza al ganador y, si la siguiente serie ya tiene ambos equipos definidos,
+   * crea sus 2 partidos iniciales.
+   */
+  finalizarYAvanzarSerie: async (
     temporadaId: string,
-    competicionId: string,
+    competicionId: TipoCompeticion,
     serie: Serie,
-    equipoGanador: { nombre: string; id: string; escudoUrl: string }
-  ): Promise<ResultService<null>> {
+    partidos: Partido[]
+  ): Promise<ResultService<null>> => {
     try {
-      // 1️⃣ Actualizar la serie como finalizada y asignar ganador
+      // 1️⃣ Contar victorias
+      let winsLocal = 0,
+        winsVisit = 0;
+      partidos.forEach((p) => {
+        if (p.estado === 'finalizado' && p.resultado) {
+          if (p.resultado.puntosLocal > p.resultado.puntosVisitante)
+            winsLocal++;
+          else if (p.resultado.puntosVisitante > p.resultado.puntosLocal)
+            winsVisit++;
+        }
+      });
+      const partidosJugados = winsLocal + winsVisit;
+      const isFinalizada = winsLocal === 2 || winsVisit === 2;
+
+      // 2️⃣ Actualizar esta serie
       const updateData: Partial<Serie> = {
-        estado: 'finalizada',
-        ganadorId: equipoGanador.id,
+        partidosGanadosLocal: winsLocal,
+        partidosGanadosVisitante: winsVisit,
+        partidosJugados,
+        estado: isFinalizada ? 'finalizada' : 'en_curso',
       };
-      const resUpd = await this.actualizar(
+      if (isFinalizada) {
+        updateData.ganadorId =
+          winsLocal === 2 ? serie.local.id : serie.visitante.id;
+      }
+
+      await serieService.actualizar(
         temporadaId,
         competicionId,
         serie.id,
         updateData
       );
-      if (!resUpd.success) {
-        throw new Error(resUpd.errorMessage || 'Error actualizando la serie');
+
+      // 3️⃣ Si finalizada → borrar pendientes
+      if (isFinalizada) {
+        await Promise.all(
+          partidos
+            .filter((p) => p.estado !== 'finalizado')
+            .map((p) =>
+              partidoService.eliminarPartido(temporadaId, competicionId, p.id)
+            )
+        );
+
+        // 4️⃣ Avanzar ganador a la serie siguiente
+        if (serie.nextSerieId) {
+          const resNext = await serieService.getSerie(
+            temporadaId,
+            competicionId,
+            serie.nextSerieId
+          );
+          if (resNext.success && resNext.data) {
+            let next = resNext.data;
+            const ganador =
+              updateData.ganadorId === serie.local.id
+                ? serie.local
+                : serie.visitante;
+
+            // Ocupamos el hueco libre (por-definir)
+            const patchNext: Partial<Serie> = {};
+            if (next.local.id === 'por-definir') patchNext.local = ganador;
+            else if (next.visitante.id === 'por-definir')
+              patchNext.visitante = ganador;
+
+            // Aplicar patch
+            await serieService.actualizar(
+              temporadaId,
+              competicionId,
+              next.id,
+              patchNext
+            );
+
+            // Actualizamos el objeto 'next' en memoria con el patch
+            next = { ...next, ...patchNext };
+
+            // 5️⃣ Si la serie siguiente está ahora completa, gestionar sus partidos
+            const localDefined = next.local.id !== 'por-definir';
+            const visitDefined = next.visitante.id !== 'por-definir';
+            if (localDefined && visitDefined) {
+              const resPartNext = await partidoService.getAllBySerie(
+                temporadaId,
+                competicionId,
+                next.id
+              );
+              const existing =
+                resPartNext.success && resPartNext.data ? resPartNext.data : [];
+
+              console.log('existing', existing);
+              if (existing.length === 0) {
+                // Crear 2 partidos iniciales
+                const iniciales: Partido[] = [1, 2].map(() => ({
+                  id: getRandomUID(),
+                  jornadaId: next.jornadaId,
+                  serieId: next.id,
+                  tipoCompeticion: competicionId,
+                  equipoLocal: next.local,
+                  equipoVisitante: next.visitante,
+                  estado: 'pendiente',
+                }));
+                await Promise.all(
+                  iniciales.map((p) =>
+                    partidoService.crear(temporadaId, competicionId, p)
+                  )
+                );
+              } else {
+                // Actualizar equipos en partidos existentes
+                await Promise.all(
+                  existing.map((p) =>
+                    partidoService.actualizarPartido(
+                      temporadaId,
+                      competicionId,
+                      p.id,
+                      {
+                        equipoLocal: next.local,
+                        equipoVisitante: next.visitante,
+                      }
+                    )
+                  )
+                );
+              }
+            }
+          }
+        }
       }
 
-      // 2️⃣ Avanzar a la siguiente serie si corresponde
-      if (serie.nextSerieId) {
-        const resSiguiente = await this.getSerie(
-          temporadaId,
-          competicionId,
-          serie.nextSerieId
-        );
-        if (!resSiguiente.success || !resSiguiente.data) {
-          throw new Error(
-            resSiguiente.errorMessage ||
-              'Error obteniendo la siguiente serie para avanzar'
-          );
-        }
-        const siguienteSerie = resSiguiente.data;
-
-        const updateSiguiente: Partial<Serie> = {};
-        if (!siguienteSerie.local) {
-          updateSiguiente.local = equipoGanador;
-        } else if (!siguienteSerie.visitante) {
-          updateSiguiente.visitante = equipoGanador;
-        }
-
-        const resUpdSiguiente = await this.actualizar(
-          temporadaId,
-          competicionId,
-          siguienteSerie.id,
-          updateSiguiente
-        );
-        if (!resUpdSiguiente.success) {
-          throw new Error(
-            resUpdSiguiente.errorMessage ||
-              'Error actualizando la siguiente serie'
-          );
-        }
-
-        // ⚡ También podrías actualizar los partidos de la siguiente serie
+      // 6️⃣ Si empate 1–1 → crear tercer partido
+      if (!isFinalizada && partidosJugados === 2) {
+        const tercerPartido: Partido = {
+          id: getRandomUID(),
+          jornadaId: serie.jornadaId,
+          serieId: serie.id,
+          tipoCompeticion: competicionId,
+          equipoLocal: serie.local,
+          equipoVisitante: serie.visitante,
+          estado: 'pendiente',
+        };
+        await partidoService.crear(temporadaId, competicionId, tercerPartido);
       }
 
       return { success: true, data: null };
     } catch (e: any) {
-      console.error('finalizarSerieYAvanzar error:', e);
+      console.error('serieService.finalizarYAvanzarSerie error:', e);
       return { success: false, errorMessage: e.message };
     }
   },

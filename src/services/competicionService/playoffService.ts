@@ -71,150 +71,39 @@ export const playoffService = {
     partidoFinalizado: Partido
   ): Promise<ResultService<null>> => {
     try {
-      const {
-        serieId,
-        tipoCompeticion: competicionId,
-        jornadaId,
-      } = partidoFinalizado;
-      if (!serieId) return { success: true, data: null };
+      const { serieId, tipoCompeticion: competicionId } = partidoFinalizado;
+      if (!serieId) {
+        // No es parte de una serie → nada que hacer
+        return { success: true, data: null };
+      }
 
       // 1️⃣ Leer todos los partidos de la serie
-      const resP = await partidoService.getAllBySerie(
+      const resPartidos = await partidoService.getAllBySerie(
         temporadaId,
         competicionId,
         serieId
       );
-      const partidos = resP.success && resP.data ? resP.data : [];
+      const partidos =
+        resPartidos.success && resPartidos.data ? resPartidos.data : [];
 
-      // 2️⃣ Contar victorias
-      let winsLocal = 0,
-        winsVisit = 0;
-      partidos.forEach((p) => {
-        if (p.estado === 'finalizado' && p.resultado) {
-          if (p.resultado.puntosLocal > p.resultado.puntosVisitante)
-            winsLocal++;
-          else if (p.resultado.puntosVisitante > p.resultado.puntosLocal)
-            winsVisit++;
-        }
-      });
-      const partidosJugados = winsLocal + winsVisit;
-
-      // 3️⃣ Leer la serie original
-      const resS = await serieService.getAllByJornada(
+      // 2️⃣ Leer la propia serie
+      const resSerie = await serieService.getSerie(
         temporadaId,
         competicionId,
-        partidoFinalizado.jornadaId
+        serieId
       );
-      const serie = resS.success
-        ? resS.data!.find((s) => s.id === serieId)!
-        : null;
-      if (!serie) throw new Error('Serie no encontrada');
-
-      // 4️⃣ Preparar payload
-      const updateData: Partial<import('../../types/Serie').Serie> = {
-        partidosGanadosLocal: winsLocal,
-        partidosGanadosVisitante: winsVisit,
-        partidosJugados,
-      };
-
-      let createThird = false;
-      if (winsLocal === 2 || winsVisit === 2) {
-        updateData.estado = 'finalizada';
-        updateData.ganadorId =
-          winsLocal === 2 ? serie.local.id : serie.visitante.id;
-      } else if (partidosJugados === 2) {
-        updateData.estado = 'en_curso';
-        createThird = true;
-      } else {
-        updateData.estado = 'en_curso';
+      if (!resSerie.success || !resSerie.data) {
+        throw new Error(resSerie.errorMessage || 'Serie no encontrada');
       }
+      const serie = resSerie.data;
 
-      // 5️⃣ Actualizar la serie
-      const resUpd = await serieService.actualizar(
+      // 3️⃣ Delegar en serieService toda la lógica de finalización y avance
+      return await serieService.finalizarYAvanzarSerie(
         temporadaId,
         competicionId,
-        serieId,
-        updateData
+        serie,
+        partidos
       );
-      if (!resUpd.success) throw new Error(resUpd.errorMessage);
-
-      // 6️⃣ Si finalizada, eliminar pendientes y avanzar ganador
-      if (updateData.estado === 'finalizada') {
-        // Dentro de la rama if (updateData.estado === 'finalizada') …
-
-        // 1) Borramos los partidos pendientes
-        await Promise.all(
-          partidos
-            .filter((p) => p.estado !== 'finalizado')
-            .map((p) =>
-              partidoService.eliminarPartido(temporadaId, competicionId, p.id)
-            )
-        );
-
-        // 2) Avanzar al ganador al primer hueco “por-definir”
-        if (serie.nextSerieId) {
-          console.log(
-            '[PLAYOFF] Avanzando ganador a serie:',
-            serie.nextSerieId
-          );
-          const resNext = await serieService.getSerie(
-            temporadaId,
-            competicionId,
-            serie.nextSerieId
-          );
-          console.log('[PLAYOFF] getSerie:', resNext);
-          if (resNext.success && resNext.data) {
-            const next = resNext.data;
-            // Determinar objeto ganador
-            const ganador =
-              updateData.ganadorId === serie.local.id
-                ? serie.local
-                : serie.visitante;
-            // Ocupar el hueco libre
-            if (next.local.id === 'por-definir') {
-              await serieService.actualizar(
-                temporadaId,
-                competicionId,
-                next.id,
-                { local: ganador }
-              );
-              console.log(
-                '[PLAYOFF] Ganador colocado en local de la siguiente serie'
-              );
-            } else if (next.visitante.id === 'por-definir') {
-              await serieService.actualizar(
-                temporadaId,
-                competicionId,
-                next.id,
-                { visitante: ganador }
-              );
-              console.log(
-                '[PLAYOFF] Ganador colocado en visitante de la siguiente serie'
-              );
-            } else {
-              console.warn(
-                '[PLAYOFF] No había hueco “por-definir” en la siguiente serie'
-              );
-            }
-          }
-        }
-      }
-
-      // 7️⃣ Si toca desempate, crear tercer partido
-      if (createThird) {
-        const partidoDecisivo: Partido = {
-          id: getRandomUID(),
-          jornadaId,
-          serieId,
-          tipoCompeticion: competicionId,
-          equipoLocal: serie.local,
-          equipoVisitante: serie.visitante,
-          estado: 'pendiente',
-        };
-        await partidoService.crear(temporadaId, competicionId, partidoDecisivo);
-      }
-
-      return { success: true, data: null };
     } catch (err: any) {
       console.error('playoffService.onPartidoFinalizado error:', err);
       return { success: false, errorMessage: err.message };

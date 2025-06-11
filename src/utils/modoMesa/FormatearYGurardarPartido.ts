@@ -19,7 +19,6 @@ export async function FormatearYGuardarPartido(
   try {
     setIsGuardando(true);
     setGuardandoTexto('Guardando partido...');
-    console.log(JSON.stringify(partido, null, 2));
 
     // Paso 1: Formatear el partido
     const partidoFinalizado: Partido = {

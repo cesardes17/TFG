@@ -242,7 +242,7 @@ export default function usePartidoMesa(
         // Para otros cuartos, actualizamos el estado local
         const partidoActualizado = inicializarCuarto(partido!, cuartoActual);
         setPartido(partidoActualizado);
-        console.log(JSON.stringify(partidoActualizado, null, 2));
+
         setTiempoActualCuarto(obtenerDuracionCuarto(cuartoActual));
       }
     };

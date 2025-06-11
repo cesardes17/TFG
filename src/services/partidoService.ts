@@ -1,3 +1,4 @@
+// src/services/partidoService.ts
 import { EstadoPartido, Partido, PartidoRT } from '../types/Partido';
 import { ResultService } from '../types/ResultService';
 import { FirestoreService, WhereClause } from './core/firestoreService';
@@ -26,18 +27,12 @@ export const partidoService = {
       if (!partidoRes.success) {
         throw new Error(partidoRes.errorMessage);
       }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Error al crear partido',
-      };
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
+
   getAllByJornada: async (
     temporadaId: string,
     competicionId: string,
@@ -51,9 +46,7 @@ export const partidoService = {
         competicionId,
         COLLECTION,
       ];
-
       const filter: WhereClause[] = [['jornadaId', '==', jornadaId]];
-
       const partidosRes = await FirestoreService.getCollectionByPath<Partido>(
         path,
         filter
@@ -61,16 +54,39 @@ export const partidoService = {
       if (!partidosRes.success) {
         throw new Error(partidosRes.errorMessage);
       }
-      return {
-        success: true,
-        data: partidosRes.data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Error al obtener partidos',
-      };
+      return { success: true, data: partidosRes.data! };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
+    }
+  },
+
+  /**
+   * Obtiene todos los partidos asociados a una serie (serieId).
+   */
+  getAllBySerie: async (
+    temporadaId: string,
+    competicionId: string,
+    serieId: string
+  ): Promise<ResultService<Partido[]>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        COLLECTION,
+      ];
+      const filter: WhereClause[] = [['serieId', '==', serieId]];
+      const partidosRes = await FirestoreService.getCollectionByPath<Partido>(
+        path,
+        filter
+      );
+      if (!partidosRes.success) {
+        throw new Error(partidosRes.errorMessage);
+      }
+      return { success: true, data: partidosRes.data! };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -94,16 +110,9 @@ export const partidoService = {
       if (!partidoRes.success || !partidoRes.data) {
         throw new Error(partidoRes.errorMessage);
       }
-      return {
-        success: true,
-        data: partidoRes.data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Error al obtener partido',
-      };
+      return { success: true, data: partidoRes.data };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -123,27 +132,17 @@ export const partidoService = {
         COLLECTION,
         partidoId,
       ];
-      const partidoRes = await FirestoreService.updateDocumentByPath(path, {
+      const res = await FirestoreService.updateDocumentByPath(path, {
         fecha,
         cancha,
       });
-      if (!partidoRes.success) {
-        throw new Error(partidoRes.errorMessage);
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al actualizar partido',
-      };
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
+
   iniciarPartido: async (
     temporadaId: string,
     competicionId: string,
@@ -158,25 +157,13 @@ export const partidoService = {
         COLLECTION,
         partidoId,
       ];
-      const estado: EstadoPartido = 'en-juego';
-      const partidoRes = await FirestoreService.updateDocumentByPath(path, {
-        estado,
+      const res = await FirestoreService.updateDocumentByPath(path, {
+        estado: 'en-juego' as EstadoPartido,
       });
-      if (!partidoRes.success) {
-        throw new Error(partidoRes.errorMessage);
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al actualizar partido',
-      };
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -194,28 +181,11 @@ export const partidoService = {
         COLLECTION,
         partido.id,
       ];
-      const payload: Partido = {
-        ...partido,
-      };
-      const partidoRes = await FirestoreService.updateDocumentByPath(
-        path,
-        payload
-      );
-      if (!partidoRes.success) {
-        throw new Error(partidoRes.errorMessage);
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al actualizar partido',
-      };
+      const res = await FirestoreService.updateDocumentByPath(path, partido);
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -233,30 +203,36 @@ export const partidoService = {
         COLLECTION,
         partido.id,
       ];
-
-      const payload: Partido = {
+      const res = await FirestoreService.updateDocumentByPath(path, {
         ...partido,
-        estado: 'finalizado',
-      };
-      const partidoRes = await FirestoreService.updateDocumentByPath(
-        path,
-        payload
-      );
-      if (!partidoRes.success) {
-        throw new Error(partidoRes.errorMessage);
-      }
-      return {
-        success: true,
-        data: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        errorMessage:
-          error instanceof Error
-            ? error.message
-            : 'Error al actualizar partido',
-      };
+        estado: 'finalizado' as EstadoPartido,
+      });
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
+    }
+  },
+
+  eliminarPartido: async (
+    temporadaId: string,
+    competicionId: string,
+    partidoId: string
+  ): Promise<ResultService<null>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        COLLECTION,
+        partidoId,
+      ];
+      const res = await FirestoreService.deleteDocumentByPath(...path);
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: null };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -264,36 +240,21 @@ export const partidoService = {
   // Métodos Realtime Database
   // ---------------------------------------------
 
-  /**
-   * Crea (o reemplaza) un partido en RTDB:
-   * /temporadas/{t}/competiciones/{c}/partidos/{p} = PartidoRT
-   */
   crearRealtime: async (partido: PartidoRT): Promise<ResultService<null>> => {
     try {
       const base = [COLLECTION, partido.id];
-      const payload: PartidoRT = { ...partido };
-      return await RealtimeService.setValue(base, payload);
-    } catch (e: any) {
-      return {
-        success: false,
-        errorMessage: e.message || 'RT: error al crear partido',
-      };
+      return await RealtimeService.setValue(base, partido);
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Actualiza campos parciales de un partido en RTDB:
-   * sólo envía las propiedades que han cambiado.
-   */
   updateRealtime: async (partido: PartidoRT): Promise<ResultService<null>> => {
     try {
       const base = [COLLECTION, partido.id];
       return await RealtimeService.updateValue(base, partido);
-    } catch (e: any) {
-      return {
-        success: false,
-        errorMessage: e.message || 'RT: error al actualizar partido',
-      };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
@@ -304,52 +265,30 @@ export const partidoService = {
     try {
       const base = [COLLECTION, partidoId];
       return await RealtimeService.updateValue(base, partido);
-    } catch (e: any) {
-      return {
-        success: false,
-        errorMessage: e.message || 'RT: error al actualizar partido',
-      };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Elimina un nodo partido completo:
-   * /temporadas/{t}/competiciones/{c}/partidos/{p}
-   */
   deleteRealtime: async (partidoId: string): Promise<ResultService<null>> => {
     try {
       return await RealtimeService.removeValue([COLLECTION, partidoId]);
-    } catch (e: any) {
-      return {
-        success: false,
-        errorMessage: e.message || 'RT: error al eliminar partido',
-      };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Obtiene “una sola vez” un partido desde RTDB:
-   * si existe, devuelve PartidoRT; si no, devuelve null.
-   */
   getPartidoRealtimeOnce: async (
     partidoId: string
   ): Promise<ResultService<PartidoRT | null>> => {
     try {
       const base = [COLLECTION, partidoId];
       return await RealtimeService.getValue<PartidoRT>(base);
-    } catch (e: any) {
-      return {
-        success: false,
-        errorMessage: e.message || 'RT: error al leer partido',
-      };
+    } catch (error: any) {
+      return { success: false, errorMessage: error.message };
     }
   },
 
-  /**
-   * Se suscribe a cambios de UN partido en RTDB.
-   * callback recibe null (si se borró) o PartidoRT.
-   * La promesa resuelve la función “off” para cancelar la suscripción.
-   */
   onPartidoRealtime: async (
     partidoId: string,
     callback: (data: PartidoRT | null) => void
@@ -358,10 +297,6 @@ export const partidoService = {
     return await RealtimeService.onValue<PartidoRT>(base, callback);
   },
 
-  /**
-   * Se suscribe en tiempo real a TODOS los partidos de una competición (o de toda la ruta).
-   * callback recibe un objeto con todos los nodos { [pId]: PartidoRT, … } o null si no hay ninguno.
-   */
   onAllPartidosRealtime: async (
     callback: (lista: Record<string, PartidoRT> | null) => void
   ): Promise<() => void> => {

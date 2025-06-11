@@ -8,6 +8,7 @@ import MostrarPartidos from './MostrarPartidos';
 import { Competicion } from '../../types/Competicion';
 import { Jornada } from '../../types/Jornada';
 import { useJornadas } from '../../hooks/useJornadas';
+import MostrarSeries from './MostrarSerie';
 
 interface BodyJornadasProps {
   competicion: Competicion;
@@ -89,7 +90,13 @@ export default function BodyJornadas({ competicion }: BodyJornadasProps) {
         jornadaSeleccionada={selectedJornada.id}
         onSeleccionarJornada={handleSelect}
       />
-      <MostrarPartidos jornada={selectedJornada} competicion={competicion} />
+      {competicion.tipo === 'playoffs' ? (
+        // Para Playoffs, mostramos las series
+        <MostrarSeries jornada={selectedJornada} competicion={competicion} />
+      ) : (
+        // Para liga o copa, mostramos los partidos
+        <MostrarPartidos jornada={selectedJornada} competicion={competicion} />
+      )}
     </View>
   );
 }

@@ -1,15 +1,15 @@
+// src/components/administracion/AdministracionCompeticiones.tsx
+import React, { useState } from 'react';
 import { View } from 'react-native';
-import { useCompeticiones } from '../../hooks/useCompeticiones';
 import StyledButton from '../common/StyledButton';
-import { useState } from 'react';
-import { Competicion } from '../../types/Competicion';
-import { getRandomUID } from '../../utils/getRandomUID';
+import StyledAlert from '../common/StyledAlert';
 import BaseConfirmationModal from '../common/BaseConfirmationModal';
+import { useCompeticiones } from '../../hooks/useCompeticiones';
 import { useEquiposConEstado } from '../../hooks/useEquiposConEstado';
 import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { ligaService } from '../../services/competicionService/ligaService';
-import StyledAlert from '../common/StyledAlert';
 import { copaService } from '../../services/competicionService/copaService';
+import { playoffService } from '../../services/competicionService/playoffService';
 
 interface Props {
   setLoading: (loading: boolean) => void;
@@ -22,7 +22,6 @@ export default function AdministracionCompeticiones({
 }: Props) {
   const { competicionesEstado, loadingCompeticiones } = useCompeticiones();
   const { temporada } = useTemporadaContext();
-
   const {
     equipos,
     equiposIncompletos,
@@ -42,28 +41,20 @@ export default function AdministracionCompeticiones({
     onConfirm: () => {},
   });
 
-  if (!temporada) {
-    return null;
-  }
+  if (!temporada) return null;
 
-  const ligaRegular = competicionesEstado.liga;
-  const copa = competicionesEstado.copa;
-  const playoffs = competicionesEstado.playoffs;
+  const { liga: ligaRegular, copa, playoffs } = competicionesEstado;
 
-  // 🎯 Método para crear liga
+  // Crear Liga
   const handleCrearLiga = async () => {
-    setModalConfig({ ...modalConfig, visible: false });
+    setModalConfig((prev) => ({ ...prev, visible: false }));
     setLoading(true);
     setLoadingText('Creando Liga...');
 
     const idsEquiposIncompletos = equiposIncompletos.map((e) => e.id);
     const equiposCompletos = equipos
       .filter((e) => e.cumple)
-      .map((e) => ({
-        id: e.id,
-        nombre: e.nombre,
-        escudoUrl: e.escudoUrl,
-      }));
+      .map((e) => ({ id: e.id, nombre: e.nombre, escudoUrl: e.escudoUrl }));
 
     await ligaService.crear(
       temporada.id,
@@ -76,112 +67,105 @@ export default function AdministracionCompeticiones({
     setLoadingText('');
   };
 
+  // Crear Copa
   const handleCrearCopa = async () => {
-    setModalConfig({ ...modalConfig, visible: false });
+    setModalConfig((prev) => ({ ...prev, visible: false }));
     setLoading(true);
     setLoadingText('Creando Copa...');
 
-    const resCopa = await copaService.crear(temporada.id, setLoadingText);
-
-    if (!resCopa.success) {
-      console.error('Error al crear la Copa:', resCopa.errorMessage);
-    } else {
-      console.log('Copa creada correctamente');
-    }
+    const res = await copaService.crear(temporada.id, setLoadingText);
+    if (!res.success) console.error('Error al crear Copa:', res.errorMessage);
 
     setLoading(false);
     setLoadingText('');
   };
 
+  // Crear Playoffs
   const handleCrearPlayOffs = async () => {
-    console.log('Crear Playoffs...');
-    setModalConfig({ ...modalConfig, visible: false });
+    setModalConfig((prev) => ({ ...prev, visible: false }));
+    setLoading(true);
+    setLoadingText('Creando Playoffs...');
+
+    const res = await playoffService.crear(temporada.id, setLoadingText);
+    if (!res.success)
+      console.error('Error al crear Playoffs:', res.errorMessage);
+
+    setLoading(false);
+    setLoadingText('');
   };
 
-  // 🟢 Modal para Liga
-  const abrirModalLiga = () => {
-    let descripcion = '';
-    if (equiposIncompletos.length > 0) {
-      const nombres = equiposIncompletos.map((e) => e.nombre);
-      const listado =
-        nombres.length === 1
-          ? nombres[0]
-          : nombres.length === 2
-          ? `${nombres[0]} y ${nombres[1]}`
-          : `${nombres.slice(0, -1).join(', ')} y ${
-              nombres[nombres.length - 1]
-            }`;
-      descripcion = `Los equipos ${listado} están incompletos. Si continúas, serán disueltos y sus jugadores pasarán a la agencia libre. ¿Deseas continuar?`;
-    } else {
-      descripcion = '¿Estás seguro de que deseas crear una liga?';
-    }
-
-    setModalConfig({
-      visible: true,
-      title: 'Crear Liga',
-      description: descripcion,
-      onConfirm: handleCrearLiga,
-    });
-  };
-
-  // 🟡 Modal para Copa
-  const abrirModalCopa = () => {
-    setModalConfig({
-      visible: true,
-      title: 'Crear Copa',
-      description:
-        '¿Estás seguro de que deseas crear la Copa? Se generará el cuadro automáticamente con los 8 primeros clasificados.',
-      onConfirm: handleCrearCopa,
-    });
-  };
-
-  // 🔴 Modal para PlayOffs
-  const abrirModalPlayOffs = () => {
-    setModalConfig({
-      visible: true,
-      title: 'Crear Playoffs',
-      description:
-        '¿Estás seguro de que deseas crear los Playoffs? Solo es posible una vez la Liga esté finalizada.',
-      onConfirm: handleCrearPlayOffs,
-    });
+  const abrirModal = (
+    title: string,
+    description: string,
+    onConfirm: () => void
+  ) => {
+    setModalConfig({ visible: true, title, description, onConfirm });
   };
 
   return (
     <View style={{ marginTop: 12 }}>
       {!ligaRegular.created && (
-        <StyledButton
-          title='Crear Liga'
-          disabled={loadingEquipos || loadingCompeticiones}
-          onPress={abrirModalLiga}
-        />
+        <View style={{ paddingVertical: 12 }}>
+          <StyledButton
+            title='Crear Liga'
+            disabled={loadingEquipos || loadingCompeticiones}
+            onPress={() =>
+              abrirModal(
+                'Crear Liga',
+                equiposIncompletos.length > 0
+                  ? `Los equipos ${equiposIncompletos
+                      .map((e) => e.nombre)
+                      .join(
+                        ', '
+                      )} están incompletos. Se disolverán. ¿Continuar?`
+                  : '¿Estás seguro de crear una nueva liga?',
+                handleCrearLiga
+              )
+            }
+          />
+        </View>
       )}
 
-      {ligaRegular.created && (
-        <StyledButton
-          title='Crear Copa'
-          onPress={abrirModalCopa}
-          disabled={copa.created || loadingCompeticiones}
-        />
+      {ligaRegular.created && !copa.created && (
+        <View style={{ paddingVertical: 12 }}>
+          <StyledButton
+            title='Crear Copa'
+            disabled={loadingCompeticiones}
+            onPress={() =>
+              abrirModal(
+                'Crear Copa',
+                '¿Deseas generar el cuadro de Copa con los 8 mejores?',
+                handleCrearCopa
+              )
+            }
+          />
+        </View>
       )}
 
-      {ligaRegular.finalized && (
-        <StyledButton
-          title='Crear PlayOffs'
-          onPress={abrirModalPlayOffs}
-          disabled={playoffs.created || loadingCompeticiones}
-        />
+      {ligaRegular.finalized && !playoffs.created && (
+        <View style={{ paddingVertical: 12 }}>
+          <StyledButton
+            title='Crear Playoffs'
+            disabled={loadingCompeticiones}
+            onPress={() =>
+              abrirModal(
+                'Crear Playoffs',
+                '¿Estás seguro de que deseas crear los Playoffs?',
+                handleCrearPlayOffs
+              )
+            }
+          />
+        </View>
       )}
 
-      {/* ⚠️ Mensaje de error si hay problemas */}
       {error && <StyledAlert variant='error' message={error} />}
 
-      {/* 🪧 Modal Único para todo */}
       <BaseConfirmationModal
         visible={modalConfig.visible}
         title={modalConfig.title}
         description={modalConfig.description}
         onConfirm={modalConfig.onConfirm}
-        onCancel={() => setModalConfig({ ...modalConfig, visible: false })}
+        onCancel={() => setModalConfig((prev) => ({ ...prev, visible: false }))}
         type='create'
         confirmLabel='Crear'
         cancelLabel='Cancelar'

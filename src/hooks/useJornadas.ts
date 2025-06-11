@@ -18,6 +18,7 @@ export function useJornadas(competicion: Competicion | null) {
       const res = await jornadaService.getAll(temporada.id, competicion.id);
       if (res.success && res.data) {
         setJornadas(res.data.sort((a, b) => a.numero - b.numero));
+        console.log('jornadas: ', res.data);
       } else {
         setJornadas([]);
         setError(res.errorMessage || 'Error al obtener jornadas');

@@ -6,6 +6,7 @@ export type EstadoPartido = 'pendiente' | 'en-juego' | 'finalizado';
 
 export type Partido = {
   jornadaId: string;
+  serieId?: string;
   id: string;
   tipoCompeticion: TipoCompeticion;
   equipoLocal: {

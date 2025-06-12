@@ -155,10 +155,15 @@ export default function AdministracionCompeticiones({
         </View>
       )}
 
-      {(ligaRegular.created || copa.created || playoffs.created) && (
-        <View style={{ flexDirection: 'row', gap: 12, paddingTop: 24 }}>
-          {ligaRegular.created && (
+      <View style={{ flexDirection: 'row', gap: 12, paddingTop: 24 }}>
+        {ligaRegular.created && (
+          <View style={{ flex: 1 }}>
             <StyledButton
+              variant={
+                ligaRegular.data?.estado === 'en-curso'
+                  ? 'error-outline'
+                  : 'outline'
+              }
               title={
                 ligaRegular.data?.estado === 'en-curso'
                   ? 'Pausar Liga'
@@ -180,10 +185,15 @@ export default function AdministracionCompeticiones({
                 setLoadingText('');
               }}
             />
-          )}
+          </View>
+        )}
 
-          {copa.created && (
+        {copa.created && (
+          <View style={{ flex: 1 }}>
             <StyledButton
+              variant={
+                copa.data?.estado === 'en-curso' ? 'error-outline' : 'outline'
+              }
               title={
                 copa.data?.estado === 'en-curso'
                   ? 'Pausar Copa'
@@ -205,10 +215,17 @@ export default function AdministracionCompeticiones({
                 setLoadingText('');
               }}
             />
-          )}
+          </View>
+        )}
 
-          {playoffs.created && (
+        {playoffs.created && (
+          <View style={{ flex: 1 }}>
             <StyledButton
+              variant={
+                playoffs.data?.estado === 'en-curso'
+                  ? 'error-outline'
+                  : 'outline'
+              }
               title={
                 playoffs.data?.estado === 'en-curso'
                   ? 'Pausar Playoffs'
@@ -230,9 +247,9 @@ export default function AdministracionCompeticiones({
                 setLoadingText('');
               }}
             />
-          )}
-        </View>
-      )}
+          </View>
+        )}
+      </View>
 
       {error && <StyledAlert variant='error' message={error} />}
 

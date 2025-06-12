@@ -308,6 +308,9 @@ export const competitionBaseService = {
         (competicion) => competicion.estado === 'en-curso'
       );
 
+      if (!competicionEnCurso && res.data.length > 0) {
+        throw new Error('No hay competiciones en curso');
+      }
       return {
         success: true,
         data: competicionEnCurso || null,

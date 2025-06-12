@@ -20,7 +20,18 @@ export default function MostrarJornadaActual() {
   }
 
   if (errorPartidos) {
-    return <StyledAlert variant='error' message={errorPartidos} />;
+    const errorVariant = errorPartidos.toLowerCase().includes('error')
+      ? 'error'
+      : 'info';
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+        }}
+      >
+        <StyledAlert variant={errorVariant} message={errorPartidos} />
+      </View>
+    );
   }
 
   return (

@@ -91,7 +91,18 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
         {/* Marcador */}
         <View style={styles.marcadorContainer}>
           <StyledText style={styles.marcador}>
-            {serie.partidosGanadosLocal} - {serie.partidosGanadosVisitante}
+            {serie.visitante.id === 'por-definir' &&
+              serie.local.id === 'por-definir' &&
+              '-'}
+            {serie.visitante.id === 'por-definir' &&
+              serie.local.id !== 'por-definir' &&
+              '2 - 0'}
+            {serie.visitante.id !== 'por-definir' &&
+              serie.local.id === 'por-definir' &&
+              '0 - 2'}
+            {serie.visitante.id !== 'por-definir' &&
+              serie.local.id !== 'por-definir' &&
+              `${serie.partidosGanadosLocal} - ${serie.partidosGanadosVisitante}`}
           </StyledText>
         </View>
 

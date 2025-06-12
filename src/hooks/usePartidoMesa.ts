@@ -242,7 +242,10 @@ export default function usePartidoMesa(
         // Para otros cuartos, actualizamos el estado local
         const partidoActualizado = inicializarCuarto(partido!, cuartoActual);
         setPartido(partidoActualizado);
-
+        // console.log(
+        //   'Cuarto actualizado:',
+        //   JSON.stringify(partidoActualizado.estadisticasJugadores, null, 2)
+        // );
         setTiempoActualCuarto(obtenerDuracionCuarto(cuartoActual));
       }
     };
@@ -283,8 +286,8 @@ export default function usePartidoMesa(
   }, [tiempoActualCuarto]);
 
   const obtenerDuracionCuarto = (cuarto: string): number => {
-    if (cuarto === 'DESCANSO') return 0.5 * 60;
-    if (cuarto.startsWith('PR')) return 0.5 * 60;
+    if (cuarto === 'DESCANSO') return 0.25 * 60;
+    if (cuarto.startsWith('PR')) return 0.25 * 60;
     return 1 * 60;
   };
 

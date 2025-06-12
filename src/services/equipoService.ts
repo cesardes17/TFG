@@ -99,6 +99,11 @@ export const equipoService = {
       };
     }
   },
+
+  /**
+   * Acumula y guarda las estadísticas de equipo para la temporada,
+   * en la subpropiedad correspondiente según la competición.
+   */
   actualizarEstadisticasEquipo: async (
     temporadaId: string,
     equipoId: string,
@@ -106,17 +111,17 @@ export const equipoService = {
     estadisticasNuevas: EstadisticasEquipo
   ): Promise<ResultService<null>> => {
     try {
+      // Ruta al documento del equipo
       const path = ['temporadas', temporadaId, COLLECION, equipoId];
-      const res = await FirestoreService.getDocumentByPath(...path);
 
-      let equipo: Equipo;
-      if (res.success && res.data) {
-        equipo = res.data as Equipo;
-      } else {
-        throw new Error('No se encontró el equipo');
+      // 1️⃣ Leer el equipo
+      const resGet = await FirestoreService.getDocumentByPath<Equipo>(...path);
+      if (!resGet.success || !resGet.data) {
+        throw new Error(resGet.errorMessage || 'Equipo no encontrado');
       }
+      const equipo = resGet.data;
 
-      // Determinar la propiedad correcta según el tipo de competición
+      // 2️⃣ Decidir qué campo toca: ligaRegular, copa o playoff
       const key =
         tipoCompeticion === 'liga-regular'
           ? 'estadisticasLigaRegular'
@@ -124,25 +129,24 @@ export const equipoService = {
           ? 'estadisticasCopa'
           : 'estadisticasPlayoff';
 
-      // Inicializar si no existe
-      if (!equipo[key]) {
-        equipo[key] = crearEstadisticasBase();
-      }
+      // 3️⃣ Inicializar base si hace falta
+      const prevStats = equipo[key] ?? crearEstadisticasBase();
 
-      // Sumar estadísticas
-      equipo[key] = sumarEstadisticas(equipo[key]!, estadisticasNuevas);
+      // 4️⃣ Sumar acumulado
+      const updatedStats = sumarEstadisticas(prevStats, estadisticasNuevas);
 
-      // Actualizar en Firestore
-      const updateRes = await FirestoreService.setDocumentByPath(
-        ...path,
-        equipo
+      // 5️⃣ Escribir solo ese campo
+      const updatePayload = { [key]: updatedStats };
+      const resUpd = await FirestoreService.updateDocumentByPath(
+        path,
+        updatePayload
       );
-      if (!updateRes.success) {
-        throw new Error(updateRes.errorMessage);
+      if (!resUpd.success) {
+        throw new Error(resUpd.errorMessage);
       }
 
       return { success: true, data: null };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:

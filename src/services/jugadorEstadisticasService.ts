@@ -1,8 +1,6 @@
-// src/services/jugadorEstadisticasService.ts
 import { TipoCompeticion } from '../types/Competicion';
 import {
   DocumentoEstadisticasJugador,
-  EstadisticasJugador,
   EstadisticasSimpleJugador,
 } from '../types/estadisticas/jugador';
 import { ResultService } from '../types/ResultService';
@@ -11,33 +9,35 @@ import { FirestoreService } from './core/firestoreService';
 const COLLECTION_NAME = 'estadisticas';
 
 export const jugadorEstadisticasService = {
-  /** Obtiene las estadísticas del jugador para una temporada */
-  getEstadisticasJugador: async (
+  getEstadisticasJugadorPorTemporada: async (
     jugadorId: string,
     temporadaId: string
   ): Promise<ResultService<DocumentoEstadisticasJugador | null>> => {
     try {
       const path = ['users', jugadorId, COLLECTION_NAME, temporadaId];
-      const res = await FirestoreService.getDocumentByPath(...path);
+      const res =
+        await FirestoreService.getDocumentByPath<DocumentoEstadisticasJugador>(
+          ...path
+        );
       if (!res.success) {
-        throw new Error(res.errorMessage || 'Error al obtener estadísticas');
+        throw new Error(res.errorMessage || 'Error al leer estadísticas');
       }
+      // Si no existe el doc, data será null
       return {
         success: true,
-        data: res.data as DocumentoEstadisticasJugador,
+        data: res.data,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'Error al obtener estadísticas',
+            : 'Error al obtener estadísticas del jugador',
       };
     }
   },
 
-  /** Actualiza las estadísticas de un jugador de forma acumulativa */
   actualizarEstadisticasJugador: async (
     jugadorId: string,
     temporadaId: string,
@@ -46,65 +46,84 @@ export const jugadorEstadisticasService = {
   ): Promise<ResultService<null>> => {
     try {
       const path = ['users', jugadorId, COLLECTION_NAME, temporadaId];
-      const res = await FirestoreService.getDocumentByPath(...path);
+      const res =
+        await FirestoreService.getDocumentByPath<DocumentoEstadisticasJugador>(
+          ...path
+        );
 
-      let estadisticasActuales: DocumentoEstadisticasJugador = {
+      console.log(
+        '🚀 ~ file: jugadorEstadisticasService.ts:26 ~ jugadorEstadisticasService ~ actualizarEstadisticasJugador: ~ obtencion de datos del path' +
+          path +
+          ': ',
+        res.data
+      );
+      // 1️⃣ Partimos de un objeto con todas las estadísticas base
+      let actuales: DocumentoEstadisticasJugador = {
         estadisticasLiga: crearEstadisticasBase(),
         estadisticasCopa: crearEstadisticasBase(),
         estadisticasPlayoff: crearEstadisticasBase(),
       };
 
+      // 2️⃣ Si ya existía el documento, sobreescribimos sólo las propiedades que sí vinieran
       if (res.success && res.data) {
-        estadisticasActuales = res.data as DocumentoEstadisticasJugador;
+        const prev = res.data;
+        actuales = {
+          estadisticasLiga: prev.estadisticasLiga ?? crearEstadisticasBase(),
+          estadisticasCopa: prev.estadisticasCopa ?? crearEstadisticasBase(),
+          estadisticasPlayoff:
+            prev.estadisticasPlayoff ?? crearEstadisticasBase(),
+        };
       }
 
-      // Determinar qué campo actualizar: liga, copa o playoff
-      const key =
+      // 3️⃣ Elegimos la clave que toca actualizar
+      const key: keyof DocumentoEstadisticasJugador =
         tipoCompeticion === 'liga-regular'
           ? 'estadisticasLiga'
           : tipoCompeticion === 'copa'
           ? 'estadisticasCopa'
           : 'estadisticasPlayoff';
 
-      // Combinar estadísticas acumulativamente
-      estadisticasActuales[key] = sumarEstadisticas(
-        estadisticasActuales[key],
-        estadisticasNuevas
-      );
+      // 4️⃣ Sumamos acumulativamente
+      const combinadas = sumarEstadisticas(actuales[key], estadisticasNuevas);
+      actuales[key] = combinadas;
 
-      // Actualizar el documento en Firestore
-      const updateRes = await FirestoreService.setDocumentByPath(
-        ...path,
-        estadisticasActuales
-      );
-
-      if (!updateRes.success) {
-        throw new Error(updateRes.errorMessage);
-      }
+      // 5️⃣ Guardamos de forma parcial sólo esa subpropiedad
+      await FirestoreService.updateDocumentByPath(path, { [key]: combinadas });
 
       return { success: true, data: null };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         errorMessage:
           error instanceof Error
             ? error.message
-            : 'Error al actualizar estadísticas del jugador',
+            : 'Error actualizando estadísticas de jugador',
       };
     }
   },
 };
 
-/** Utilidad para sumar estadísticas jugador */
+// Helper: inicializa a cero
+function crearEstadisticasBase(): EstadisticasSimpleJugador {
+  return {
+    puntos: 0,
+    tirosLibres: { anotados: 0, fallados: 0 },
+    tirosDos: { anotados: 0, fallados: 0 },
+    tirosTres: { anotados: 0, fallados: 0 },
+    asistencias: 0,
+    rebotes: 0,
+    faltasCometidas: 0,
+    partidosJugados: 0,
+  };
+}
+
+// Helper: suma dos estadísticas
 function sumarEstadisticas(
   prev: EstadisticasSimpleJugador,
   nueva: EstadisticasSimpleJugador
 ): EstadisticasSimpleJugador {
   return {
     puntos: prev.puntos + nueva.puntos,
-    asistencias: prev.asistencias + nueva.asistencias,
-    rebotes: prev.rebotes + nueva.rebotes,
-    faltasCometidas: prev.faltasCometidas + nueva.faltasCometidas,
     tirosLibres: {
       anotados: prev.tirosLibres.anotados + nueva.tirosLibres.anotados,
       fallados: prev.tirosLibres.fallados + nueva.tirosLibres.fallados,
@@ -117,20 +136,9 @@ function sumarEstadisticas(
       anotados: prev.tirosTres.anotados + nueva.tirosTres.anotados,
       fallados: prev.tirosTres.fallados + nueva.tirosTres.fallados,
     },
-    partidosJugados: prev.partidosJugados + nueva.partidosJugados,
-  };
-}
-
-/** Inicializa estadísticas vacías */
-function crearEstadisticasBase(): EstadisticasSimpleJugador {
-  return {
-    puntos: 0,
-    asistencias: 0,
-    rebotes: 0,
-    faltasCometidas: 0,
-    tirosLibres: { anotados: 0, fallados: 0 },
-    tirosDos: { anotados: 0, fallados: 0 },
-    tirosTres: { anotados: 0, fallados: 0 },
-    partidosJugados: 0,
+    asistencias: prev.asistencias + nueva.asistencias,
+    rebotes: prev.rebotes + nueva.rebotes,
+    faltasCometidas: prev.faltasCometidas + nueva.faltasCometidas,
+    partidosJugados: prev.partidosJugados + 1,
   };
 }

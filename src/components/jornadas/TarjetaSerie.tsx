@@ -20,6 +20,19 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
     router.push(`/serie/${serie.id}`);
   };
 
+  let resultado;
+
+  if (serie.estado === 'finalizada' && serie.visitante.id === 'bye') {
+    resultado = '2 - 0';
+  } else if (
+    serie.visitante.id === 'por-definir' ||
+    serie.local.id === 'por-definir'
+  ) {
+    resultado = 'vs';
+  } else {
+    resultado = `${serie.partidosGanadosLocal} - ${serie.partidosGanadosVisitante}`;
+  }
+
   const getEstadoStyle = (estado: string) => {
     switch (estado) {
       case 'pendiente':
@@ -90,20 +103,7 @@ export const TarjetaSerie = ({ serie, refetchSerie }: TarjetaSerieProps) => {
 
         {/* Marcador */}
         <View style={styles.marcadorContainer}>
-          <StyledText style={styles.marcador}>
-            {serie.visitante.id === 'por-definir' &&
-              serie.local.id === 'por-definir' &&
-              '-'}
-            {serie.visitante.id === 'por-definir' &&
-              serie.local.id !== 'por-definir' &&
-              '2 - 0'}
-            {serie.visitante.id !== 'por-definir' &&
-              serie.local.id === 'por-definir' &&
-              '0 - 2'}
-            {serie.visitante.id !== 'por-definir' &&
-              serie.local.id !== 'por-definir' &&
-              `${serie.partidosGanadosLocal} - ${serie.partidosGanadosVisitante}`}
-          </StyledText>
+          <StyledText style={styles.marcador}>{resultado}</StyledText>
         </View>
 
         {/* Equipo Visitante */}

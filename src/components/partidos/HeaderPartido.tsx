@@ -177,7 +177,17 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
         </View>
 
         {/* Equipo Visitante */}
-        <TouchableOpacity style={styles.equipoContainer}>
+        <TouchableOpacity
+          style={styles.equipoContainer}
+          onPress={() => {
+            router.push({
+              pathname: 'equipo/[id]',
+              params: {
+                id: equipoVisitante.id,
+              },
+            });
+          }}
+        >
           <ProgressiveImage
             uri={equipoVisitante.escudoUrl}
             containerStyle={styles.escudo}

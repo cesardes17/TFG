@@ -81,7 +81,7 @@ export default function TeamCard({
       {/* Sección derecha */}
       <View style={styles.rightSection}>
         <StyledText variant='secondary' size={16} style={styles.sectionTitle}>
-          Estadísticas
+          Estadísticas Clasificación
         </StyledText>
         {clasificacion?.partidosJugados !== undefined &&
         clasificacion?.partidosJugados > 0 ? (

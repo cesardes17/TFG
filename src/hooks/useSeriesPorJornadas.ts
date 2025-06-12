@@ -4,6 +4,7 @@ import { Serie } from '../types/Serie';
 import { ResultService } from '../types/ResultService';
 import { serieService } from '../services/serieService';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
+import { useFocusEffect } from 'expo-router';
 
 interface UseSeriesResult {
   series: Serie[];
@@ -44,10 +45,11 @@ export function useSeriesPorJornada(
     setLoading(false);
   }, [jornadaId.id, competicion.id, competicion.tipo]);
 
-  useEffect(() => {
-    if (!jornadaId.id) return;
-    fetch();
-  }, [jornadaId.id, competicion.id, competicion.tipo]);
+  useFocusEffect(
+    useCallback(() => {
+      fetch();
+    }, [jornadaId.id, competicion.id, competicion.tipo])
+  );
 
   return { series, loading, error, fetch };
 }

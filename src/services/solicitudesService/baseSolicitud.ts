@@ -265,7 +265,6 @@ export const BaseSolicitudService = {
       ['temporadas', temporadaId, 'solicitudes'],
       [['vistoAfectado', '==', false]]
     );
-    console.log('res Afectado - ', res); // Añadido para depuración: imprime el resultado de la consulta a Firestore
 
     if (!res.success || !res.data) return 0;
 

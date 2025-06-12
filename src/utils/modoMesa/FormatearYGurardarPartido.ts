@@ -1,4 +1,4 @@
-// src/utils/FormatearYGuardarPartido.ts
+// src / utils / FormatearYGuardarPartido.ts;
 import { ToastType } from '../../components/common/Toast';
 import { ligaService } from '../../services/competicionService/ligaService';
 import { partidoService } from '../../services/partidoService';

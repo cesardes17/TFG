@@ -21,10 +21,11 @@ export function useEstadisticasJugador(
     const fetchEstadisticas = async () => {
       setLoading(true);
       try {
-        const res = await jugadorEstadisticasService.getEstadisticasJugador(
-          jugadorId,
-          temporadaId
-        );
+        const res =
+          await jugadorEstadisticasService.getEstadisticasJugadorPorTemporada(
+            jugadorId,
+            temporadaId
+          );
 
         if (!res.success) {
           throw new Error(res.errorMessage);

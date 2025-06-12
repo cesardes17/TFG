@@ -27,7 +27,7 @@ export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
   }
 
   const esEnVivo = partido.estado === 'en-juego';
-  console.log('es en vivo: ', esEnVivo);
+
   // 👉 Usamos el hook con callback
   const partidoEnVivo = usePartidoEnVivo(
     partido.id,

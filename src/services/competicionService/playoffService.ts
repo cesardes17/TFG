@@ -10,6 +10,7 @@ import { partidoService } from '../partidoService';
 import { serieService } from '../serieService';
 import { getRandomUID } from '../../utils/getRandomUID';
 import { generarCuadroPlayoffs } from '../../utils/competiciones/generarCuadroPlayOffs';
+import { competitionBaseService } from './baseService';
 
 const competicion: TipoCompeticion = 'playoffs';
 
@@ -146,5 +147,13 @@ export const playoffService = {
       console.error('playoffService.crearTercerPartido error:', error);
       return { success: false, errorMessage: error.message };
     }
+  },
+
+  pausar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.pausarCompetcion(temporadaId, competicion);
+  },
+
+  reanudar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.reanudarCompeticion(temporadaId, competicion);
   },
 };

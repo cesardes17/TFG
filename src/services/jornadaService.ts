@@ -159,8 +159,6 @@ export const jornadaService = {
     }
   },
 
-  // src/services/jornadaService.ts
-
   getLastJornada: async (
     temporadaId: string,
     competicionId: string
@@ -196,6 +194,48 @@ export const jornadaService = {
       return {
         success: false,
         errorMessage: error.message || 'Error al obtener la última jornada',
+      };
+    }
+  },
+
+  getJornadaActual: async (
+    temporadaId: string,
+    competicionId: string
+  ): Promise<ResultService<Jornada>> => {
+    try {
+      const path = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        competicionId,
+        'jornadas',
+      ];
+      // Obtener todas las jornadas
+      const jornadasRes = await FirestoreService.getCollectionByPath<Jornada>(
+        path
+      );
+      if (!jornadasRes.success || !jornadasRes.data) {
+        throw new Error(
+          jornadasRes.errorMessage || 'Error al obtener jornadas'
+        );
+      }
+      const jornadas = jornadasRes.data.sort((a, b) => a.numero - b.numero);
+      // Filtrar las jornadas que están en estado "en curso"
+      const jornadaActual = jornadas.find(
+        (jornada) => jornada.estado === 'pendiente'
+      );
+      if (!jornadaActual) {
+        throw new Error('No se encontró la jornada actual');
+      }
+      return {
+        success: true,
+        data: jornadaActual,
+      };
+    } catch (error: any) {
+      console.error('Error al obtener la jornada actual:', error);
+      return {
+        success: false,
+        errorMessage: error.message || 'Error al obtener la jornada actual',
       };
     }
   },

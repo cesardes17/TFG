@@ -292,4 +292,34 @@ export const competitionBaseService = {
       };
     }
   },
+
+  getCompeticionEnCurso: async (
+    temporadaId: string
+  ): Promise<ResultService<Competicion | null>> => {
+    try {
+      const path = ['temporadas', temporadaId, COLLECTION];
+      const res = await FirestoreService.getCollectionByPath<Competicion>(path);
+      if (!res.success || !res.data) {
+        throw new Error(
+          res.errorMessage || 'No se pudo obtener las competiciones'
+        );
+      }
+      const competicionEnCurso = res.data.find(
+        (competicion) => competicion.estado === 'en-curso'
+      );
+
+      return {
+        success: true,
+        data: competicionEnCurso || null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al obtener las competiciones',
+      };
+    }
+  },
 };

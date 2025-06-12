@@ -1,11 +1,13 @@
 import { View } from 'react-native';
-import StyledText from '../components/common/StyledText';
+
 import CompeticionesCards from '../components/inicio/EstadoCompeticiones';
+import MostrarJornadaActual from '../components/inicio/MostrarJornadaActual';
 
 export default function IndexScreen() {
   return (
     <View>
       <CompeticionesCards />
+      <MostrarJornadaActual />
     </View>
   );
 }

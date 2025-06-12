@@ -162,4 +162,18 @@ export const ligaService = {
       };
     }
   },
+
+  pausar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.pausarCompetcion(
+      temporadaId,
+      ID_LIGA_REGULAR
+    );
+  },
+
+  reanudar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.reanudarCompeticion(
+      temporadaId,
+      ID_LIGA_REGULAR
+    );
+  },
 };

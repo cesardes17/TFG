@@ -39,18 +39,21 @@ export default function WebLayout() {
           name='index'
           options={{
             drawerLabel: () => <DrawerLabelWithBadge label={'Inicio'} />,
+            title: 'Inicio',
           }}
         />
         <Drawer.Screen
           name='clasificacion'
           options={{
             drawerLabel: () => <DrawerLabelWithBadge label={'Clasificación'} />,
+            title: 'Clasificación',
           }}
         />
         <Drawer.Screen
           name='jornadas'
           options={{
             drawerLabel: () => <DrawerLabelWithBadge label={'Jornadas'} />,
+            title: 'Jornadas',
           }}
         />
         <Drawer.Screen

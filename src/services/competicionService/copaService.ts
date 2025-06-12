@@ -5,6 +5,7 @@ import { generarCuadroCopa } from '../../utils/competiciones/generarCuadroCopa';
 import { clasificacionService } from '../clasificacionService';
 import { FirestoreService } from '../core/firestoreService';
 import { partidoService } from '../partidoService';
+import { competitionBaseService } from './baseService';
 
 const competicion: TipoCompeticion = 'copa';
 
@@ -134,5 +135,12 @@ export const copaService = {
       console.error(error);
       return { success: false, errorMessage: error.message };
     }
+  },
+  pausar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.pausarCompetcion(temporadaId, competicion);
+  },
+
+  reanudar: async (temporadaId: string): Promise<ResultService<boolean>> => {
+    return competitionBaseService.reanudarCompeticion(temporadaId, competicion);
   },
 };

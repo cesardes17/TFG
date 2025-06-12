@@ -20,13 +20,13 @@ export default function AdministracionCompeticiones({
   setLoading,
   setLoadingText,
 }: Props) {
-  const { competicionesEstado, loadingCompeticiones } = useCompeticiones();
+  const { competicionesEstado, loadingCompeticiones, error } =
+    useCompeticiones();
   const { temporada } = useTemporadaContext();
   const {
     equipos,
     equiposIncompletos,
     loading: loadingEquipos,
-    error,
   } = useEquiposConEstado();
 
   const [modalConfig, setModalConfig] = useState<{
@@ -45,7 +45,6 @@ export default function AdministracionCompeticiones({
 
   const { liga: ligaRegular, copa, playoffs } = competicionesEstado;
 
-  // Crear Liga
   const handleCrearLiga = async () => {
     setModalConfig((prev) => ({ ...prev, visible: false }));
     setLoading(true);
@@ -67,7 +66,6 @@ export default function AdministracionCompeticiones({
     setLoadingText('');
   };
 
-  // Crear Copa
   const handleCrearCopa = async () => {
     setModalConfig((prev) => ({ ...prev, visible: false }));
     setLoading(true);
@@ -80,7 +78,6 @@ export default function AdministracionCompeticiones({
     setLoadingText('');
   };
 
-  // Crear Playoffs
   const handleCrearPlayOffs = async () => {
     setModalConfig((prev) => ({ ...prev, visible: false }));
     setLoading(true);
@@ -155,6 +152,85 @@ export default function AdministracionCompeticiones({
               )
             }
           />
+        </View>
+      )}
+
+      {(ligaRegular.created || copa.created || playoffs.created) && (
+        <View style={{ flexDirection: 'row', gap: 12, paddingTop: 24 }}>
+          {ligaRegular.created && (
+            <StyledButton
+              title={
+                ligaRegular.data?.estado === 'en-curso'
+                  ? 'Pausar Liga'
+                  : 'Reanudar Liga'
+              }
+              onPress={async () => {
+                setLoading(true);
+                setLoadingText(
+                  ligaRegular.data?.estado === 'en-curso'
+                    ? 'Pausando Liga...'
+                    : 'Reanudando Liga...'
+                );
+                if (ligaRegular.data?.estado === 'en-curso') {
+                  await ligaService.pausar(temporada.id);
+                } else {
+                  await ligaService.reanudar(temporada.id);
+                }
+                setLoading(false);
+                setLoadingText('');
+              }}
+            />
+          )}
+
+          {copa.created && (
+            <StyledButton
+              title={
+                copa.data?.estado === 'en-curso'
+                  ? 'Pausar Copa'
+                  : 'Reanudar Copa'
+              }
+              onPress={async () => {
+                setLoading(true);
+                setLoadingText(
+                  copa.data?.estado === 'en-curso'
+                    ? 'Pausando Copa...'
+                    : 'Reanudando Copa...'
+                );
+                if (copa.data?.estado === 'en-curso') {
+                  await copaService.pausar(temporada.id);
+                } else {
+                  await copaService.reanudar(temporada.id);
+                }
+                setLoading(false);
+                setLoadingText('');
+              }}
+            />
+          )}
+
+          {playoffs.created && (
+            <StyledButton
+              title={
+                playoffs.data?.estado === 'en-curso'
+                  ? 'Pausar Playoffs'
+                  : 'Reanudar Playoffs'
+              }
+              onPress={async () => {
+                setLoading(true);
+                setLoadingText(
+                  playoffs.data?.estado === 'en-curso'
+                    ? 'Pausando Playoffs...'
+                    : 'Reanudando Playoffs...'
+                );
+                if (playoffs.data?.estado === 'en-curso') {
+                  await playoffService.pausar(temporada.id);
+                } else {
+                  await playoffService.reanudar(temporada.id);
+                }
+                setLoading(false);
+                setLoadingText('');
+              }}
+            />
+          )}
         </View>
       )}
 

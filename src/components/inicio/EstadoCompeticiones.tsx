@@ -6,6 +6,7 @@ import StyledText from '../common/StyledText';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useCompeticiones } from '../../hooks/useCompeticiones';
 import LoadingIndicator from '../common/LoadingIndicator';
+import { Theme } from '../../theme/theme';
 
 // Tipos para las competiciones
 interface Competicion {
@@ -75,14 +76,26 @@ function Badge({
 }) {
   return (
     <View style={[styles.badge, style]}>
-      <StyledText style={styles.badgeText}>{children}</StyledText>
+      <StyledText variant='dark' style={styles.badgeText}>
+        {children}
+      </StyledText>
     </View>
   );
 }
 
 // Componente Card personalizado
-function Card({ children }: { children: React.ReactNode }) {
-  return <View style={styles.card}>{children}</View>;
+function Card({
+  children,
+  theme,
+}: {
+  children: React.ReactNode;
+  theme: Theme;
+}) {
+  return (
+    <View style={[styles.card, { backgroundColor: theme.cardDefault }]}>
+      {children}
+    </View>
+  );
 }
 
 export default function CompeticionesCards() {
@@ -126,7 +139,7 @@ export default function CompeticionesCards() {
 
       <View style={styles.cardsContainer}>
         {competicionesCreadas.map(({ tipo, data }) => (
-          <Card key={data!.id}>
+          <Card key={data!.id} theme={theme}>
             <View style={styles.cardHeader}>
               <StyledText style={styles.cardTitle} numberOfLines={2}>
                 {data!.nombre}
@@ -136,14 +149,18 @@ export default function CompeticionesCards() {
 
             <View style={styles.cardContent}>
               <View style={styles.row}>
-                <StyledText style={styles.label}>Tipo:</StyledText>
+                <StyledText variant='secondary' style={styles.label}>
+                  Tipo:
+                </StyledText>
                 <Badge style={obtenerEstiloTipo(tipo)}>
                   {obtenerNombreTipo(tipo)}
                 </Badge>
               </View>
 
               <View style={styles.row}>
-                <StyledText style={styles.label}>Estado:</StyledText>
+                <StyledText variant='secondary' style={styles.label}>
+                  Estado:
+                </StyledText>
                 <Badge style={obtenerEstiloEstado(data!.estado)}>
                   {titleCase(data!.estado.replace('-', ' '))}
                 </Badge>
@@ -151,8 +168,10 @@ export default function CompeticionesCards() {
 
               <View style={styles.row}>
                 <CalendarIcon size={16} color={theme.text.secondary} />
-                <StyledText style={styles.label}>Inicio:</StyledText>
-                <StyledText style={styles.dateText}>
+                <StyledText variant='secondary' style={styles.label}>
+                  Inicio:
+                </StyledText>
+                <StyledText variant='secondary' style={styles.dateText}>
                   {formatearFecha(data!.fechaInicio)}
                 </StyledText>
               </View>
@@ -164,22 +183,18 @@ export default function CompeticionesCards() {
   );
 }
 
-const { width } = Dimensions.get('window');
-const cardWidth = width > 768 ? (width - 60) / 2 : width - 32;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   header: {
     padding: 24,
     paddingBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#111827',
+
     marginBottom: 8,
   },
   subtitle: {
@@ -194,8 +209,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   card: {
-    width: cardWidth,
-    backgroundColor: '#FFFFFF',
+    width: '100%',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -214,7 +228,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
     flex: 1,
     marginRight: 8,
   },
@@ -229,11 +242,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B7280',
   },
   dateText: {
     fontSize: 14,
-    color: '#6B7280',
   },
   badge: {
     paddingHorizontal: 8,
@@ -286,7 +297,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+
     marginTop: 16,
     marginBottom: 8,
   },

@@ -57,19 +57,26 @@ export default function SerieInfoScreen({ serieId }: SerieInfoScreenProps) {
           title: `${serie.local.nombre} vs ${serie.visitante.nombre}`,
         }}
       />
-      {partidos.map((partido, idx) => (
-        <View key={partido.id}>
-          {/* Agrupamos con un contenedor con key */}
-          <StyledText
-            size='large'
-            variant='secondary'
-            style={{ marginVertical: 8 }}
-          >
-            Partido {idx + 1}
-          </StyledText>
-          <TarjetaPartido partido={partido} reftechPartidos={fecthPartidos} />
-        </View>
-      ))}
+      {partidos.length === 0 ? (
+        <StyledAlert
+          variant='warning'
+          message='No hay partidos en esta serie'
+        />
+      ) : (
+        partidos.map((partido, idx) => (
+          <View key={partido.id}>
+            {/* Agrupamos con un contenedor con key */}
+            <StyledText
+              size='large'
+              variant='secondary'
+              style={{ marginVertical: 8 }}
+            >
+              Partido {idx + 1}
+            </StyledText>
+            <TarjetaPartido partido={partido} reftechPartidos={fecthPartidos} />
+          </View>
+        ))
+      )}
     </View>
   );
 }

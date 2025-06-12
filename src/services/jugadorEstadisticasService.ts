@@ -51,31 +51,28 @@ export const jugadorEstadisticasService = {
           ...path
         );
 
-      console.log(
-        '🚀 ~ file: jugadorEstadisticasService.ts:26 ~ jugadorEstadisticasService ~ actualizarEstadisticasJugador: ~ obtencion de datos del path' +
-          path +
-          ': ',
-        res.data
-      );
-      // 1️⃣ Partimos de un objeto con todas las estadísticas base
+      console.log('res', res);
+
+      // 1️⃣ Base
       let actuales: DocumentoEstadisticasJugador = {
         estadisticasLiga: crearEstadisticasBase(),
         estadisticasCopa: crearEstadisticasBase(),
         estadisticasPlayoff: crearEstadisticasBase(),
       };
 
-      // 2️⃣ Si ya existía el documento, sobreescribimos sólo las propiedades que sí vinieran
+      // 2️⃣ Si ya existía, cargamos valores anteriores
       if (res.success && res.data) {
-        const prev = res.data;
         actuales = {
-          estadisticasLiga: prev.estadisticasLiga ?? crearEstadisticasBase(),
-          estadisticasCopa: prev.estadisticasCopa ?? crearEstadisticasBase(),
+          estadisticasLiga:
+            res.data.estadisticasLiga ?? crearEstadisticasBase(),
+          estadisticasCopa:
+            res.data.estadisticasCopa ?? crearEstadisticasBase(),
           estadisticasPlayoff:
-            prev.estadisticasPlayoff ?? crearEstadisticasBase(),
+            res.data.estadisticasPlayoff ?? crearEstadisticasBase(),
         };
       }
 
-      // 3️⃣ Elegimos la clave que toca actualizar
+      // 3️⃣ Elegir clave
       const key: keyof DocumentoEstadisticasJugador =
         tipoCompeticion === 'liga-regular'
           ? 'estadisticasLiga'
@@ -83,15 +80,20 @@ export const jugadorEstadisticasService = {
           ? 'estadisticasCopa'
           : 'estadisticasPlayoff';
 
-      // 4️⃣ Sumamos acumulativamente
-      const combinadas = sumarEstadisticas(actuales[key], estadisticasNuevas);
-      actuales[key] = combinadas;
+      // 4️⃣ Sumar
+      actuales[key] = sumarEstadisticas(actuales[key], estadisticasNuevas);
 
-      // 5️⃣ Guardamos de forma parcial sólo esa subpropiedad
-      await FirestoreService.updateDocumentByPath(path, { [key]: combinadas });
-
+      // 5️⃣ Upsert completo con setDocumentByPath (créa o reemplaza)
+      const resActualizar = await FirestoreService.setDocumentByPath(
+        ...path,
+        actuales
+      );
+      if (!resActualizar.success) {
+        throw new Error(resActualizar.errorMessage || 'Error al actualizar');
+      }
       return { success: true, data: null };
     } catch (error: any) {
+      console.error(error);
       return {
         success: false,
         errorMessage:

@@ -1,6 +1,6 @@
 // src/services/competitionService/baseService.ts
 import { FirestoreService } from '../core/firestoreService';
-import { Competicion } from '../../types/Competicion';
+import { Competicion, EstadoCompeticion } from '../../types/Competicion';
 import { ResultService } from '../../types/ResultService';
 import { jornadaService } from '../jornadaService';
 import { Jornada } from '../../types/Jornada';
@@ -16,6 +16,15 @@ export const competitionBaseService = {
     try {
       const path = ['temporadas', temporadaId, COLLECTION, competicionId];
       const res = await FirestoreService.setDocumentByPath(...path, data);
+
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al crear la competición');
+      }
+
+      //si la competicion es copa debemos marcar la liga regular como pausada
+      if (data.tipo === 'copa') {
+        competitionBaseService.pausarCompetcion(temporadaId, 'liga-regular');
+      }
       return res;
     } catch (error) {
       return {
@@ -163,10 +172,118 @@ export const competitionBaseService = {
         console.log(
           `🎉 Competición ${tipoCompeticion} marcada como finalizada.`
         );
+
+        if (tipoCompeticion === 'copa') {
+          await competitionBaseService.reanudarCompeticion(
+            temporadaId,
+            'liga-regular'
+          );
+        }
+
         return { success: true, data: true };
       }
 
       return { success: true, data: false };
+    } catch (error) {
+      console.error('Error al finalizar competición:', error);
+      return {
+        success: false,
+        errorMessage: 'Error al finalizar competición',
+      };
+    }
+  },
+
+  pausarCompetcion: async (
+    temporadaId: string,
+    tipoCompeticion: string
+  ): Promise<ResultService<boolean>> => {
+    try {
+      const competicionPath = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        tipoCompeticion,
+      ];
+
+      const estado: EstadoCompeticion = 'pendiente';
+
+      const resPausarCompeticion = await FirestoreService.updateDocumentByPath(
+        competicionPath,
+        {
+          estado,
+        }
+      );
+      if (!resPausarCompeticion.success) {
+        throw new Error(
+          resPausarCompeticion.errorMessage || 'Error al pausar la competición'
+        );
+      }
+      console.log(`🎉 Competición ${tipoCompeticion} marcada como pausada.`);
+      return { success: true, data: true };
+    } catch (error) {
+      console.error('Error al pausar competición:', error);
+      return {
+        success: false,
+        errorMessage: 'Error al pausar competición',
+      };
+    }
+  },
+  reanudarCompeticion: async (
+    temporadaId: string,
+    tipoCompeticion: string
+  ): Promise<ResultService<boolean>> => {
+    try {
+      const competicionPath = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        tipoCompeticion,
+      ];
+      const estado: EstadoCompeticion = 'en-curso';
+      const resReanudarCompeticion =
+        await FirestoreService.updateDocumentByPath(competicionPath, {
+          estado,
+        });
+      if (!resReanudarCompeticion.success) {
+        throw new Error(
+          resReanudarCompeticion.errorMessage ||
+            'Error al reanudar la competición'
+        );
+      }
+      return { success: true, data: true };
+    } catch (error) {
+      console.error('Error al reanudar competición:', error);
+      return {
+        success: false,
+        errorMessage: 'Error al reanudar competición',
+      };
+    }
+  },
+  finalizarCompeticion: async (
+    temporadaId: string,
+    tipoCompeticion: string
+  ): Promise<ResultService<boolean>> => {
+    try {
+      const competicionPath = [
+        'temporadas',
+        temporadaId,
+        'competiciones',
+        tipoCompeticion,
+      ];
+      const estado: EstadoCompeticion = 'finalizada';
+      const resFinalizarCompeticion =
+        await FirestoreService.updateDocumentByPath(competicionPath, {
+          estado,
+        });
+
+      if (!resFinalizarCompeticion.success) {
+        throw new Error(
+          resFinalizarCompeticion.errorMessage ||
+            'Error al finalizar la competición'
+        );
+      }
+
+      return { success: true, data: true };
     } catch (error) {
       console.error('Error al finalizar competición:', error);
       return {

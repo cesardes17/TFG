@@ -10,6 +10,8 @@ import { useTemporadaContext } from '../../contexts/TemporadaContext';
 import { ligaService } from '../../services/competicionService/ligaService';
 import { copaService } from '../../services/competicionService/copaService';
 import { playoffService } from '../../services/competicionService/playoffService';
+import { temporadaService } from '../../services/temporadaService';
+import { router } from 'expo-router';
 
 interface Props {
   setLoading: (loading: boolean) => void;
@@ -89,6 +91,18 @@ export default function AdministracionCompeticiones({
 
     setLoading(false);
     setLoadingText('');
+  };
+
+  const handleFinalizarTemporada = async () => {
+    setModalConfig((prev) => ({ ...prev, visible: false }));
+    setLoading(true);
+    setLoadingText('Finalizando Temporada...');
+    const res = await temporadaService.finalizarTemporadaActual();
+    if (!res.success)
+      console.error('Error al finalizar Temporada:', res.errorMessage);
+    setLoading(false);
+    setLoadingText('');
+    router.reload();
   };
 
   const abrirModal = (
@@ -248,6 +262,25 @@ export default function AdministracionCompeticiones({
               }}
             />
           </View>
+        )}
+      </View>
+
+      <View
+        style={{
+          marginTop: 8,
+        }}
+      >
+        {temporada !== undefined && (
+          <StyledButton
+            title='Finalizar Temporada'
+            onPress={() => {
+              abrirModal(
+                'Finalizar Temporada',
+                '¿Estás seguro de que deseas finalizar la temporada actual?',
+                handleFinalizarTemporada
+              );
+            }}
+          />
         )}
       </View>
 

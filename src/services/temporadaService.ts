@@ -47,6 +47,16 @@ export const temporadaService = {
    */
   createTemporada: async (): Promise<ResultService<Temporada>> => {
     try {
+      const resTempActual = await temporadaService.getTemporadaActual();
+
+      if (resTempActual.data) {
+        return {
+          success: false,
+          errorMessage:
+            'Ya existe una temporada activa, finalizala antes de crear una nueva',
+        };
+      }
+
       const temporadaID = getRandomUID();
       const fechaAhora = new Date();
 
@@ -80,6 +90,48 @@ export const temporadaService = {
           error instanceof Error
             ? error.message
             : 'Error al crear la temporada',
+      };
+    }
+  },
+
+  /**
+   * Finaliza la temporada actual (activa === true)
+   */
+  finalizarTemporadaActual: async (): Promise<ResultService<Temporada>> => {
+    try {
+      const resTempActual = await temporadaService.getTemporadaActual();
+      if (!resTempActual.success) {
+        throw new Error(resTempActual.errorMessage);
+      }
+      if (!resTempActual.data) {
+        return {
+          success: false,
+          errorMessage: 'No se encontró una temporada activa',
+        };
+      }
+      const temporadaData = resTempActual.data;
+      temporadaData.fechaFin = new Date();
+      temporadaData.activa = false;
+      // Actualizamos con updateByPath en 'temporadas/{temporadaID}'
+      const res = await FirestoreService.updateDocumentByPath(
+        ['temporadas', temporadaData.id], // colección
+        temporadaData
+      );
+      if (!res.success) {
+        throw new Error(res.errorMessage || 'Error al finalizar la temporada');
+      }
+      return {
+        success: true,
+        data: temporadaData,
+      };
+    } catch (error: any) {
+      console.error('Error al finalizar la temporada:', error);
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : 'Error al finalizar la temporada',
       };
     }
   },

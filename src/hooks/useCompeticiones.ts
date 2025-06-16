@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTemporadaContext } from '../contexts/TemporadaContext';
 import { Competicion } from '../types/Competicion';
 import { FirestoreService } from '../services/core/firestoreService';
+import { Platform } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 
 export type EstadoCompeticiones = {
   liga: {
@@ -32,50 +34,59 @@ export function useCompeticiones() {
   const [loadingCompeticiones, setLoadingCompeticiones] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [competiciones, setCompeticiones] = useState<Competicion[]>([]);
+
+  const cargarCompeticiones = async () => {
+    if (!temporada) return;
+    setLoadingCompeticiones(true);
+    setError(null);
+
+    const res = await FirestoreService.getCollectionByPath<Competicion>([
+      'temporadas',
+      temporada.id,
+      'competiciones',
+    ]);
+
+    if (res.success && res.data) {
+      const liga = res.data.find((c) => c.tipo === 'liga-regular');
+      const copa = res.data.find((c) => c.tipo === 'copa');
+      const playoffs = res.data.find((c) => c.tipo === 'playoffs');
+
+      setCompeticionesEstado({
+        liga: {
+          created: !!liga,
+          finalized: liga?.estado === 'finalizada' || false,
+          data: liga,
+        },
+        copa: {
+          created: !!copa,
+          finalized: copa?.estado === 'finalizada' || false,
+          data: copa,
+        },
+        playoffs: {
+          created: !!playoffs,
+          finalized: playoffs?.estado === 'finalizada' || false,
+          data: playoffs,
+        },
+      });
+      setCompeticiones(res.data);
+    } else {
+      setError(res.errorMessage || 'Error al obtener las competiciones');
+    }
+
+    setLoadingCompeticiones(false);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      cargarCompeticiones();
+    }, [])
+  );
+
   useEffect(() => {
-    const cargarCompeticiones = async () => {
-      if (!temporada) return;
-      setLoadingCompeticiones(true);
-      setError(null);
-
-      const res = await FirestoreService.getCollectionByPath<Competicion>([
-        'temporadas',
-        temporada.id,
-        'competiciones',
-      ]);
-
-      if (res.success && res.data) {
-        const liga = res.data.find((c) => c.tipo === 'liga-regular');
-        const copa = res.data.find((c) => c.tipo === 'copa');
-        const playoffs = res.data.find((c) => c.tipo === 'playoffs');
-
-        setCompeticionesEstado({
-          liga: {
-            created: !!liga,
-            finalized: liga?.estado === 'finalizada' || false,
-            data: liga,
-          },
-          copa: {
-            created: !!copa,
-            finalized: copa?.estado === 'finalizada' || false,
-            data: copa,
-          },
-          playoffs: {
-            created: !!playoffs,
-            finalized: playoffs?.estado === 'finalizada' || false,
-            data: playoffs,
-          },
-        });
-        setCompeticiones(res.data);
-      } else {
-        setError(res.errorMessage || 'Error al obtener las competiciones');
-      }
-
-      setLoadingCompeticiones(false);
-    };
-
-    cargarCompeticiones();
-  }, [temporada?.id]);
+    if (Platform.OS === 'web') {
+      cargarCompeticiones();
+    }
+  }, []);
 
   return { competiciones, competicionesEstado, loadingCompeticiones, error };
 }

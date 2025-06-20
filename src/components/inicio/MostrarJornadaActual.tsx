@@ -4,6 +4,9 @@ import LoadingIndicator from '../common/LoadingIndicator';
 import StyledAlert from '../common/StyledAlert';
 import TarjetaPartido from '../jornadas/TarjetaPartido';
 import StyledText from '../common/StyledText';
+import { TarjetaSerie } from '../jornadas/TarjetaSerie';
+import { Serie } from '../../types/Serie';
+import { Partido } from '../../types/Partido';
 
 export default function MostrarJornadaActual() {
   const {
@@ -12,6 +15,7 @@ export default function MostrarJornadaActual() {
     jornadaActual,
     competicionActual,
     partidos,
+    series,
     getPartidosJornadaActual,
   } = usePartidosJornadaActual();
 
@@ -38,7 +42,9 @@ export default function MostrarJornadaActual() {
     <View style={{ paddingHorizontal: 16, gap: 12 }}>
       {jornadaActual && competicionActual && (
         <>
-          <StyledText size='large'> Partidos</StyledText>
+          <StyledText size='large' style={{ marginLeft: 8 }}>
+            {competicionActual.tipo === 'playoffs' ? 'Series' : 'Partidos'}
+          </StyledText>
           <StyledText
             style={{ marginLeft: 8, marginTop: -5 }}
             size='medium'
@@ -46,21 +52,62 @@ export default function MostrarJornadaActual() {
           >
             {jornadaActual?.nombre} ({competicionActual.nombre})
           </StyledText>
+
+          {competicionActual.tipo === 'playoffs' ? (
+            <MostrarSeriesInicio
+              series={series}
+              refetchSerie={getPartidosJornadaActual}
+            />
+          ) : (
+            <MostrarPartidosInicio
+              partidos={partidos}
+              refetchPartidos={getPartidosJornadaActual}
+            />
+          )}
         </>
       )}
-      {partidos.length > 0 ? (
-        partidos.map((partido, index) => {
-          return (
-            <TarjetaPartido
-              key={index}
-              partido={partido}
-              reftechPartidos={getPartidosJornadaActual}
-            />
-          );
-        })
-      ) : (
-        <StyledAlert variant='info' message='No hay partidos para mostrar' />
-      )}
+    </View>
+  );
+}
+
+function MostrarSeriesInicio({
+  series,
+  refetchSerie,
+}: {
+  series: Serie[];
+  refetchSerie: () => void;
+}) {
+  if (series.length === 0) {
+    return <StyledAlert variant='info' message='No hay series disponibles' />;
+  }
+  return (
+    <View style={{ gap: 12, marginTop: 12 }}>
+      {series.map((serie, index) => (
+        <TarjetaSerie key={index} serie={serie} refetchSerie={refetchSerie} />
+      ))}
+    </View>
+  );
+}
+
+function MostrarPartidosInicio({
+  partidos,
+  refetchPartidos,
+}: {
+  partidos: Partido[];
+  refetchPartidos: () => void;
+}) {
+  if (partidos.length === 0) {
+    return <StyledAlert variant='info' message='No hay partidos disponibles' />;
+  }
+  return (
+    <View style={{ gap: 12, marginTop: 12 }}>
+      {partidos.map((partido, index) => (
+        <TarjetaPartido
+          key={index}
+          partido={partido}
+          refetchPartidos={refetchPartidos}
+        />
+      ))}
     </View>
   );
 }

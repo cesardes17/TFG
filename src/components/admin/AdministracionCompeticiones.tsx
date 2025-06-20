@@ -170,7 +170,7 @@ export default function AdministracionCompeticiones({
       )}
 
       <View style={{ flexDirection: 'row', gap: 12, paddingTop: 24 }}>
-        {ligaRegular.created && (
+        {ligaRegular.created && !ligaRegular.finalized && (
           <View style={{ flex: 1 }}>
             <StyledButton
               variant={
@@ -202,7 +202,7 @@ export default function AdministracionCompeticiones({
           </View>
         )}
 
-        {copa.created && (
+        {copa.created && !copa.finalized && (
           <View style={{ flex: 1 }}>
             <StyledButton
               variant={
@@ -272,6 +272,7 @@ export default function AdministracionCompeticiones({
       >
         {temporada !== undefined && (
           <StyledButton
+            variant='error'
             title='Finalizar Temporada'
             onPress={() => {
               abrirModal(

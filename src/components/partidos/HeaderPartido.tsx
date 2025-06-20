@@ -332,6 +332,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    gap: 8,
   },
   iconoTexto: {
     fontSize: 16,

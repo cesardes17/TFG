@@ -9,7 +9,7 @@ import type {
 } from '../types/User';
 import type { ResultService } from '../types/ResultService';
 import { AuthService } from './core/authService';
-import { FirestoreService } from './core/firestoreService';
+import { FirestoreService, WhereClause } from './core/firestoreService';
 import { Timestamp } from '@react-native-firebase/firestore';
 import { RealtimeService } from './core/realtimeService';
 
@@ -238,6 +238,25 @@ export const UserService = {
           error instanceof Error
             ? error.message
             : 'Error al actualizar perfil de usuario',
+      };
+    }
+  },
+
+  getArbitros: async (): Promise<ResultService<User[]>> => {
+    try {
+      const path = ['users'];
+      const andFilters: WhereClause[] = [['rol', '==', 'arbitro']];
+      const res = await FirestoreService.getCollectionByPath<User>(
+        path,
+        andFilters
+      );
+      if (!res.success) throw new Error(res.errorMessage);
+      return { success: true, data: res.data };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage:
+          error instanceof Error ? error.message : 'Error al obtener arbitros',
       };
     }
   },

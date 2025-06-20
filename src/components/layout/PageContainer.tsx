@@ -30,13 +30,8 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, style }) => {
         translucent
       />
       <ScrollView
-        style={[
-          styles.container,
-          {
-            width: containerWidth,
-          },
-          style,
-        ]}
+        style={[styles.container, style]}
+        contentContainerStyle={{ width: containerWidth }}
       >
         {children}
       </ScrollView>

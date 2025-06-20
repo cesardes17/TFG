@@ -4,6 +4,13 @@ import { EstadisticasJugadores } from './estadisticas/jugador';
 
 export type EstadoPartido = 'pendiente' | 'en-juego' | 'finalizado';
 
+export interface ArbitroAsignado {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  correo: string;
+}
+
 export type Partido = {
   jornadaId: string;
   serieId?: string;
@@ -32,6 +39,10 @@ export type Partido = {
   estadisticasEquipos?: EstadisticasEquiposPartido | null;
 
   siguientePartidoId?: string; // id del partido al que avanza el ganador solo en partidos copa
+
+  arbitro1?: ArbitroAsignado | null;
+  arbitro2?: ArbitroAsignado | null;
+  arbitro3?: ArbitroAsignado | null;
 };
 
 export type PartidoRT = Partido & {

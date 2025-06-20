@@ -8,10 +8,13 @@ import { Partido } from '../types/Partido';
 import { Jornada } from '../types/Jornada';
 import { Competicion } from '../types/Competicion';
 import { Platform } from 'react-native';
+import { serieService } from '../services/serieService';
+import { Serie } from '../types/Serie';
 
 export default function usePartidosJornadaActual() {
   const { temporada } = useTemporadaContext();
   const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [series, setSeries] = useState<Serie[]>([]);
   const [isLoadingPartidos, setIsLoadingPartidos] = useState<boolean>(false);
   const [errorPartidos, setErrorPartidos] = useState<string | null>(null);
   const [jornadaActual, setJornadaActual] = useState<Jornada | null>(null);
@@ -51,20 +54,39 @@ export default function usePartidosJornadaActual() {
 
       setJornadaActual(resJornadaActual.data);
 
-      const resPartidos = await partidoService.getAllByJornada(
-        temporada.id,
-        resCompeticionActual.data.id,
-        resJornadaActual.data.id
-      );
-
-      if (!resPartidos.success || !resPartidos.data) {
-        setErrorPartidos(
-          resPartidos.errorMessage || 'Error al obtener los partidos.'
+      // Obtener los partidos de la jornada actual si competicion es liga o copa
+      if (
+        competicionActual?.tipo === 'liga-regular' ||
+        competicionActual?.tipo === 'copa'
+      ) {
+        const resPartidos = await partidoService.getAllByJornada(
+          temporada.id,
+          resCompeticionActual.data.id,
+          resJornadaActual.data.id
         );
-        return;
-      }
 
-      setPartidos(resPartidos.data);
+        if (!resPartidos.success || !resPartidos.data) {
+          setErrorPartidos(
+            resPartidos.errorMessage || 'Error al obtener los partidos.'
+          );
+          return;
+        }
+
+        setPartidos(resPartidos.data);
+      } else {
+        const resPartidos = await serieService.getAllByJornada(
+          temporada.id,
+          resCompeticionActual.data.id,
+          resJornadaActual.data.id
+        );
+        if (!resPartidos.success || !resPartidos.data) {
+          setErrorPartidos(
+            resPartidos.errorMessage || 'Error al obtener los partidos.'
+          );
+          return;
+        }
+        setSeries(resPartidos.data);
+      }
     } catch (error: any) {
       setErrorPartidos(error.message || 'Error desconocido');
     } finally {
@@ -88,6 +110,7 @@ export default function usePartidosJornadaActual() {
 
   return {
     partidos,
+    series,
     jornadaActual,
     competicionActual,
     isLoadingPartidos,

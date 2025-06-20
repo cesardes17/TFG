@@ -15,10 +15,10 @@ const isTablet = screenWidth > 768;
 
 interface Props {
   partido: Partido;
-  reftechPartidos: () => void;
+  refetchPartidos: () => void;
 }
 
-export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
+export default function TarjetaPartido({ partido, refetchPartidos }: Props) {
   const { theme } = useTheme();
   const { temporada } = useTemporadaContext();
 
@@ -32,7 +32,7 @@ export default function TarjetaPartido({ partido, reftechPartidos }: Props) {
   const partidoEnVivo = usePartidoEnVivo(
     partido.id,
     esEnVivo,
-    reftechPartidos // 🔥 callback para recargar
+    refetchPartidos // 🔥 callback para recargar
   );
 
   const partidoAMostrar = partidoEnVivo || partido;

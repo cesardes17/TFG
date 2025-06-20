@@ -16,6 +16,8 @@ import { Partido } from '../../../types/Partido';
 import { partidoService } from '../../../services/partidoService';
 import { useTemporadaContext } from '../../../contexts/TemporadaContext';
 import { useToast } from '../../../contexts/ToastContext';
+import useArbitros from '../../../hooks/useArbitros';
+import SelectorArbitro from '../SelectorArbitro';
 
 const pabellonesDisponibles: Option<string>[] = [
   {
@@ -30,16 +32,36 @@ const pabellonesDisponibles: Option<string>[] = [
   },
 ];
 
-// Paso 1: fecha y hora
+// Esquemas por paso
 const esquemaPaso1 = Yup.object().shape({
   fechaHora: Yup.date()
     .min(new Date(), 'La fecha y hora deben ser actuales o futuras')
     .required('La fecha y hora del partido son obligatorias'),
 });
 
-// Paso 2: cancha
 const esquemaPaso2 = Yup.object().shape({
   cancha: Yup.string().required('Selecciona un pabellón'),
+});
+
+const esquemaPaso3 = Yup.object().shape({
+  arbitro1: Yup.object({
+    id: Yup.string().required(),
+    nombre: Yup.string().required(),
+    apellidos: Yup.string().required(),
+    correo: Yup.string().email().required(),
+  }).required('Selecciona el árbitro principal'),
+  arbitro2: Yup.object({
+    id: Yup.string().required(),
+    nombre: Yup.string().required(),
+    apellidos: Yup.string().required(),
+    correo: Yup.string().email().required(),
+  }).required('Selecciona el árbitro secundario'),
+  arbitro3: Yup.object({
+    id: Yup.string().required(),
+    nombre: Yup.string().required(),
+    apellidos: Yup.string().required(),
+    correo: Yup.string().email().required(),
+  }).required('Selecciona el árbitro de mesa'),
 });
 
 function getValidationSchema(step: number) {
@@ -48,6 +70,8 @@ function getValidationSchema(step: number) {
       return esquemaPaso1;
     case 2:
       return esquemaPaso2;
+    case 3:
+      return esquemaPaso3;
     default:
       return null;
   }
@@ -65,10 +89,18 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingText, setIsLoadingText] = useState('');
+  const { arbitros } = useArbitros();
+
   const valoresIniciales = {
     fechaHora: partido.fecha ? new Date(partido.fecha) : new Date(),
-    cancha: partido?.cancha || '',
+    cancha: partido.cancha || '',
+    arbitro1: partido.arbitro1 || null,
+    arbitro2: partido.arbitro2 || null,
+    arbitro3: partido.arbitro3 || null,
   };
+
+  const totalSteps = 3;
+  const esPasoFinal = step === totalSteps;
 
   const manejarEnvio = async (valores: typeof valoresIniciales) => {
     setIsLoading(true);
@@ -80,23 +112,28 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
         (pab) => pab.value === valores.cancha
       )?.label;
       if (!cancha) throw new Error('Pabellón no encontrado');
-      console.log('Actualizando partido con id', partido.id);
-      const res = await partidoService.actualizarFechaCancha(
+
+      const res = await partidoService.actualizarPartido(
         temporada.id,
         partido.tipoCompeticion,
         partido.id,
-        valores.fechaHora,
-        cancha
+        {
+          fecha: valores.fechaHora,
+          cancha,
+          arbitro1: valores.arbitro1,
+          arbitro2: valores.arbitro2,
+          arbitro3: valores.arbitro3,
+        }
       );
       if (!res) throw new Error('Error al actualizar el partido');
       showToast('Partido actualizado correctamente', 'success');
+      router.back();
     } catch (err: any) {
       showToast(err.message || 'Error al actualizar el partido', 'error');
       setError(err.message || 'Error al actualizar el partido');
     } finally {
       setIsLoading(false);
       setIsLoadingText('');
-      router.back();
     }
   };
 
@@ -142,8 +179,6 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
       >
         {(formikProps: FormikProps<typeof valoresIniciales>) => {
           const { values, setFieldValue, errors, touched } = formikProps;
-          const totalSteps = 2;
-          const esPasoFinal = step === totalSteps;
 
           return (
             <View
@@ -164,7 +199,6 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
                   Paso {step} de {totalSteps}
                 </StyledText>
               </View>
-
               {step === 1 && (
                 <View style={styles.paso}>
                   <StyledText
@@ -187,7 +221,6 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
                     )}
                 </View>
               )}
-
               {step === 2 && (
                 <View style={styles.paso}>
                   <StyledText
@@ -207,7 +240,38 @@ export default function EditarPartidoForm({ partido }: PartidoFormProps) {
                   )}
                 </View>
               )}
-
+              {step === 3 && (
+                <View style={styles.paso}>
+                  <SelectorArbitro
+                    arbitros={arbitros}
+                    selected={{
+                      arbitro1: values.arbitro1,
+                      arbitro2: values.arbitro2,
+                      arbitro3: values.arbitro3,
+                    }}
+                    onChange={(nuevo) => {
+                      setFieldValue('arbitro1', nuevo.arbitro1);
+                      setFieldValue('arbitro2', nuevo.arbitro2);
+                      setFieldValue('arbitro3', nuevo.arbitro3);
+                    }}
+                  />
+                  {touched.arbitro1 && errors.arbitro1 && (
+                    <StyledText style={styles.mensajeError}>
+                      {(errors.arbitro1 as any)?.id}
+                    </StyledText>
+                  )}
+                  {touched.arbitro2 && errors.arbitro2 && (
+                    <StyledText style={styles.mensajeError}>
+                      {(errors.arbitro2 as any)?.id}
+                    </StyledText>
+                  )}
+                  {touched.arbitro3 && errors.arbitro3 && (
+                    <StyledText style={styles.mensajeError}>
+                      {(errors.arbitro3 as any)?.id}
+                    </StyledText>
+                  )}
+                </View>
+              )}{' '}
               <View style={styles.contenedorBotones}>
                 {step > 1 && (
                   <View style={styles.botonMitad}>

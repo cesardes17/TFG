@@ -8,6 +8,8 @@ import { ResultService } from '../../types/ResultService';
 import { generarCalendarioLiga } from '../../utils/calendario/generarJornadas';
 import { disolverEquipo } from '../../utils/equipos/disolverEquipo';
 import { clasificacionService } from '../clasificacionService';
+import { jornadaService } from '../jornadaService';
+import { partidoService } from '../partidoService';
 import { competitionBaseService } from './baseService';
 
 const ID_LIGA_REGULAR = 'liga-regular';
@@ -58,8 +60,19 @@ export const ligaService = {
         };
       }
 
-      await generarCalendarioLiga(temporadaId, equiposCompletos, onProgress);
+      const { jornadas, partidosPorJornada } = await generarCalendarioLiga(
+        equiposCompletos,
+        onProgress
+      );
 
+      // Guardar jornadas y partidos en base de datos
+      for (const jornada of jornadas) {
+        await jornadaService.crear(temporadaId, ID_LIGA_REGULAR, jornada);
+        const partidos = partidosPorJornada[jornada.id] || [];
+        for (const partido of partidos) {
+          await partidoService.crear(temporadaId, ID_LIGA_REGULAR, partido);
+        }
+      }
       return { success: true, data: null };
     } catch (error) {
       return {

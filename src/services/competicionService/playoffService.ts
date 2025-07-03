@@ -11,6 +11,7 @@ import { serieService } from '../serieService';
 import { getRandomUID } from '../../utils/getRandomUID';
 import { generarCuadroPlayoffs } from '../../utils/competiciones/generarCuadroPlayOffs';
 import { competitionBaseService } from './baseService';
+import { jornadaService } from '../jornadaService';
 
 const competicion: TipoCompeticion = 'playoffs';
 
@@ -36,6 +37,7 @@ export const playoffService = {
           resClasif.errorMessage || 'Error al obtener clasificación'
         );
       }
+
       const topEquipos = resClasif.data.slice(0, 8).map((c) => c.equipo);
 
       if (onProgress) onProgress('Guardando documento de Playoffs...');
@@ -46,6 +48,7 @@ export const playoffService = {
         estado: 'en-curso',
         fechaInicio: new Date(),
       };
+
       const resDoc = await FirestoreService.setDocumentByPath(
         'temporadas',
         temporadaId,
@@ -58,7 +61,37 @@ export const playoffService = {
       }
 
       if (onProgress) onProgress('Generando cuadro de Playoffs...');
-      await generarCuadroPlayoffs(temporadaId, competicion, topEquipos);
+      const { rondas, seriesPorRonda, partidosPorSerie } =
+        generarCuadroPlayoffs(temporadaId, topEquipos);
+
+      if (onProgress) onProgress('Guardando jornadas...');
+      for (const ronda of rondas) {
+        const res = await jornadaService.crear(temporadaId, competicion, ronda);
+        if (!res.success)
+          throw new Error(`Error al guardar jornada: ${ronda.nombre}`);
+      }
+
+      if (onProgress) onProgress('Guardando series...');
+      for (const series of Object.values(seriesPorRonda)) {
+        for (const serie of series) {
+          const res = await serieService.crear(temporadaId, competicion, serie);
+          if (!res.success)
+            throw new Error(`Error al guardar serie ${serie.id}`);
+        }
+      }
+
+      if (onProgress) onProgress('Guardando partidos...');
+      for (const partidos of Object.values(partidosPorSerie)) {
+        for (const partido of partidos) {
+          const res = await partidoService.crear(
+            temporadaId,
+            competicion,
+            partido
+          );
+          if (!res.success)
+            throw new Error(`Error al guardar partido ${partido.id}`);
+        }
+      }
 
       return { success: true, data: null };
     } catch (error: any) {

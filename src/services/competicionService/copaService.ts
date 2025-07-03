@@ -4,6 +4,7 @@ import { ResultService } from '../../types/ResultService';
 import { generarCuadroCopa } from '../../utils/competiciones/generarCuadroCopa';
 import { clasificacionService } from '../clasificacionService';
 import { FirestoreService } from '../core/firestoreService';
+import { jornadaService } from '../jornadaService';
 import { partidoService } from '../partidoService';
 import { competitionBaseService } from './baseService';
 
@@ -16,22 +17,22 @@ export const copaService = {
   ): Promise<ResultService<null>> => {
     try {
       if (onProgress) onProgress('Obteniendo Top 8 Equipos...');
-      // 1. Obtener clasificación actual de la liga regular (podrías tener un servicio o usar Firestore directamente)
+
+      // 1. Obtener clasificación actual de la liga regular
       const resClasificacion = await clasificacionService.get(
         temporadaId,
         'liga-regular'
       );
-      console.log('resClasificacion', resClasificacion);
       if (!resClasificacion.success || !resClasificacion.data)
         throw new Error(resClasificacion.errorMessage);
-      // 2. Ordenar por puntos
-      const topClasificados = resClasificacion.data.slice(0, 8);
 
-      // 2.1. Extraer solo la info del equipo
+      const topClasificados = resClasificacion.data.slice(0, 8);
       const topEquipos = topClasificados.map((c) => c.equipo);
 
       if (onProgress) onProgress('Generando Cuadro de Copa...');
-      // 3. Crear estructura de la Copa (cuadro, rondas, etc.)
+
+      // 2. Crear documento de competición 'Copa'
+      const competicion = 'copa';
       const copa = {
         id: competicion,
         nombre: 'Copa',
@@ -40,7 +41,6 @@ export const copaService = {
         fechaInicio: new Date(),
       };
 
-      // 4. Guardar la competición Copa en Firestore
       const res = await FirestoreService.setDocumentByPath(
         'temporadas',
         temporadaId,
@@ -52,8 +52,22 @@ export const copaService = {
         return { success: false, errorMessage: res.errorMessage };
       }
 
-      // 5. Crear las rondas y partidos (lógica de cuadro de copa)
-      await generarCuadroCopa(temporadaId, competicion, topEquipos);
+      // 3. Generar rondas y partidos (sin persistencia)
+      const { rondas, partidosPorRonda } = generarCuadroCopa(topEquipos);
+
+      if (onProgress) onProgress('Guardando rondas y partidos en Firestore...');
+
+      // 4. Guardar rondas
+      for (const ronda of rondas) {
+        await jornadaService.crear(temporadaId, copa.id, ronda);
+      }
+
+      // 5. Guardar partidos
+      for (const [rondaId, partidos] of Object.entries(partidosPorRonda)) {
+        for (const partido of partidos) {
+          await partidoService.crear(temporadaId, copa.id, partido);
+        }
+      }
 
       return { success: true, data: null };
     } catch (error: any) {

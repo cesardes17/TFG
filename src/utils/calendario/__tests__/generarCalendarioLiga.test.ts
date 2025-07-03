@@ -86,4 +86,61 @@ describe('generarCalendarioLiga', () => {
       );
     }
   });
+
+  it('genera correctamente jornadas y partidos con número impar de equipos (7)', async () => {
+    const equipos = crearEquipos(7);
+    const { jornadas, partidosPorJornada } = await generarCalendarioLiga(
+      equipos
+    );
+
+    expect(jornadas).toHaveLength(14); // 7 ida + 7 vuelta
+
+    const jornadasIda = jornadas.slice(0, 7);
+    const jornadasVuelta = jornadas.slice(7);
+
+    const partidosIda = jornadasIda.flatMap(
+      (j: Jornada) => partidosPorJornada[j.id]
+    );
+    const partidosVuelta = jornadasVuelta.flatMap(
+      (j: Jornada) => partidosPorJornada[j.id]
+    );
+
+    // Ignorar partidos con 'descansa'
+    const partidosIdaValidos = partidosIda.filter(
+      (p: Partido) =>
+        p.equipoLocal.id !== 'descansa' && p.equipoVisitante.id !== 'descansa'
+    );
+    const partidosVueltaValidos = partidosVuelta.filter(
+      (p: Partido) =>
+        p.equipoLocal.id !== 'descansa' && p.equipoVisitante.id !== 'descansa'
+    );
+
+    // Que no haya partidos repetidos en la ida
+    const partidosIdaStr = partidosToStr(partidosIdaValidos);
+    const setIda = new Set(partidosIdaStr);
+    expect(setIda.size).toBe(partidosIdaStr.length);
+
+    // Que la vuelta sea la ida invertida
+    expect(partidosVueltaValidos).toHaveLength(partidosIdaValidos.length);
+    for (let i = 0; i < partidosIdaValidos.length; i++) {
+      expect(areInverse(partidosIdaValidos[i], partidosVueltaValidos[i])).toBe(
+        true
+      );
+    }
+
+    // Verificar que cada jornada tiene un solo partido con 'descansa'
+    for (const j of jornadas) {
+      const partidos = partidosPorJornada[j.id];
+      const conDescansa = partidos.filter(
+        (p: Partido) =>
+          p.equipoLocal.id === 'descansa' || p.equipoVisitante.id === 'descansa'
+      );
+      expect(conDescansa).toHaveLength(1);
+    }
+
+    // Verificar que cada jornada tiene exactamente 4 partidos (8 equipos tras agregar "descansa")
+    for (const j of jornadas) {
+      expect(partidosPorJornada[j.id]).toHaveLength(4);
+    }
+  });
 });

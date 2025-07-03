@@ -1,32 +1,22 @@
 // src/utils/generarCuadroCopa.ts
 import { getRandomUID } from '../getRandomUID';
-import { Jornada, EstadoJornada } from '../../types/Jornada';
+import { Jornada } from '../../types/Jornada';
 import { Partido } from '../../types/Partido';
-import { jornadaService } from '../../services/jornadaService';
-import { partidoService } from '../../services/partidoService';
 
 type EquipoSimple = { id: string; nombre: string; escudoUrl: string };
 
-export async function generarCuadroCopa(
-  temporadaId: string,
-  competicionId: string,
-  equiposOriginales: EquipoSimple[]
-): Promise<{
+export function generarCuadroCopa(equiposOriginales: EquipoSimple[]): {
   rondas: Jornada[];
   partidosPorRonda: Record<string, Partido[]>;
-}> {
-  console.log('equiposOriginales: ', equiposOriginales);
-
+} {
   const rondas: Jornada[] = [];
   const partidosPorRonda: Record<string, Partido[]> = {};
 
-  // Asegurarse de tener 8 equipos (rellenar con bye si faltan)
   const equipos: EquipoSimple[] = [...equiposOriginales];
   while (equipos.length < 8) {
     equipos.push({ id: 'bye', nombre: 'DESCANSA', escudoUrl: '' });
   }
 
-  // 1️⃣ Final
   const rondaFinal: Jornada = {
     id: getRandomUID(),
     nombre: 'Final',
@@ -47,11 +37,8 @@ export async function generarCuadroCopa(
     },
     estado: 'pendiente',
   };
-  await partidoService.crear(temporadaId, competicionId, partidoFinal);
-  await jornadaService.crear(temporadaId, competicionId, rondaFinal);
   partidosPorRonda[rondaFinal.id] = [partidoFinal];
 
-  // 2️⃣ Semifinales
   const rondaSemis: Jornada = {
     id: getRandomUID(),
     nombre: 'Semifinales',
@@ -73,16 +60,12 @@ export async function generarCuadroCopa(
         escudoUrl: '',
       },
       estado: 'pendiente',
-      siguientePartidoId: partidoFinal.id, // Todos apuntan a la final
+      siguientePartidoId: partidoFinal.id,
     };
     partidosSemis.push(partido);
-
-    await partidoService.crear(temporadaId, competicionId, partido);
   }
-  await jornadaService.crear(temporadaId, competicionId, rondaSemis);
   partidosPorRonda[rondaSemis.id] = partidosSemis;
 
-  // 3️⃣ Cuartos de final
   const rondaCuartos: Jornada = {
     id: getRandomUID(),
     nombre: 'Cuartos de Final',
@@ -94,13 +77,11 @@ export async function generarCuadroCopa(
   const partidosCuartos: Partido[] = [];
   const equiposQuePasanASemis: EquipoSimple[] = [];
 
-  // Lógica para asignar cada cuarto a la semifinal correcta
-  // Mapeo: índice del partido de cuartos => índice del partido de semifinal
   const cuartosAsemisMap: Record<number, number> = {
-    0: 0, // 1° vs 8° -> semifinal 1
-    3: 0, // 4° vs 5° -> semifinal 1
-    1: 1, // 2° vs 7° -> semifinal 2
-    2: 1, // 3° vs 6° -> semifinal 2
+    0: 0,
+    3: 0,
+    1: 1,
+    2: 1,
   };
 
   for (let i = 0; i < 4; i++) {
@@ -122,19 +103,14 @@ export async function generarCuadroCopa(
     };
     partidosCuartos.push(partido);
 
-    await partidoService.crear(temporadaId, competicionId, partido);
-
-    // Avance automático por bye
     if (local.id === 'bye') {
       equiposQuePasanASemis.push(visitante);
     } else if (visitante.id === 'bye') {
       equiposQuePasanASemis.push(local);
     }
   }
-  await jornadaService.crear(temporadaId, competicionId, rondaCuartos);
   partidosPorRonda[rondaCuartos.id] = partidosCuartos;
 
-  // 4️⃣ Insertar equipos que avanzan automáticamente en semis
   for (const equipo of equiposQuePasanASemis) {
     const partidoSemi = partidosSemis.find(
       (p) =>
@@ -147,13 +123,6 @@ export async function generarCuadroCopa(
       } else if (partidoSemi.equipoVisitante.id === 'por-definir') {
         partidoSemi.equipoVisitante = equipo;
       }
-      // Actualizar la semi en Firestore
-      await partidoService.actualizarPartido(
-        temporadaId,
-        competicionId,
-        partidoSemi.id,
-        partidoSemi
-      );
     }
   }
 

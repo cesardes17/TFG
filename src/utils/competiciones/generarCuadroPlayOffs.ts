@@ -3,9 +3,6 @@ import { getRandomUID } from '../getRandomUID';
 import { Jornada } from '../../types/Jornada';
 import { Serie } from '../../types/Serie';
 import { Partido } from '../../types/Partido';
-import { jornadaService } from '../../services/jornadaService';
-import { partidoService } from '../../services/partidoService';
-import { serieService } from '../../services/serieService';
 
 type EquipoSimple = { id: string; nombre: string; escudoUrl: string };
 
@@ -15,11 +12,10 @@ interface CuadroPlayoffsResult {
   partidosPorSerie: Record<string, Partido[]>;
 }
 
-export async function generarCuadroPlayoffs(
+export function generarCuadroPlayoffs(
   temporadaId: string,
-  competicionId: string,
   equiposOriginales: EquipoSimple[]
-): Promise<CuadroPlayoffsResult> {
+): CuadroPlayoffsResult {
   const equipos = [...equiposOriginales];
   while (equipos.length < 8) {
     equipos.push({ id: 'bye', nombre: 'DESCANSA', escudoUrl: '' });
@@ -46,14 +42,11 @@ export async function generarCuadroPlayoffs(
   };
 
   const rondas = [rondaCuartos, rondaSemis, rondaFinal];
-  for (const ronda of rondas) {
-    await jornadaService.crear(temporadaId, competicionId, ronda);
-  }
 
   const seriesPorRonda: Record<string, Serie[]> = {};
   const partidosPorSerie: Record<string, Partido[]> = {};
 
-  // 1️⃣ Crear la Final
+  // 1️⃣ Final
   const finalSerie: Serie = {
     id: getRandomUID(),
     jornadaId: rondaFinal.id,
@@ -68,13 +61,12 @@ export async function generarCuadroPlayoffs(
     estado: 'pendiente',
     createdAt: new Date(),
   };
-  await serieService.crear(temporadaId, competicionId, finalSerie);
   seriesPorRonda[rondaFinal.id] = [finalSerie];
 
-  // 2️⃣ Crear las Semifinales apuntando a la Final
+  // 2️⃣ Semifinales
   const seriesSemis: Serie[] = [];
   for (let i = 0; i < 2; i++) {
-    const semiSerie: Serie = {
+    seriesSemis.push({
       id: getRandomUID(),
       jornadaId: rondaSemis.id,
       temporadaId,
@@ -88,25 +80,29 @@ export async function generarCuadroPlayoffs(
       estado: 'pendiente',
       createdAt: new Date(),
       nextSerieId: finalSerie.id,
-    };
-    await serieService.crear(temporadaId, competicionId, semiSerie);
-    seriesSemis.push(semiSerie);
+    });
   }
   seriesPorRonda[rondaSemis.id] = seriesSemis;
 
-  // 3️⃣ Crear los Cuartos apuntando a las Semifinales correctas
+  // 3️⃣ Cuartos
   const cuartosASemisMap: Record<number, number> = {
-    0: 0, // 1° vs 8° → semi 1
-    3: 0, // 4° vs 5° → semi 1
-    1: 1, // 2° vs 7° → semi 2
-    2: 1, // 3° vs 6° → semi 2
+    0: 0, // 1° vs 8°
+    3: 0, // 4° vs 5°
+    1: 1, // 2° vs 7°
+    2: 1, // 3° vs 6°
   };
 
   const seriesCuartos: Serie[] = [];
+
   for (let i = 0; i < 4; i++) {
     const local = equipos[i];
     const visitante = equipos[7 - i];
     const semifinalIndex = cuartosASemisMap[i];
+    const semifinal = seriesSemis[semifinalIndex];
+
+    const isBye = local.id === 'bye' || visitante.id === 'bye';
+    const estado = isBye ? 'finalizada' : 'pendiente';
+    const ganador = local.id === 'bye' ? visitante : local;
 
     const serieCuartos: Serie = {
       id: getRandomUID(),
@@ -119,62 +115,38 @@ export async function generarCuadroPlayoffs(
       partidosGanadosVisitante: 0,
       partidosJugados: 0,
       maxPartidos: 3,
-      estado:
-        local.id === 'bye' || visitante.id === 'bye'
-          ? 'finalizada'
-          : 'pendiente',
+      estado,
       createdAt: new Date(),
-      nextSerieId: seriesSemis[semifinalIndex].id,
+      nextSerieId: semifinal.id,
+      ...(isBye ? { ganadorId: ganador.id } : {}),
     };
-
-    await serieService.crear(temporadaId, competicionId, serieCuartos);
     seriesCuartos.push(serieCuartos);
 
-    // Si hay bye, avanzar automáticamente
-    if (local.id === 'bye' || visitante.id === 'bye') {
-      const winner = local.id === 'bye' ? visitante : local;
-      await serieService.actualizar(
-        temporadaId,
-        competicionId,
-        serieCuartos.id,
-        {
-          estado: 'finalizada',
-          ganadorId: winner.id,
-        }
-      );
-      // Asignar en la semifinal
-      const semiSerie = seriesSemis[semifinalIndex];
-      if (semiSerie.local.id === 'por-definir') {
-        semiSerie.local = winner;
+    if (isBye) {
+      // Insertar al ganador directamente en la semi
+      if (semifinal.local.id === 'por-definir') {
+        semifinal.local = ganador;
       } else {
-        semiSerie.visitante = winner;
+        semifinal.visitante = ganador;
       }
-      await serieService.actualizar(
-        temporadaId,
-        competicionId,
-        semiSerie.id,
-        semiSerie
-      );
     }
 
-    // Crear dos partidos iniciales para cada serie de cuartos
+    // Generar 2 partidos
     const partidos: Partido[] = [];
-    for (let game = 1; game <= 2; game++) {
-      const partido: Partido = {
+    for (let j = 0; j < 2; j++) {
+      partidos.push({
         id: getRandomUID(),
         jornadaId: rondaCuartos.id,
         serieId: serieCuartos.id,
         tipoCompeticion: 'playoffs',
         equipoLocal: local,
         equipoVisitante: visitante,
-        estado:
-          serieCuartos.estado === 'finalizada' ? 'finalizado' : 'pendiente',
-      };
-      partidos.push(partido);
-      await partidoService.crear(temporadaId, competicionId, partido);
+        estado: isBye ? 'finalizado' : 'pendiente',
+      });
     }
     partidosPorSerie[serieCuartos.id] = partidos;
   }
+
   seriesPorRonda[rondaCuartos.id] = seriesCuartos;
 
   return { rondas, seriesPorRonda, partidosPorSerie };

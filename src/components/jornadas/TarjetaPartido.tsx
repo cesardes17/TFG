@@ -28,12 +28,7 @@ export default function TarjetaPartido({ partido, refetchPartidos }: Props) {
 
   const esEnVivo = partido.estado === 'en-juego';
 
-  // 👉 Usamos el hook con callback
-  const partidoEnVivo = usePartidoEnVivo(
-    partido.id,
-    esEnVivo,
-    refetchPartidos // 🔥 callback para recargar
-  );
+  const partidoEnVivo = usePartidoEnVivo(partido.id, esEnVivo, refetchPartidos);
 
   const partidoAMostrar = partidoEnVivo || partido;
   const esDescansa =
@@ -77,15 +72,20 @@ export default function TarjetaPartido({ partido, refetchPartidos }: Props) {
     }
   };
 
-  const formatearFecha = (fecha?: Date) => {
-    if (!fecha) return null;
-    return fecha.toLocaleDateString('es-ES', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const formatearFecha = (fecha: Date | string) => {
+    try {
+      const dateObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+      if (isNaN(dateObj.getTime())) return '-';
+      return dateObj.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '-';
+    }
   };
 
   const estadoStyle = getEstadoStyle(partidoAMostrar.estado);

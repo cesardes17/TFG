@@ -77,14 +77,20 @@ const HeaderPartido: React.FC<HeaderPartidoProps> = ({
     }
   };
 
-  const formatearFecha = (fecha: Date) => {
-    return fecha.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const formatearFecha = (fecha: Date | string) => {
+    try {
+      const dateObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+      if (isNaN(dateObj.getTime())) return '-';
+      return dateObj.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '-';
+    }
   };
 
   const badgeStyle = getEstadoBadgeStyle();

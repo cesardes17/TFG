@@ -27,15 +27,15 @@ export default function PlayerMobileInfo({ player }: PlayerMobileInfoProps) {
         </StyledText>
         <StyledText style={styles.rolWeb}>{player.rol}</StyledText>
         <View style={styles.row}>
-          <BasketballOutlineIcon color={theme.icon.active} size={20} />
+          <BasketballOutlineIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.textWeb}>{player.posicion}</StyledText>
         </View>
         <View style={styles.row}>
-          <RulerIcon color={theme.icon.active} size={20} />
+          <RulerIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.textWeb}>{player.altura} cm</StyledText>
         </View>
         <View style={styles.row}>
-          <WeightHangingIcon color={theme.icon.active} size={20} />
+          <WeightHangingIcon color={theme.icon.primary} size={20} />
           <StyledText style={styles.textWeb}>{player.peso} kg</StyledText>
         </View>
       </View>

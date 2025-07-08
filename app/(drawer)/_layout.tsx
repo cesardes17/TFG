@@ -24,12 +24,12 @@ export default function WebLayout() {
           headerStyle: {
             backgroundColor: theme.background.navigation,
           },
-          headerTintColor: theme.text.primary,
+          headerTintColor: theme.text.light,
           drawerStyle: {
             backgroundColor: theme.background.navigation,
           },
           drawerLabelStyle: {
-            color: theme.text.primary,
+            color: theme.text.light,
           },
           drawerActiveTintColor: theme.icon.active,
           headerTitleAlign: 'center',
@@ -144,7 +144,13 @@ export default function WebLayout() {
           }}
         />
 
-        <Drawer.Screen name='ajustes' options={{ drawerLabel: 'Ajustes' }} />
+        <Drawer.Screen
+          name='Ajustes'
+          options={{
+            drawerLabel: () => <DrawerLabelWithBadge label={'Ajustes'} />,
+            title: 'Ajustes',
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

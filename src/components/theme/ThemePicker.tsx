@@ -5,9 +5,9 @@ import { ThemePreference, useTheme } from '../../contexts/ThemeContext';
 import StyledText from '../common/StyledText';
 
 const options: { label: string; value: ThemePreference }[] = [
-  { label: 'System', value: 'system' },
-  { label: 'Light', value: 'light' },
-  { label: 'Dark', value: 'dark' },
+  { label: 'Sistema', value: 'system' },
+  { label: 'Claro', value: 'light' },
+  { label: 'Oscuro', value: 'dark' },
 ];
 
 export default function ThemeSwitcher() {
@@ -16,7 +16,7 @@ export default function ThemeSwitcher() {
   return (
     <View style={[styles.container]}>
       <Text style={[styles.title, { color: theme.text.primary }]}>
-        Choose Theme
+        Elige Tema
       </Text>
       <View style={styles.optionsContainer}>
         {options.map((opt) => {
@@ -28,7 +28,9 @@ export default function ThemeSwitcher() {
                 styles.optionButton,
 
                 {
-                  backgroundColor: selected ? theme.text.info : 'transparent',
+                  backgroundColor: selected
+                    ? theme.button.primary.background
+                    : 'transparent',
                 },
               ]}
               onPress={() => setPreference(opt.value)}

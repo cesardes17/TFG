@@ -21,7 +21,7 @@ export default function NuevaSolicitudPage() {
 
   return (
     <PageContainer>
-      {Platform.OS !== 'web' && <HeaderConfig title='Nueva Solicitud' />}
+      {<HeaderConfig title='Nueva Solicitud' />}
       <NuevaSolicitudScreen />
     </PageContainer>
   );

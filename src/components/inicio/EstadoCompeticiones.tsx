@@ -134,7 +134,7 @@ export default function CompeticionesCards() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <StyledText style={styles.title}>Competiciones Activas</StyledText>
+        <StyledText style={styles.title}>Competiciones</StyledText>
       </View>
 
       <View style={styles.cardsContainer}>

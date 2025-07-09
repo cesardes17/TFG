@@ -145,7 +145,7 @@ export default function WebLayout() {
         />
 
         <Drawer.Screen
-          name='Ajustes'
+          name='ajustes'
           options={{
             drawerLabel: () => <DrawerLabelWithBadge label={'Ajustes'} />,
             title: 'Ajustes',

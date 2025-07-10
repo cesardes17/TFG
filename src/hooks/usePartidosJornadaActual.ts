@@ -31,10 +31,6 @@ export default function usePartidosJornadaActual() {
         await competitionBaseService.getCompeticionEnCurso(temporada.id);
 
       if (!resCompeticionActual.success || !resCompeticionActual.data) {
-        setErrorPartidos(
-          resCompeticionActual.errorMessage ||
-            'Error al obtener la competición en curso.'
-        );
         return;
       }
 

@@ -1,4 +1,4 @@
-# Liga Deportiva App – Guía de Instalación y Desarrollo Local
+# Aplicación Multiplataforma para la Gestión y Seguimiento de una Liga de Baloncesto – Guía de Instalación y Desarrollo Local
 
 Bienvenido/a al repositorio de la app de gestión de liga deportiva. Aquí encontrarás los pasos necesarios para levantar el entorno en local, tanto para web como para dispositivos Android e iOS, utilizando tu propia cuenta y proyecto de Firebase.
 
